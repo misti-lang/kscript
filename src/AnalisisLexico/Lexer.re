@@ -164,220 +164,257 @@ let parseCaracter = caracter => {
 
 
 /// Aplica p1 y luego p2
-let internal parseLuego p1 p2 =
-    let inner entrada inicio =
-        let res1 = run p1 entrada inicio
+let parseLuego = (p1, p2) => {
+    let inner = (entrada, inicio) => {
+        let res1 = run(p1, entrada, inicio);
 
-        match res1 with
-        | Error err => Error err
-        | Exito ex1 =>
-            let res2 = run p2 entrada ex1.posFinal
+        switch (res1) {
+        | Error(err) => Error(err)
+        | Exito(ex1) => {
+            let res2 = run(p2, entrada, ex1.posFinal);
 
-            match res2 with
-            | Error err => Error err
-            | Exito ex2 =>
+            switch (res2) {
+            | Error(err) => Error(err)
+            | Exito(ex2) =>
                 Exito {
-                    res = (ex1.res, ex2.res)
-                    posInicio = inicio
-                    posFinal = ex2.posFinal
-                    tipo = Nada
+                    res: (ex1.res, ex2.res),
+                    posInicio: inicio,
+                    posFinal: ex2.posFinal,
+                    tipo: Nada
                 }
+            };
+        }
+        };
+    };
 
-    Parser inner
+    Parser(inner);
+};
 
 
-let internal ( .>>. ) = parseLuego
+let ( |>>| ) = parseLuego
 
 
 /// Intenta aplicar p1 y si falla aplica p2
-let internal parseOtro p1 p2 =
-    let innerFn entrada inicio =
-        let result1 = run p1 entrada inicio
+let parseOtro = (p1, p2) => {
+    let innerFn = (entrada, inicio) => {
+        let result1 = run(p1, entrada, inicio);
 
-        match result1 with
-        | Exito _ => result1
-        | Error _ => run p2 entrada inicio
+        switch (result1) {
+        | Exito(_) => result1
+        | Error(_) => run(p2, entrada, inicio)
+        };
+    };
 
-    Parser innerFn
+    Parser(innerFn);
+};
 
-let internal ( <|> ) = parseOtro
+let ( <|> ) = parseOtro
 
 
 /// Escoge desde una lista de parsers
-let internal escoger listOfParsers =
-    List.reduce ( <|> ) listOfParsers
-
+let escoger = listOfParsers => {
+    let (primer, resto) = (List.hd(listOfParsers), List.tl(listOfParsers));
+    List.fold_left(( <|> ), primer, resto);
+};
 
 /// Escoge desde una lista de caracteres
-let internal cualquier listOfChars =
+let cualquier = listOfChars =>
     listOfChars
-    |> List.map parseCaracter
+    |> List.map(parseCaracter)
     |> escoger
 
 
 /// Convierte una lista de Parsers a un Parser de listas
-let rec internal sequence parserList =
+let rec sequence = parserList => {
     
-    let cons head tail = head::tail
+    let cons = (head, tail) => [head, ...tail];
 
-    let consP = lift2 cons
+    let consP = lift2(cons);
 
     // process the list of parsers recursively
-    match parserList with
-    | [] =>
-        returnP []
-    | head::tail =>
-        consP head (sequence tail)
+    switch (parserList) {
+    | [] => returnP([]);
+    | [head, ...tail] => consP(head, sequence(tail))
+    };
+};
 
 
+let rec parseVariosHelper = (parser, entrada, inicio) => {
 
-let rec internal parseVariosHelper parser entrada inicio =
-
-    let resultado = run parser entrada inicio
+    let resultado = run(parser, entrada, inicio);
     
-    match resultado with
-    | Error _ => ([], inicio)
-    | Exito ex =>
+    switch (resultado) {
+    | Error(_) => ([], inicio)
+    | Exito(ex) => {
         let (resultado, posSig) = (ex.res, ex.posFinal)
-        let (valores, posFinal) = parseVariosHelper parser entrada posSig
+        let (valores, posFinal) = parseVariosHelper(parser, entrada, posSig);
 
-        (resultado::valores, posFinal)
+        ([resultado, ...valores], posFinal)
+    }
+    };
+};
 
 
-let internal parseVarios parser =
-    let inner entrada inicio =
-        let (datos, posFinal) = parseVariosHelper parser entrada inicio
+let parseVarios = parser => {
+    let inner = (entrada, inicio) => {
+        let (datos, posFinal) = parseVariosHelper(parser, entrada, inicio);
         Exito {
-            res = datos
-            posInicio = inicio
-            posFinal = posFinal
-            tipo = Nada
+            res: datos,
+            posInicio: inicio,
+            posFinal: posFinal,
+            tipo: Nada
         }
+    };
 
-    Parser inner
+    Parser(inner);
+};
 
 
-let internal parseVarios1 parser =
-    let inner entrada inicio =
-        let (datos, posFinal) = parseVariosHelper parser entrada inicio
+let parseVarios1 = parser => {
+    let inner = (entrada, inicio) => {
+        let (datos, posFinal) = parseVariosHelper(parser, entrada, inicio);
 
-        match datos with
-        | [] => Error ""
+        switch (datos) {
+        | [] => Error("");
         | _ => Exito {
-            res = datos
-            posInicio = inicio
-            posFinal = posFinal
-            tipo = Nada
+            res: datos,
+            posInicio: inicio,
+            posFinal: posFinal,
+            tipo: Nada
         }
+        }
+    };
 
-    Parser inner
+    Parser(inner);
+};
 
 
-let internal parseSegundoOpcional p1 p2 =
-    let inner entrada inicio =
-        let res1 = run p1 entrada inicio
+let parseSegundoOpcional = (p1, p2) => {
+    let inner = (entrada, inicio) => {
+        let res1 = run(p1, entrada, inicio);
         
-        match res1 with
-        | Error err => Error err
-        | Exito ex1 =>
-            let res2 = run p2 entrada ex1.posFinal
+        switch (res1) {
+        | Error(err) => Error(err);
+        | Exito(ex1) => {
+            let res2 = run(p2, entrada, ex1.posFinal);
             
-            match res2 with
-            | Exito ex2 =>
+            switch (res2) {
+            | Exito(ex2) =>
                 Exito {
-                    res = (ex1.res, Some ex2.res)
-                    posInicio = inicio
-                    posFinal = ex2.posFinal
-                    tipo = Nada
+                    res: (ex1.res, Some(ex2.res)),
+                    posInicio: inicio,
+                    posFinal: ex2.posFinal,
+                    tipo: Nada
                 }
-            | Error _ =>
+            | Error(_) =>
                 Exito {
-                    res = (ex1.res, None)
-                    posInicio = inicio
-                    posFinal = ex1.posFinal
-                    tipo = Nada
+                    res: (ex1.res, None),
+                    posInicio: inicio,
+                    posFinal: ex1.posFinal,
+                    tipo: Nada
                 }
+            };
+        }
+        };
+    };
     
-    Parser inner
+    Parser(inner);
+};
 
-let internal (<?>) = parseSegundoOpcional
+
+let (<?>) = parseSegundoOpcional
 
 
-let internal parseCualquierMenos caracter =
-    let inner entrada inicio =
-        if String.IsNullOrEmpty entrada || inicio >= entrada.Length then
-            Error "Entrada terminada"
-        else
-            let c = entrada.[inicio]
-            if caracter = c then
-                Error "Se encontró el caracter a no parsear."
-            else
+let parseCualquierMenos = caracter => {
+    let inner = (entrada, inicio) => {
+        if (entrada == "" || inicio >= String.length(entrada))
+            Error("Entrada terminada")
+        else {
+            let c = String.get(entrada, inicio);
+            if (caracter == c) {
+                Error("Se encontró el caracter a no parsear.");
+            } else {
                 Exito {
-                    res = c
-                    posInicio = inicio
-                    posFinal = inicio + 1
-                    tipo = Nada
+                    res: c,
+                    posInicio: inicio,
+                    posFinal: inicio + 1,
+                    tipo: Nada
                 }
+            }
+        }
+    };
         
         
-    Parser inner
+    Parser(inner);
+};
 
+
+let crearSome = x => Some(x);
 
 /// Parsea una ocurrencia opcional de p y lo devuelve en option
-let internal pOpc p =
-    let some = p |>> Some
-    let none = returnP None
+let pOpc = p => {
+    let some = p |>> crearSome;
+    let none = returnP(None);
     some <|> none
+};
 
 
 /// Ignora el resultado del parser derecho
-let internal (.>>) p1 p2 = p1 .>>. p2 |>> fun (a,_) => a
+let (|>>) = (p1, p2) =>  p1 |>>| p2 |>> ((a,_) => a);
 
 /// Ignora el resultado del parser izq
-let internal (>>.) p1 p2 = p1 .>>. p2 |>> fun (_,b) => b
+let (>>|) = (p1, p2) => mapP((_,b) => b, p1 |>>| p2);
+
 
 /// Ignora el resultado de los parsers de los costados
-let internal between p1 p2 p3 =
-    p1 >>. p2 .>> p3
+let between = (p1, p2, p3) => p1 >>| p2 |>> p3
 
 
-let internal parseVariasOpciones parsers =
-    let inner entrada pos =
+let parseVariasOpciones = parsers => {
+    let inner = (entrada, pos) => {
 
-        let rec inner2 parsers =
-            match parsers with
-            | p::ps =>
-                let resultado = run p entrada pos
+        let rec inner2 = parsers =>
+            switch (parsers) {
+            | [p, ...ps] =>
+                let resultado = run(p, entrada, pos);
 
-                match resultado with
-                | Exito ex =>
+                switch (resultado) {
+                | Exito(ex) =>
                     Exito {
-                        res = ex.res
-                        posInicio = ex.posInicio
-                        posFinal = ex.posFinal
-                        tipo = ex.tipo
+                        res: ex.res,
+                        posInicio: ex.posInicio,
+                        posFinal: ex.posFinal,
+                        tipo: ex.tipo
                     }
-                | _ => inner2 ps
-            | [] => Error "Ningun parser se adapta a la entrada."
+                | _ => inner2(ps)
+                };
+
+            | [] => Error("Ningun parser se adapta a la entrada.");
+            };
 
 
-        inner2 parsers
+        inner2(parsers)
+    };
 
-    Parser inner
+    Parser(inner);
+};
 
 
-let internal mapTipo parser nuevoTipo =
-    let inner entrada inicio =
-        let res = run parser entrada inicio
+let mapTipo = (parser, nuevoTipo) => {
+    let inner = (entrada, inicio) => {
+        let res = run(parser, entrada, inicio);
         
-        match res with
-        | Error err => Error err
-        | Exito ex => Exito {
-            res = ex.res
-            posInicio = ex.posInicio
-            posFinal = ex.posFinal
-            tipo = nuevoTipo
+        switch (res) {
+        | Error(err) => Error(err);
+        | Exito(ex) => Exito {
+            res: ex.res,
+            posInicio: ex.posInicio,
+            posFinal: ex.posFinal,
+            tipo: nuevoTipo
         }
+        };
+    };
 
-    Parser inner
+    Parser(inner)
+};
 
