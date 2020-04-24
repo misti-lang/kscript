@@ -146,7 +146,7 @@ let parseCaracter = caracter => {
         if (entrada == "" || inicio >= String.length(entrada))
             Error("Entrada terminada")
         else {
-            let c = String.get(entrada, inicio);
+            let c = String.sub(entrada, inicio, 1);
             if (c == caracter)
                 Exito {
                     res: c,
@@ -330,7 +330,7 @@ let parseCualquierMenos = caracter => {
         if (entrada == "" || inicio >= String.length(entrada))
             Error("Entrada terminada")
         else {
-            let c = String.get(entrada, inicio);
+            let c = String.sub(entrada, inicio, 1);
             if (caracter == c) {
                 Error("Se encontró el caracter a no parsear.");
             } else {
@@ -360,10 +360,10 @@ let pOpc = p => {
 
 
 /// Ignora el resultado del parser derecho
-let (|>>) = (p1, p2) =>  p1 |>>| p2 |>> ((a,_) => a);
+let (|>>) = (p1, p2) =>  p1 |>>| p2 |>> (((a,_)) => a);
 
 /// Ignora el resultado del parser izq
-let (>>|) = (p1, p2) => mapP((_,b) => b, p1 |>>| p2);
+let (>>|) = (p1, p2) => mapP(((_,b)) => b, p1 |>>| p2);
 
 
 /// Ignora el resultado de los parsers de los costados
