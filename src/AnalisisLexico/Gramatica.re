@@ -150,7 +150,7 @@ let crearLexer = (entrada: string) => {
     let posActual = ref(0);
     let indentacionActual = ref(0);
     let lookAhead = ref(None: option(resLexer));
-    
+
     let rec sigTokenLuegoDeIdentacion = posActual => {
         let sigToken = run(parserGeneral, entrada, posActual);
         switch (sigToken) {
