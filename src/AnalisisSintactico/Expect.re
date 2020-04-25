@@ -2,12 +2,13 @@ open Lexer;
 open Gramatica;
 
 exception ErrorComun(string);
+exception OpInvalida(string);
 
 let extraerToken = (resLexer, msgError) => {
     switch (resLexer) {
     | ErrorLexer(err) => raise(ErrorComun({j|$msgError ($err)|j}));
     | EOF => raise(ErrorComun({j|$msgError (EOF)|j}));
-    | Token (token, indentacion) => token
+    | Token (token, _) => token
     };
 };
 

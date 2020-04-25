@@ -119,7 +119,7 @@ let mapP = (f, p) => {
 };
 
 let ( <!> ) = mapP
-let ( |>> ) = (x, f) => mapP(f, x);
+let ( |>> ) = (x: parser('a), f: 'a => 'b) => mapP(f, x);
 
 
 let applyP = (fP, xP) =>
