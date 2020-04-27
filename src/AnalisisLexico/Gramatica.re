@@ -139,6 +139,7 @@ type lexer = {
     entrada: string,
     sigToken: unit => resLexer,
     lookAhead: unit => resLexer,
+    retroceder: unit => unit,
     hayTokens: unit => bool
 };
 
@@ -150,6 +151,7 @@ let crearLexer = (entrada: string) => {
     let posActual = ref(0);
     let indentacionActual = ref(0);
     let lookAhead = ref(None: option(resLexer));
+    let ultimoToken = ref(None: option(resLexer));
 
     let rec sigTokenLuegoDeIdentacion = posActual => {
         let sigToken = run(parserGeneral, entrada, posActual);
@@ -265,13 +267,17 @@ let crearLexer = (entrada: string) => {
     }};
 
     let sigToken = () => {
-        switch (lookAhead^) {
+        let tokenRespuesta =
+            switch (lookAhead^) {
             | Some(token) => {
                 lookAhead := None;
                 token
             };
             | None => extraerToken();
-        };
+            };
+        
+        ultimoToken := Some(tokenRespuesta);
+        tokenRespuesta;
     };
 
     {
@@ -279,13 +285,21 @@ let crearLexer = (entrada: string) => {
         sigToken: sigToken,
         lookAhead: () => {
             switch (lookAhead^) {
-                | Some(token) => token
-                | None => {
-                    let sigToken = sigToken();
-                    lookAhead := Some(sigToken);
-                    sigToken;
-                };
+            | Some(token) => token
+            | None => {
+                let sigToken = sigToken();
+                lookAhead := Some(sigToken);
+                sigToken;
+            };
             }
+        },
+        retroceder: () => {
+            switch (lookAhead^) {
+            | Some(_) => ()
+            | None => {
+                lookAhead := ultimoToken^
+            }
+            };
         },
         hayTokens: () => posActual^ < String.length(entrada)
     }
