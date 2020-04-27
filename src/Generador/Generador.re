@@ -38,6 +38,14 @@ let rec generarJs = (expr: expresion, toplevel, nivel) => {
         {j|$jsFun($jsParam)|j}
     };
 
+    let generarJS_EOperadorApl = (eOpApl: eOperadorApl) => {
+        let {op, izq, der} = eOpApl;
+        let operador = op.valor.valor;
+        let jsExprIzq = generarJs(izq, false, nivel);
+        let jsExprDer = generarJs(der, false, nivel);
+        "(" ++ jsExprIzq ++ ") " ++ operador ++ " " ++ jsExprDer
+    };
+
 
     let generarJS_EBloque = (exprs, toplevel) => {
 
@@ -75,6 +83,7 @@ let rec generarJs = (expr: expresion, toplevel, nivel) => {
     | EIdentificador(datos) => generarJS_EIdentificador(datos)
     | EDeclaracion(dec) => generarJS_EDeclaracion(dec)
     | EFuncion(efuncion) => generarJS_EFuncion(efuncion)
+    | EOperadorApl(eOpApl) => generarJS_EOperadorApl(eOpApl)
     | _ => "/* No implementado :c */"
     };
 

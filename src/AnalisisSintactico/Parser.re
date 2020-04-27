@@ -75,9 +75,9 @@ let obtSigIndentacion = (lexer: lexer, msgError, fnErrorLexer, fnEOF) => {
     let hayNuevaLinea = ref(false);
     try ({
         while (true) {
-            _TNuevaLinea(lexer.lookAhead(), None, "");
+            let _ = _TNuevaLinea(lexer.lookAhead(), None, "");
             hayNuevaLinea := true;
-            lexer.sigToken();
+            let _ = lexer.sigToken();
         };
         (1, true)
     }) {
@@ -122,6 +122,7 @@ let obtInfoOp = (operador) => {
     | "%" => (11, Izq)
     | "^" => (12, Der)
     | "." => (13, Izq)
+    | _ => (14, Izq)
     };
 };
 
@@ -135,7 +136,7 @@ let parseTokens = (lexer: lexer) => {
             let preTokenId = ref(token2);
                 
            try ({
-                let infoTokenMut = _PC_MUT(token2, None, "");
+                let _ = _PC_MUT(token2, None, "");
                 esMut := true;
                 preTokenId := lexer.sigToken();
             }) {
@@ -143,7 +144,7 @@ let parseTokens = (lexer: lexer) => {
             };
 
             let infoTokenId = _TIdentificador(preTokenId^, None, "Se esperaba un identificador");
-            let infoTokenOpAsign = _TOperador(lexer.sigToken(), Some("="), "Se esperaba el operador de asignación '=' luego del indentificador.");
+            let _ = _TOperador(lexer.sigToken(), Some("="), "Se esperaba el operador de asignación '=' luego del indentificador.");
 
             let (nuevoNivel, hayNuevaLinea) = obtSigIndentacion(lexer, "Se esperaba una expresion luego del signo '='.", None, None);
 
@@ -153,7 +154,7 @@ let parseTokens = (lexer: lexer) => {
 
             switch (sigExpresion (nuevoNivel, hayNuevaLinea, 15, Izq)) {
             | PEOF => PError("Se esperaba una expresión luego de la asignacion.");
-            | PError(err) => PError({j|Se esperaba una expresión luego de la asignación:|j});
+            | PError(err) => PError({j|Se esperaba una expresión luego de la asignación: $err|j});
             | PExito(exprFinal) =>
                 PExito(EDeclaracion({
                     mut: esMut^,
@@ -172,10 +173,11 @@ let parseTokens = (lexer: lexer) => {
 
     and sigExprOperador = (exprIzq, infoOp: infoToken(string), precedencia, asociatividad) => {
         let valorOp = infoOp.valor
-        switch (sigExpresion(0, false, 15, Izq)) {
+        switch (sigExpresion(0, false, precedencia, Izq)) {
         | PEOF => PError({j|Se esperaba una expresión a la derecha del operador $valorOp|j})
         | PError(err) => PError({j|Se esperaba una expresion a la derecha del operador $valorOp. Interrumpido por: $err.|j});
         | PExito(exprFinal) => {
+            // TODO: Aqui continuar a procesar el sig token.
             let eOperadorRes: eOperador = { signatura: Indefinida, valor: infoOp }
             PExito(EOperadorApl({
                 op: eOperadorRes,
@@ -197,7 +199,7 @@ let parseTokens = (lexer: lexer) => {
         switch (lexer.sigToken()) {
         | EOF => PExito(exprFunAct)
         | ErrorLexer(err) => PError(err)
-        | Token(token, indentacion) =>
+        | Token(token, _) =>
             switch (token) {
             | TIdentificador(infoId2) => {
                 let expr2 = EIdentificador {
@@ -233,7 +235,7 @@ let parseTokens = (lexer: lexer) => {
         switch (lexer.sigToken()) {
         | EOF => PExito(primeraExprId)
         | ErrorLexer(err) => PError(err)
-        | Token (token, indentacion) => {
+        | Token (token, _) => {
             switch (token) {
             | TIdentificador(infoId2) => {
                 let expr2 = EIdentificador({
@@ -256,16 +258,45 @@ let parseTokens = (lexer: lexer) => {
             }
             | TOperador(infoOp) => {
                 let (precOp, asocOp) = obtInfoOp(infoOp.valor);
-                if (precedencia < precOp || precedencia == precOp && asociatividad == Izq ) {
+                if (precedencia < precOp || precedencia == precOp && asociatividad == Der ) {
                     lexer.retroceder();
                     PExito(primeraExprId);
                 } else {
                     sigExprOperador(primeraExprId, infoOp, precOp, asocOp);
                 }
             }
-            | _ => PExito(primeraExprId)
+            | _ => {
+                lexer.retroceder();
+                PExito(primeraExprId)
+            }
             };
         };
+        };
+    }
+
+    and sigExprParen = (infoParen, nivel) => {
+        let sigToken = sigExpresion(nivel, false, 15, Izq);
+        switch (sigToken) {
+        | PError(_) => sigToken
+        | PEOF => {
+            let posInicio = infoParen.inicio;
+            PError({j|El parentesis abierto en $posInicio no está cerrado.|j});
+        }
+        | PExito(sigToken2) => {
+            let ultimoToken = lexer.sigToken();
+            switch (ultimoToken) {
+            | EOF =>
+                PError({j|El parentesis abierto en $infoParen.inicio contiene una expresion, pero no está cerrado.|j})
+            | ErrorLexer(error) =>
+                PError({j|El parentesis abierto en $infoParen.inicio no está cerrado debido a un error léxico: $error|j})
+            | Token (ultimoToken3, _) => {
+                switch (ultimoToken3) {
+                | TParenCer(_) => PExito(sigToken2)
+                | _ => PError("Se esperaba un cierre de parentesis.")
+                };
+            }
+            };
+        }
         };
     }
 
@@ -277,40 +308,16 @@ let parseTokens = (lexer: lexer) => {
             switch (resultado) {
             | EOF => PEOF
             | ErrorLexer(err) => PError(err)
-            | Token(token, identacion) => {
+            | Token(token, _) => {
                 switch (token) {
-                | PC_SEA(infoToken) => sigExprDeclaracion(nivel)
+                | PC_SEA(_) => sigExprDeclaracion(nivel)
                 | PC_MUT(_) => PError("No se esperaba la palabra clave 'sea' aquí.")
                 | TComentario(_) => sigExpresion(nivel, aceptarExprMismoNivel, precedencia, asociatividad)
                 | TNumero(infoNumero) => PExito(ENumero(infoNumero))
                 | TTexto(infoTexto) => PExito(ETexto(infoTexto))
                 | TBool(infoBool) => PExito(EBool(infoBool))
                 | TIdentificador(infoId) => sigExprIdentificador(infoId, nivel, precedencia, asociatividad)
-                | TParenAb(infoParen) => {
-                    let sigToken = sigExpresion(nivel, false, precedencia, asociatividad);
-                    switch (sigToken) {
-                    | PError(_) => sigToken
-                    | PEOF => {
-                        let posInicio = infoParen.inicio;
-                        PError({j|El parentesis abierto en $posInicio no está cerrado.|j});
-                    }
-                    | PExito(sigToken2) => {
-                        let ultimoToken = lexer.sigToken();
-                        switch (ultimoToken) {
-                        | EOF =>
-                            PError({j|El parentesis abierto en $infoParen.inicio contiene una expresion, pero no está cerrado.|j})
-                        | ErrorLexer(error) =>
-                            PError({j|El parentesis abierto en $infoParen.inicio no está cerrado debido a un error léxico: $error|j})
-                        | Token (ultimoToken3, indentacion2) => {
-                            switch (ultimoToken3) {
-                            | TParenCer(_) => PExito(sigToken2)
-                            | _ => PError("Se esperaba un cierre de parentesis.")
-                            };
-                        }
-                        };
-                    }
-                    };
-                }
+                | TParenAb(infoParen) => sigExprParen(infoParen, nivel)
                 | TParenCer(_) => PError("No se esperaba un parentesis aquí.")
                 | TNuevaLinea(_) => sigExpresion(nivel, aceptarExprMismoNivel, precedencia, asociatividad)
                 | TAgrupAb(_) | TAgrupCer(_) => PError("Otros signos de agrupacion aun no estan soportados.")
@@ -325,7 +332,7 @@ let parseTokens = (lexer: lexer) => {
         | PEOF => sigExprActual
         | PError(_) => sigExprActual
         | PExito(exprAct) => {
-            try ({
+            try {
                 let (sigNivelIndentacion, _) = obtSigIndentacion(lexer, "", Some(x => OpInvalida(x)), None);
                 if (aceptarExprMismoNivel && sigNivelIndentacion == nivel) {
                     let sigExprTop = sigExpresion(nivel, aceptarExprMismoNivel, precedencia, asociatividad);
@@ -343,7 +350,7 @@ let parseTokens = (lexer: lexer) => {
                 } else {
                     sigExprActual
                 };
-            }) {
+            } {
             | OpInvalida(err) => PError(err)
             | _ => sigExprActual
             };

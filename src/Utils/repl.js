@@ -11,7 +11,8 @@ const repl = () => {
         if (respuesta === ":s") {
             rl.close();
         } else {
-            console.log(flujoPrincipal(respuesta));
+            const jsResultado = flujoPrincipal(respuesta);
+            console.log(jsResultado);
             repl();
         }
     });
