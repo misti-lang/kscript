@@ -20,24 +20,14 @@ let tknToStr = token2 => {
     };
 };
 
-
-let main = () => {
-
-    let entrada = "sea mut hola = 20";
+let flujoPrincipal = entrada => {
     let lexer = Gramatica.crearLexer(entrada);
     let expresion = Parser.parseTokens(lexer);
-
     switch (expresion) {
+    | ErrorParser(err) => err
     | ExitoParser(expr) => {
-        let js = Generador.generarJs(expr, true, 0);
-        Js.log(js);
+        Generador.generarJs(expr, true, 0);
     }
-    | ErrorParser(err) => {
-        Js.log(err);
-    }
-    }
-
+    };
 };
 
-
-main();
