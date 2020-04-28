@@ -43,7 +43,7 @@ let rec generarJs = (expr: expresion, toplevel, nivel) => {
         let operador = op.valor.valor;
         let jsExprIzq = generarJs(izq, false, nivel);
         let jsExprDer = generarJs(der, false, nivel);
-        "(" ++ jsExprIzq ++ ") " ++ operador ++ " " ++ jsExprDer
+        "(" ++ jsExprIzq ++ ") " ++ operador ++ " (" ++ jsExprDer ++ ")"
     };
 
 

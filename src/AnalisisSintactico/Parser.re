@@ -121,8 +121,8 @@ let obtInfoOp = (operador) => {
     | "+" | "-" => (10, Izq)
     | "*" | "/" | "%" => (11, Izq)
     | "^" => (12, Der)
-    | "." | "?." => (13, Izq)
-    | _ => (14, Izq)
+    | "." | "?." => (14, Izq)
+    | _ => (13, Izq)
     };
 };
 
@@ -130,16 +130,16 @@ let obtInfoOp = (operador) => {
 let parseTokens = (lexer: lexer) => {
 
     let rec sigExprDeclaracion = nivel => {
-        try ({
+        try {
             let esMut = ref(false);
             let token2 = lexer.sigToken();
             let preTokenId = ref(token2);
-                
-           try ({
+
+            try {
                 let _ = _PC_MUT(token2, None, "");
                 esMut := true;
                 preTokenId := lexer.sigToken();
-            }) {
+            } {
             | _ => ()
             };
 
@@ -166,7 +166,7 @@ let parseTokens = (lexer: lexer) => {
                 }))
             };
 
-        }) {
+        } {
         | ErrorComun(err) => PError(err)
         };
     }
@@ -198,7 +198,28 @@ let parseTokens = (lexer: lexer) => {
                     lexer.retroceder();
                     PExito(exprOpRes);
                 }
-                | _ => PError("Es esto posible?")
+                | TNuevaLinea(_) => {
+                    PExito(exprOpRes);
+                }
+                | TIdentificador(_) => {
+                    PError({j|Se encontró un identificador luego de la aplicacion de un operador. Si tu intencion es usar el resultado del operador como funcion, agrupalo en parentesis.|j});
+                }
+                | TGenerico(_) => {
+                    PError({j|No se esperaba un genérico luego de la aplicación del operador.|j})
+                }
+                | TComentario(_) => {
+                    PExito(exprOpRes);
+                }
+                | TNumero(_) => {
+                    PError({j|Se encontró un número luego de la aplicacion de un operador. Si tu intencion es usar el resultado del operador como funcion, agrupalo en parentesis.|j})
+                }
+                | TTexto(_) => {
+                    PError({j|Se encontró un texto luego de la aplicacion de un operador. Si tu intencion es usar el resultado del operador como funcion, agrupalo en parentesis.|j})
+                }
+                | TBool(_) => {
+                    PError({j|Se encontró un bool luego de la aplicacion de un operador. Si tu intencion es usar el resultado del operador como funcion, agrupalo en parentesis.|j})
+                }
+                | _ => PError({j|Se encotro un token invalido luego de la aplicación del operador.|j})
                 };
             }
             };
@@ -258,23 +279,43 @@ let parseTokens = (lexer: lexer) => {
         | Token (token, _) => {
             switch (token) {
             | TIdentificador(infoId2) => {
-                let expr2 = EIdentificador({
-                    signatura: Indefinida,
-                    valor: infoId2
-                });
-                sigExprFuncion(primeraExprId, expr2, nivel, precedencia, asociatividad);
+                if (precedencia < 14) {
+                    let expr2 = EIdentificador({
+                        signatura: Indefinida,
+                        valor: infoId2
+                    });
+                    sigExprFuncion(primeraExprId, expr2, nivel, precedencia, asociatividad);
+                } else {
+                    lexer.retroceder();
+                    PExito(primeraExprId);
+                };
             }
             | TNumero(infoNum) => {
-                let expr2 = ENumero(infoNum);
-                sigExprFuncion(primeraExprId, expr2, nivel, precedencia, asociatividad);
+                if (precedencia < 14) {
+                    let expr2 = ENumero(infoNum);
+                    sigExprFuncion(primeraExprId, expr2, nivel, precedencia, asociatividad);
+                } else {
+                    lexer.retroceder();
+                    PExito(primeraExprId);
+                };
             }
             | TTexto(infoTxt) => {
-                let expr2 = ETexto(infoTxt);
-                sigExprFuncion(primeraExprId, expr2, nivel, precedencia, asociatividad);
+                if (precedencia < 14) {
+                    let expr2 = ETexto(infoTxt);
+                    sigExprFuncion(primeraExprId, expr2, nivel, precedencia, asociatividad);
+                } else {
+                    lexer.retroceder();
+                    PExito(primeraExprId);
+                };
             }
             | TBool(infoBool) => {
-                let expr2 = EBool(infoBool);
-                sigExprFuncion(primeraExprId, expr2, nivel, precedencia, asociatividad);
+                if (precedencia < 14) {
+                    let expr2 = EBool(infoBool);
+                    sigExprFuncion(primeraExprId, expr2, nivel, precedencia, asociatividad);
+                } else {
+                    lexer.retroceder();
+                    PExito(primeraExprId);
+                };
             }
             | TOperador(infoOp) => {
                 let (precOp, asocOp) = obtInfoOp(infoOp.valor);
