@@ -201,8 +201,12 @@ let parseTokens = (lexer: lexer) => {
                 | TNuevaLinea(_) => {
                     PExito(exprOpRes);
                 }
-                | TIdentificador(_) => {
-                    PError({j|Se encontró un identificador luego de la aplicacion de un operador. Si tu intencion es usar el resultado del operador como funcion, agrupalo en parentesis.|j});
+                | TIdentificador(infoId) => {
+                    let exprId = EIdentificador {
+                        signatura: Indefinida,
+                        valor: infoId
+                    };
+                    sigExprFuncion(exprOpRes, exprId, 0, precedencia, asociatividad);
                 }
                 | TGenerico(_) => {
                     PError({j|No se esperaba un genérico luego de la aplicación del operador.|j})
@@ -223,8 +227,6 @@ let parseTokens = (lexer: lexer) => {
                 };
             }
             };
-
-            
         }
         };
     }
@@ -260,6 +262,25 @@ let parseTokens = (lexer: lexer) => {
             | TBool(infoBool) => {
                 let expr2 = EBool(infoBool);
                 sigExprFuncion(exprFunAct, expr2, nivel, precedencia, asociatividad);
+            }
+            | TOperador(infoOp) => {
+                let (precOp, asocOp) = obtInfoOp(infoOp.valor);
+                if (precOp < 14) {
+                    sigExprOperador(exprFunAct, infoOp, precOp, asocOp);
+                } else {
+                    let exprDerFun = sigExprOperador(paramExpr, infoOp, precOp, asocOp);
+                    switch (exprDerFun) {
+                    | PEOF => PError({j|Se esperaba una expresion a la izq del operador.|j})
+                    | PError(err) => PError(err)
+                    | PExito(exprOp) => {
+                        PExito(EFuncion {
+                            signatura: Indefinida,
+                            fn: funExpr,
+                            param: exprOp
+                        });
+                    }
+                    };
+                }
             }
             | _ => PExito(exprFunAct);
             };
