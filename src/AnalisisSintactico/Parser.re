@@ -106,7 +106,8 @@ let obtInfoOp = (operador) => {
     | "+" | "-" => (10, Izq)
     | "*" | "/" | "%" => (11, Izq)
     | "^" => (12, Der)
-    | "ñ" | "Ñ" => (14, Der)
+    | "ñ" | "Ñ" => (14, Izq)
+    | "." => (15, Izq)
     | _ => (13, Izq)
     };
 };
@@ -158,7 +159,8 @@ let parseTokens = (lexer: lexer) => {
 
     and sigExprOperador = (exprIzq, infoOp: infoToken(string), precedencia, asociatividad) => {
         let valorOp = infoOp.valor
-        switch (sigExpresion(0, false, precedencia, Izq)) {
+        let (precOp1, asocOp1) = obtInfoOp(valorOp);
+        switch (sigExpresion(0, false, precOp1, asocOp1)) {
         | PEOF => PError({j|Se esperaba una expresión a la derecha del operador $valorOp|j})
         | PError(err) => PError({j|Se esperaba una expresion a la derecha del operador $valorOp. Interrumpido por: $err.|j});
         | PExito(exprFinal) => {
@@ -185,12 +187,13 @@ let parseTokens = (lexer: lexer) => {
                 | TNuevaLinea(_) => {
                     PExito(exprOpRes);
                 }
-                | TIdentificador(infoId) => {
+                | TIdentificador(_) => {
                     let infoOp2 = obtInfoFunAppl(false);
                     // TODO: revisar si aqui se necesita agrupar la aplicacion dependiendo
                     //  de la precedencia.
-                    let (precOp, asocOp) = obtInfoOp(infoOp2.valor);
-                    sigExprOperador(exprOpRes, infoOp2, precOp, asocOp);
+                    let (precOpFunApl, asocOpFunApl) = obtInfoOp(infoOp2.valor);
+                    lexer.retroceder();
+                    sigExprOperador(exprOpRes, infoOp2, precOpFunApl, asocOpFunApl);
                 }
                 | TGenerico(_) => {
                     PError({j|No se esperaba un genérico luego de la aplicación del operador.|j})
@@ -229,12 +232,16 @@ let parseTokens = (lexer: lexer) => {
             switch (token) {
             | TIdentificador(_) | TNumero(_) | TTexto(_) | TBool(_) => {
                 lexer.retroceder();
-                if (precedencia < 14) {
+                let (precFunApl, asocFunApl) = (14, Izq)
+                if (precFunApl > precedencia) {
                     let infoOpFunApl = obtInfoFunAppl(false);
-                    sigExprOperador(primeraExprId, infoOpFunApl, precedencia, asociatividad);
+                    sigExprOperador(primeraExprId, infoOpFunApl, precFunApl, asocFunApl);
+                } else if (precFunApl == precedencia && asocFunApl == Der) {
+                    let infoOpFunApl = obtInfoFunAppl(false);
+                    sigExprOperador(primeraExprId, infoOpFunApl, precFunApl, asocFunApl);
                 } else {
                     PExito(primeraExprId);
-                };
+                }
             }
             | TOperador(infoOp) => {
                 let (precOp, asocOp) = obtInfoOp(infoOp.valor);
