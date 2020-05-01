@@ -148,6 +148,8 @@ let crearLexer = (entrada: string) => {
 
     let tamanoEntrada = String.length(entrada);
     let esInicioDeLinea = ref(true)
+    let numLineaActual = ref(1);
+    let posAbsInicioLinea = ref(0);
     let posActual = ref(0);
     let indentacionActual = ref(0);
     let lookAhead = ref(None: option(resLexer));
@@ -185,7 +187,9 @@ let crearLexer = (entrada: string) => {
                 Token(tipo {
                     valor: valor,
                     inicio: ex.posInicio,
-                    final: ex.posFinal
+                    final: ex.posFinal,
+                    numLinea: numLineaActual^,
+                    posInicioLinea: posAbsInicioLinea^
                 }, indentacionActual^)
             };
 
@@ -221,11 +225,15 @@ let crearLexer = (entrada: string) => {
                 let resultado = Token(TNuevaLinea {
                     valor: (),
                     inicio: ex.posInicio,
-                    final: ex.posFinal
+                    final: ex.posFinal,
+                    numLinea: numLineaActual^,
+                    posInicioLinea: posAbsInicioLinea^
                 }, indentacionActual^);
                 posActual := ex.posFinal;
                 esInicioDeLinea := true;
                 indentacionActual := 0;
+                numLineaActual := numLineaActual^ + 1;
+                posAbsInicioLinea := ex.posFinal;
                 resultado;
             };
             | Identificador | IdentificadorTipo => {

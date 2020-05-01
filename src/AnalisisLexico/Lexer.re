@@ -25,9 +25,11 @@ type exito('A) = {
 
 
 type infoToken('A) = {
-    valor:       'A,
-    inicio:      int,
-    final:       int
+    valor:          'A,
+    inicio:         int,
+    final:          int,
+    numLinea:       int,
+    posInicioLinea: int
 }
 
 

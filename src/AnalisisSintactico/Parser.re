@@ -66,7 +66,9 @@ type asociatividad =
 let obtInfoFunAppl = esCurry => ({
     valor: if (esCurry) {j|Ñ|j} else {j|ñ|j},
     inicio: -1,
-    final: -1
+    final: -1,
+    numLinea: -1,
+    posInicioLinea: -1
 });
 
 
@@ -169,7 +171,7 @@ let parseTokens = (lexer: lexer) => {
         let (precOp1, asocOp1) = obtInfoOp(valorOp);
         switch (sigExpresion(0, false, precOp1, asocOp1)) {
         | PEOF => PError({j|Se esperaba una expresión a la derecha del operador $valorOp|j})
-        | PError(err) => PError({j|Se esperaba una expresion a la derecha del operador $valorOp. Interrumpido por: $err.|j});
+        | PError(err) => PError({j|Se esperaba una expresion a la derecha del operador $valorOp :\n$err.|j});
         | PExito(exprFinal) => {
             let eOperadorRes: eOperador = { signatura: Indefinida, valor: infoOp }
             let exprOpRes = EOperadorApl({
@@ -296,6 +298,14 @@ let parseTokens = (lexer: lexer) => {
         };
     }
 
+    and generarTextoError = (inicio, final, numLinea, posInicioLinea) => {
+        let substr = String.sub(lexer.entrada, posInicioLinea, final);
+        let espBlanco = String.make(inicio - posInicioLinea, ' ');
+        let indicador = String.make(final - inicio, '^');
+        let strIndicador = {j|     $espBlanco$indicador|j};
+        {j| $numLinea | $substr\n$strIndicador\n|j};
+    }
+
     and sigExpresion = (nivel, aceptarExprMismoNivel, precedencia, asociatividad) => {
 
         let resultado = lexer.sigToken();
@@ -318,7 +328,10 @@ let parseTokens = (lexer: lexer) => {
                 | TNuevaLinea(_) => sigExpresion(nivel, aceptarExprMismoNivel, precedencia, asociatividad)
                 | TAgrupAb(_) | TAgrupCer(_) => PError("Otros signos de agrupación aun no estan soportados.")
                 | TGenerico(_) => PError("Los genericos aun no estan soportados.")
-                | TOperador(_) => PError("No se puede usar un operador como expresión. Si esa es tu intención, rodea el operador en paréntesis, por ejemplo: (+)")
+                | TOperador(infoOp) => {
+                    let textoErr = generarTextoError(infoOp.inicio, infoOp.final, infoOp.numLinea, infoOp.posInicioLinea);
+                    PError({j|No se puede usar un operador como expresión. Si esa es tu intención, rodea el operador en paréntesis, por ejemplo: (+)\n\n$textoErr|j});
+                }
                 };
             }
             };
