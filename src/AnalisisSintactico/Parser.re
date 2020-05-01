@@ -93,6 +93,8 @@ let obtSigIndentacion = (lexer: lexer, msgError, fnErrorLexer, fnEOF) => {
  * El operador Ñ representa aplicacion de funcion con currying.
  */
 let obtInfoOp = (operador) => {
+    let strEneMinuscula = {j|ñ|j};
+    let strEneMayuscula = {j|Ñ|j}
     switch (operador) {
     | "," => (1, Izq)
     | "=" | "+=" | "-=" | "*=" | "/=" | "%=" | "^=" => (2, Izq)
@@ -106,9 +108,14 @@ let obtInfoOp = (operador) => {
     | "+" | "-" => (10, Izq)
     | "*" | "/" | "%" => (11, Izq)
     | "^" => (12, Der)
-    | "ñ" | "Ñ" => (14, Izq)
     | "." => (15, Izq)
-    | _ => (13, Izq)
+    | _ => {
+        if (operador == strEneMayuscula || operador == strEneMinuscula) {
+            (14, Izq)
+        } else {
+            (13, Izq)
+        }
+    }
     };
 };
 
@@ -233,6 +240,7 @@ let parseTokens = (lexer: lexer) => {
             | TIdentificador(_) | TNumero(_) | TTexto(_) | TBool(_) => {
                 lexer.retroceder();
                 let (precFunApl, asocFunApl) = (14, Izq)
+                Js.log({j|Comparando $precFunApl con $precedencia|j});
                 if (precFunApl > precedencia) {
                     let infoOpFunApl = obtInfoFunAppl(false);
                     sigExprOperador(primeraExprId, infoOpFunApl, precFunApl, asocFunApl);
