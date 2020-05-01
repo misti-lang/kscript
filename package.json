@@ -1,10 +1,13 @@
 {
   "name": "kan-comp",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "scripts": {
     "build": "bsb -make-world",
     "start": "node ./lib/js/src/Inicio.bs.js",
-    "clean": "bsb -clean-world"
+    "clean": "bsb -clean-world",
+    "repl": "node ./src/index.js --repl",
+    "compile": "node ./src/index.js -c",
+    "watch": "bsb -make-world -w"
   },
   "keywords": [
     "BuckleScript"

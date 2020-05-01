@@ -239,8 +239,7 @@ let parseTokens = (lexer: lexer) => {
             switch (token) {
             | TIdentificador(_) | TNumero(_) | TTexto(_) | TBool(_) => {
                 lexer.retroceder();
-                let (precFunApl, asocFunApl) = (14, Izq)
-                Js.log({j|Comparando $precFunApl con $precedencia|j});
+                let (precFunApl, asocFunApl) = (14, Izq);
                 if (precFunApl > precedencia) {
                     let infoOpFunApl = obtInfoFunAppl(false);
                     sigExprOperador(primeraExprId, infoOpFunApl, precFunApl, asocFunApl);

@@ -18,6 +18,11 @@ const repl = () => {
     });
 };
 
-console.log("Kan v0.0.1");
-console.log("Para salir del REPL escribe :s o CTRL+C");
-repl();
+
+const flujoREPL = () => {
+    console.log("Kan v0.0.2");
+    console.log("Para salir del REPL escribe :s o CTRL+C");
+    repl();
+};
+
+module.exports.flujoREPL = flujoREPL;
