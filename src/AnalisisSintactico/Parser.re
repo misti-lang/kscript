@@ -30,18 +30,11 @@ and eOperadorApl = {
     der: expresion
 }
 
-and eFuncion = {
-    signatura: signatura,
-    fn: expresion,
-    param: expresion,
-}
-
 and eDeclaracion = {
     mut: bool,
     id: eIdentificador,
     valor: expresion
 }
-
 
 and expresion =
     | EIdentificador(eIdentificador)
@@ -51,7 +44,6 @@ and expresion =
     | EBool(infoToken(bool))
     | EOperador(infoToken(string))
     | EOperadorApl(eOperadorApl)
-    | EFuncion(eFuncion)
     | EDeclaracion(eDeclaracion)
     | EBloque(list(expresion))
 
@@ -69,6 +61,13 @@ type resParser =
 type asociatividad =
     | Izq
     | Der
+
+
+let obtInfoFunAppl = esCurry => ({
+    valor: if (esCurry) {j|Ñ|j} else {j|ñ|j},
+    inicio: -1,
+    final: -1
+});
 
 
 let obtSigIndentacion = (lexer: lexer, msgError, fnErrorLexer, fnEOF) => {
@@ -90,23 +89,9 @@ let obtSigIndentacion = (lexer: lexer, msgError, fnErrorLexer, fnEOF) => {
 
 
 /**
- * Precedencia y Asociatividad de los tokens
- * = += -= *= /= %= ^=      ->  1 L
- * <| |>                    ->  2 L
- * << >>                    ->  3 L
- * ||                       ->  4 L
- * &&                       ->  5 L
- * == !=                    ->  6 L
- * === !==                  ->  7 L
- * < <= > >=                ->  8 L
- * + -                      ->  9 L
- * * /                      -> 10 L
- * %                        -> 11 L
- * ^                        -> 12 R
- * .                        -> 13 L
- * 
+ * El operador ñ representa aplicacion de funcion.
+ * El operador Ñ representa aplicacion de funcion con currying.
  */
-
 let obtInfoOp = (operador) => {
     switch (operador) {
     | "," => (1, Izq)
@@ -121,7 +106,7 @@ let obtInfoOp = (operador) => {
     | "+" | "-" => (10, Izq)
     | "*" | "/" | "%" => (11, Izq)
     | "^" => (12, Der)
-    | "." | "?." => (14, Izq)
+    | "ñ" | "Ñ" => (14, Der)
     | _ => (13, Izq)
     };
 };
@@ -177,7 +162,6 @@ let parseTokens = (lexer: lexer) => {
         | PEOF => PError({j|Se esperaba una expresión a la derecha del operador $valorOp|j})
         | PError(err) => PError({j|Se esperaba una expresion a la derecha del operador $valorOp. Interrumpido por: $err.|j});
         | PExito(exprFinal) => {
-            // TODO: Aqui continuar a procesar el sig token.
             let eOperadorRes: eOperador = { signatura: Indefinida, valor: infoOp }
             let exprOpRes = EOperadorApl({
                 op: eOperadorRes,
@@ -202,11 +186,11 @@ let parseTokens = (lexer: lexer) => {
                     PExito(exprOpRes);
                 }
                 | TIdentificador(infoId) => {
-                    let exprId = EIdentificador {
-                        signatura: Indefinida,
-                        valor: infoId
-                    };
-                    sigExprFuncion(exprOpRes, exprId, 0, precedencia, asociatividad);
+                    let infoOp2 = obtInfoFunAppl(false);
+                    // TODO: revisar si aqui se necesita agrupar la aplicacion dependiendo
+                    //  de la precedencia.
+                    let (precOp, asocOp) = obtInfoOp(infoOp2.valor);
+                    sigExprOperador(exprOpRes, infoOp2, precOp, asocOp);
                 }
                 | TGenerico(_) => {
                     PError({j|No se esperaba un genérico luego de la aplicación del operador.|j})
@@ -232,62 +216,6 @@ let parseTokens = (lexer: lexer) => {
     }
 
 
-    and sigExprFuncion = (funExpr, paramExpr, nivel, precedencia, asociatividad) => {
-        let exprFunAct = EFuncion {
-            signatura: Indefinida,
-            fn: funExpr,
-            param: paramExpr
-        };
-
-        switch (lexer.sigToken()) {
-        | EOF => PExito(exprFunAct)
-        | ErrorLexer(err) => PError(err)
-        | Token(token, _) =>
-            switch (token) {
-            | TIdentificador(infoId2) => {
-                let expr2 = EIdentificador {
-                    signatura: Indefinida,
-                    valor: infoId2
-                };
-                sigExprFuncion(exprFunAct, expr2, nivel, precedencia, asociatividad);
-            }
-            | TNumero(infoNum) => {
-                let expr2 = ENumero(infoNum);
-                sigExprFuncion(exprFunAct, expr2, nivel, precedencia, asociatividad);
-            }
-            | TTexto(infoTxt) => {
-                let expr2 = ETexto(infoTxt);
-                sigExprFuncion(exprFunAct, expr2, nivel, precedencia, asociatividad);
-            }
-            | TBool(infoBool) => {
-                let expr2 = EBool(infoBool);
-                sigExprFuncion(exprFunAct, expr2, nivel, precedencia, asociatividad);
-            }
-            | TOperador(infoOp) => {
-                let (precOp, asocOp) = obtInfoOp(infoOp.valor);
-                if (precOp < 14) {
-                    sigExprOperador(exprFunAct, infoOp, precOp, asocOp);
-                } else {
-                    let exprDerFun = sigExprOperador(paramExpr, infoOp, precOp, asocOp);
-                    switch (exprDerFun) {
-                    | PEOF => PError({j|Se esperaba una expresion a la izq del operador.|j})
-                    | PError(err) => PError(err)
-                    | PExito(exprOp) => {
-                        PExito(EFuncion {
-                            signatura: Indefinida,
-                            fn: funExpr,
-                            param: exprOp
-                        });
-                    }
-                    };
-                }
-            }
-            | _ => PExito(exprFunAct);
-            };
-        };
-    }
-
-
     and sigExprIdentificador = (infoId, nivel, precedencia, asociatividad) => {
         let primeraExprId = EIdentificador {
             signatura: Indefinida,
@@ -299,42 +227,12 @@ let parseTokens = (lexer: lexer) => {
         | ErrorLexer(err) => PError(err)
         | Token (token, _) => {
             switch (token) {
-            | TIdentificador(infoId2) => {
+            | TIdentificador(_) | TNumero(_) | TTexto(_) | TBool(_) => {
+                lexer.retroceder();
                 if (precedencia < 14) {
-                    let expr2 = EIdentificador({
-                        signatura: Indefinida,
-                        valor: infoId2
-                    });
-                    sigExprFuncion(primeraExprId, expr2, nivel, precedencia, asociatividad);
+                    let infoOpFunApl = obtInfoFunAppl(false);
+                    sigExprOperador(primeraExprId, infoOpFunApl, precedencia, asociatividad);
                 } else {
-                    lexer.retroceder();
-                    PExito(primeraExprId);
-                };
-            }
-            | TNumero(infoNum) => {
-                if (precedencia < 14) {
-                    let expr2 = ENumero(infoNum);
-                    sigExprFuncion(primeraExprId, expr2, nivel, precedencia, asociatividad);
-                } else {
-                    lexer.retroceder();
-                    PExito(primeraExprId);
-                };
-            }
-            | TTexto(infoTxt) => {
-                if (precedencia < 14) {
-                    let expr2 = ETexto(infoTxt);
-                    sigExprFuncion(primeraExprId, expr2, nivel, precedencia, asociatividad);
-                } else {
-                    lexer.retroceder();
-                    PExito(primeraExprId);
-                };
-            }
-            | TBool(infoBool) => {
-                if (precedencia < 14) {
-                    let expr2 = EBool(infoBool);
-                    sigExprFuncion(primeraExprId, expr2, nivel, precedencia, asociatividad);
-                } else {
-                    lexer.retroceder();
                     PExito(primeraExprId);
                 };
             }

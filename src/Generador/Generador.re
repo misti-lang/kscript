@@ -32,12 +32,6 @@ let rec generarJs = (expr: expresion, toplevel, nivel) => {
         };
     };
 
-    let generarJS_EFuncion = (efuncion: eFuncion) => {
-        let jsFun = generarJs(efuncion.fn, false, nivel);
-        let jsParam = generarJs(efuncion.param, false, nivel);
-        {j|$jsFun($jsParam)|j}
-    };
-
     let generarJS_EOperadorApl = (eOpApl: eOperadorApl) => {
         let {op, izq, der} = eOpApl;
         let operador = op.valor.valor;
@@ -82,7 +76,6 @@ let rec generarJs = (expr: expresion, toplevel, nivel) => {
     | EBool(info) => generarJS_EBool(info)
     | EIdentificador(datos) => generarJS_EIdentificador(datos)
     | EDeclaracion(dec) => generarJS_EDeclaracion(dec)
-    | EFuncion(efuncion) => generarJS_EFuncion(efuncion)
     | EOperadorApl(eOpApl) => generarJS_EOperadorApl(eOpApl)
     | _ => "/* No implementado :c */"
     };
