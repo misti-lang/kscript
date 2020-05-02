@@ -178,7 +178,7 @@ let parseTokens = (lexer: lexer) => {
         };
     }
 
-    and sigExprOperador = (exprIzq, infoOp: infoToken(string), precedencia, asociatividad) => {
+    and sigExprOperador = (exprIzq, infoOp: infoToken(string), nivel, precedencia, asociatividad) => {
         let valorOp = infoOp.valor
         let (precOp1, asocOp1) = obtInfoOp(valorOp);
         switch (sigExpresion(0, false, precOp1, asocOp1)) {
@@ -199,7 +199,7 @@ let parseTokens = (lexer: lexer) => {
                 switch token {
                 | TOperador(infoOp2) => {
                     let (precOp, asocOp) = obtInfoOp(infoOp2.valor);
-                    sigExprOperador(exprOpRes, infoOp2, precOp, asocOp);
+                    sigExprOperador(exprOpRes, infoOp2, nivel, precOp, asocOp);
                 }
                 | TParenCer(_) => {
                     lexer.retroceder();
@@ -214,7 +214,7 @@ let parseTokens = (lexer: lexer) => {
                     //  de la precedencia.
                     let (precOpFunApl, asocOpFunApl) = obtInfoOp(infoOp2.valor);
                     lexer.retroceder();
-                    sigExprOperador(exprOpRes, infoOp2, precOpFunApl, asocOpFunApl);
+                    sigExprOperador(exprOpRes, infoOp2, nivel, precOpFunApl, asocOpFunApl);
                 }
                 | TGenerico(infoGen) => {
                     let textoError = generarTextoError(infoGen);
@@ -223,14 +223,43 @@ let parseTokens = (lexer: lexer) => {
                 | TComentario(_) => {
                     PExito(exprOpRes);
                 }
-                | _ => PError({j|Se encotro un token invalido luego de la aplicación del operador.|j})
+                | TParenAb(infoParen) => {
+                    let sigExpr = sigExprParen(infoParen, nivel);
+                    switch sigExpr {
+                    | PError(err) => PError(err)
+                    | PEOF => PError("Hay un parentesis sin cerrar.")
+                    | PExito(expr) => {
+                        let infoOpFunApl = obtInfoFunAppl(false);
+                        PExito(EOperadorApl {
+                            op: { signatura: Indefinida, valor: infoOpFunApl },
+                            izq: exprOpRes,
+                            der: expr
+                        });
+                    }
+                    };
+                }
+                | PC_SEA(info) => {
+                    let textoError = generarTextoError(info);
+                    PError({j|No se esperaba la palabra clave 'sea' luego de la aplicación del operador.\n\n$textoError|j})
+                }
+                | PC_MUT(info) => {
+                    let textoError = generarTextoError(info);
+                    PError({j|No se esperaba la palabra clave 'mut' luego de la aplicación del operador.\n\n$textoError|j})
+                }
+                | TAgrupAb(info) => {
+                    let textoError = generarTextoError(info);
+                    PError({j|Este signo de agrupación aun no está soportado.\n\n$textoError|j});
+                }
+                | TAgrupCer(info) => {
+                    let textoError = generarTextoError(info);
+                    PError({j|Este signo de agrupación aun no está soportado.\n\n$textoError|j});
+                }
                 };
             }
             };
         }
         };
     }
-
 
     and sigExprIdentificador = (infoId, nivel, precedencia, asociatividad) => {
         let primeraExprId = EIdentificador {
@@ -248,10 +277,10 @@ let parseTokens = (lexer: lexer) => {
                 let (precFunApl, asocFunApl) = (14, Izq);
                 if (precFunApl > precedencia) {
                     let infoOpFunApl = obtInfoFunAppl(false);
-                    sigExprOperador(primeraExprId, infoOpFunApl, precFunApl, asocFunApl);
+                    sigExprOperador(primeraExprId, infoOpFunApl, nivel, precFunApl, asocFunApl);
                 } else if (precFunApl == precedencia && asocFunApl == Der) {
                     let infoOpFunApl = obtInfoFunAppl(false);
-                    sigExprOperador(primeraExprId, infoOpFunApl, precFunApl, asocFunApl);
+                    sigExprOperador(primeraExprId, infoOpFunApl, nivel, precFunApl, asocFunApl);
                 } else {
                     PExito(primeraExprId);
                 }
@@ -259,9 +288,9 @@ let parseTokens = (lexer: lexer) => {
             | TOperador(infoOp) => {
                 let (precOp, asocOp) = obtInfoOp(infoOp.valor);
                 if (precOp > precedencia) {
-                    sigExprOperador(primeraExprId, infoOp, precOp, asocOp);
+                    sigExprOperador(primeraExprId, infoOp, nivel, precOp, asocOp);
                 } else if (precOp == precedencia && asocOp == Der) {
-                    sigExprOperador(primeraExprId, infoOp, precOp, asocOp);
+                    sigExprOperador(primeraExprId, infoOp, nivel, precOp, asocOp);
                 } else {
                     lexer.retroceder();
                     PExito(primeraExprId);
