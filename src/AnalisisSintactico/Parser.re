@@ -184,7 +184,7 @@ let parseTokens = (lexer: lexer) => {
             | EOF => PExito(exprOpRes)
             | ErrorLexer(err) => PError(err)
             | Token(token, _) => {
-                switch (token) {
+                switch token {
                 | TOperador(infoOp2) => {
                     let (precOp, asocOp) = obtInfoOp(infoOp2.valor);
                     sigExprOperador(exprOpRes, infoOp2, precOp, asocOp);
@@ -196,7 +196,7 @@ let parseTokens = (lexer: lexer) => {
                 | TNuevaLinea(_) => {
                     PExito(exprOpRes);
                 }
-                | TIdentificador(_) => {
+                | TIdentificador(_) | TNumero(_) | TTexto(_) | TBool(_) => {
                     let infoOp2 = obtInfoFunAppl(false);
                     // TODO: revisar si aqui se necesita agrupar la aplicacion dependiendo
                     //  de la precedencia.
@@ -204,20 +204,12 @@ let parseTokens = (lexer: lexer) => {
                     lexer.retroceder();
                     sigExprOperador(exprOpRes, infoOp2, precOpFunApl, asocOpFunApl);
                 }
-                | TGenerico(_) => {
-                    PError({j|No se esperaba un genérico luego de la aplicación del operador.|j})
+                | TGenerico(infoGen) => {
+                    let textoError = generarTextoError(infoGen);
+                    PError({j|No se esperaba un genérico luego de la aplicación del operador.\n\n$textoError|j})
                 }
                 | TComentario(_) => {
                     PExito(exprOpRes);
-                }
-                | TNumero(_) => {
-                    PError({j|Se encontró un número luego de la aplicacion de un operador. Si tu intencion es usar el resultado del operador como funcion, agrupalo en parentesis.|j})
-                }
-                | TTexto(_) => {
-                    PError({j|Se encontró un texto luego de la aplicacion de un operador. Si tu intencion es usar el resultado del operador como funcion, agrupalo en parentesis.|j})
-                }
-                | TBool(_) => {
-                    PError({j|Se encontró un bool luego de la aplicacion de un operador. Si tu intencion es usar el resultado del operador como funcion, agrupalo en parentesis.|j})
                 }
                 | _ => PError({j|Se encotro un token invalido luego de la aplicación del operador.|j})
                 };
@@ -238,7 +230,7 @@ let parseTokens = (lexer: lexer) => {
         | EOF => PExito(primeraExprId)
         | ErrorLexer(err) => PError(err)
         | Token (token, _) => {
-            switch (token) {
+            switch token {
             | TIdentificador(_) | TNumero(_) | TTexto(_) | TBool(_) => {
                 lexer.retroceder();
                 let (precFunApl, asocFunApl) = (14, Izq);
@@ -274,21 +266,31 @@ let parseTokens = (lexer: lexer) => {
 
     and sigExprParen = (infoParen, nivel) => {
         let sigToken = sigExpresion(nivel, false, 0, Izq);
-        switch (sigToken) {
+        switch sigToken {
         | PError(_) => sigToken
         | PEOF => {
-            let posInicio = infoParen.inicio;
-            PError({j|El parentesis abierto en $posInicio no está cerrado.|j});
+            let textoErr = generarTextoError(infoParen);
+            let numLinea = infoParen.numLinea;
+            let numColumna = infoParen.inicio - infoParen.posInicioLinea;
+            PError({j|El parentesis abierto en $numLinea,$numColumna no está cerrado.\n\n$textoErr|j});
         }
         | PExito(sigToken2) => {
             let ultimoToken = lexer.sigToken();
-            switch (ultimoToken) {
-            | EOF =>
-                PError({j|El parentesis abierto en $infoParen.inicio contiene una expresion, pero no está cerrado.|j})
-            | ErrorLexer(error) =>
-                PError({j|El parentesis abierto en $infoParen.inicio no está cerrado debido a un error léxico: $error|j})
+            switch ultimoToken {
+            | EOF => {
+                let textoErr = generarTextoError(infoParen);
+                let numLinea = infoParen.numLinea;
+                let numColumna = infoParen.inicio - infoParen.posInicioLinea;
+                PError({j|El parentesis abierto en $numLinea,$numColumna contiene una expresion, pero no está cerrado.\n\n$textoErr|j});
+            }
+            | ErrorLexer(error) => {
+                let textoErr = generarTextoError(infoParen);
+                let numLinea = infoParen.numLinea;
+                let numColumna = infoParen.inicio - infoParen.posInicioLinea;
+                PError({j|El parentesis abierto en $numLinea,$numColumna no está cerrado.\n\n$textoErr\nDebido a un error léxico: $error|j});
+            }
             | Token (ultimoToken3, _) => {
-                switch (ultimoToken3) {
+                switch ultimoToken3 {
                 | TParenCer(_) => PExito(sigToken2)
                 | _ => PError("Se esperaba un cierre de parentesis.")
                 };
@@ -298,11 +300,12 @@ let parseTokens = (lexer: lexer) => {
         };
     }
 
-    and generarTextoError = (inicio, final, numLinea, posInicioLinea) => {
-        let substr = String.sub(lexer.entrada, posInicioLinea, final);
-        let espBlanco = String.make(inicio - posInicioLinea, ' ');
-        let indicador = String.make(final - inicio, '^');
+    and generarTextoError = info => {
+        let substr = String.sub(lexer.entrada, info.posInicioLinea, info.final);
+        let espBlanco = String.make(info.inicio - info.posInicioLinea, ' ');
+        let indicador = String.make(info.final - info.inicio, '^');
         let strIndicador = {j|     $espBlanco$indicador|j};
+        let numLinea = info.numLinea;
         {j| $numLinea | $substr\n$strIndicador\n|j};
     }
 
@@ -311,25 +314,31 @@ let parseTokens = (lexer: lexer) => {
         let resultado = lexer.sigToken();
 
         let sigExprActual = {
-            switch (resultado) {
+            switch resultado {
             | EOF => PEOF
             | ErrorLexer(err) => PError(err)
             | Token(token, _) => {
-                switch (token) {
+                switch token {
                 | PC_SEA(_) => sigExprDeclaracion(nivel)
-                | PC_MUT(_) => PError("No se esperaba la palabra clave 'sea' aquí.")
+                | PC_MUT(infoPC) => {
+                    let textoErr = generarTextoError(infoPC);
+                    PError({j|No se esperaba la palabra clave 'mut' aquí.\n\n$textoErr|j});
+                }
                 | TComentario(_) => sigExpresion(nivel, aceptarExprMismoNivel, precedencia, asociatividad)
                 | TNumero(infoNumero) => PExito(ENumero(infoNumero))
                 | TTexto(infoTexto) => PExito(ETexto(infoTexto))
                 | TBool(infoBool) => PExito(EBool(infoBool))
                 | TIdentificador(infoId) => sigExprIdentificador(infoId, nivel, precedencia, asociatividad)
                 | TParenAb(infoParen) => sigExprParen(infoParen, nivel)
-                | TParenCer(_) => PError("No se esperaba un parentesis aquí.")
+                | TParenCer(infoParen) => {
+                    let textoErr = generarTextoError(infoParen);
+                    PError({j|No se esperaba un parentesis aquí. No hay ningún parentesis a cerrar.\n\n$textoErr|j});
+                }
                 | TNuevaLinea(_) => sigExpresion(nivel, aceptarExprMismoNivel, precedencia, asociatividad)
-                | TAgrupAb(_) | TAgrupCer(_) => PError("Otros signos de agrupación aun no estan soportados.")
-                | TGenerico(_) => PError("Los genericos aun no estan soportados.")
+                | TAgrupAb(_) | TAgrupCer(_) => PError({j|Otros signos de agrupación aun no estan soportados.|j})
+                | TGenerico(_) => PError({j|Los genericos aun no estan soportados.|j})
                 | TOperador(infoOp) => {
-                    let textoErr = generarTextoError(infoOp.inicio, infoOp.final, infoOp.numLinea, infoOp.posInicioLinea);
+                    let textoErr = generarTextoError(infoOp);
                     PError({j|No se puede usar un operador como expresión. Si esa es tu intención, rodea el operador en paréntesis, por ejemplo: (+)\n\n$textoErr|j});
                 }
                 };
@@ -345,7 +354,7 @@ let parseTokens = (lexer: lexer) => {
                 let (sigNivelIndentacion, _) = obtSigIndentacion(lexer, "", Some(x => OpInvalida(x)), None);
                 if (aceptarExprMismoNivel && sigNivelIndentacion == nivel) {
                     let sigExprTop = sigExpresion(nivel, aceptarExprMismoNivel, precedencia, asociatividad);
-                    switch (sigExprTop) {
+                    switch sigExprTop {
                     | PError(err) => PError(err)
                     | PEOF => sigExprActual
                     | PExito(expr) =>
@@ -372,7 +381,7 @@ let parseTokens = (lexer: lexer) => {
     switch (exprRe) {
     | PError(err) => ErrorParser(err);
     | PExito(expr) => ExitoParser(expr);
-    | PEOF => ErrorParser("EOF sin tratar en el parser.");
+    | PEOF => ExitoParser(EBloque([]));
     };
 
 };
