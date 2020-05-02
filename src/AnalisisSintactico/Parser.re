@@ -124,6 +124,18 @@ let obtInfoOp = (operador) => {
 
 let parseTokens = (lexer: lexer) => {
 
+    let generarTextoError = info => {
+        let largo = info.final - info.posInicioLinea;
+        let substr = String.sub(lexer.entrada, info.posInicioLinea, largo);
+        let espBlanco = String.make(info.inicio - info.posInicioLinea, ' ');
+        let indicador = String.make(info.final - info.inicio, '~');
+        let numLinea = info.numLinea;
+        let strIndicadorNumLinea = {j| $numLinea | |j};
+        let espacioBlancoIndicador = String.make(String.length(strIndicadorNumLinea), ' ');
+        let strIndicador = {j|$espBlanco$indicador|j};
+        {j|$strIndicadorNumLinea$substr\n$espacioBlancoIndicador$strIndicador\n|j};
+    }
+
     let rec sigExprDeclaracion = nivel => {
         try {
             let esMut = ref(false);
@@ -298,15 +310,6 @@ let parseTokens = (lexer: lexer) => {
             };
         }
         };
-    }
-
-    and generarTextoError = info => {
-        let substr = String.sub(lexer.entrada, info.posInicioLinea, info.final);
-        let espBlanco = String.make(info.inicio - info.posInicioLinea, ' ');
-        let indicador = String.make(info.final - info.inicio, '^');
-        let strIndicador = {j|     $espBlanco$indicador|j};
-        let numLinea = info.numLinea;
-        {j| $numLinea | $substr\n$strIndicador\n|j};
     }
 
     and sigExpresion = (nivel, aceptarExprMismoNivel, precedencia, asociatividad) => {
