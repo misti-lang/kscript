@@ -72,16 +72,20 @@ let obtInfoFunAppl = esCurry => ({
 });
 
 
+// TODO: Mover esta funcion al lexer propio, para que se integre con lookAhead
+//       O, en todo caso, eliminar el uso de esta funcion.
+//          Se podria conseguir haciendo que todos los parsers continuen parseando,
+//          similar a como lo hace sigExprOperador
 let obtSigIndentacion = (lexer: lexer, msgError, fnErrorLexer, fnEOF) => {
     let hayNuevaLinea = ref(false);
-    try ({
+    try {
         while (true) {
             let _ = _TNuevaLinea(lexer.lookAhead(), None, "");
             hayNuevaLinea := true;
             let _ = lexer.sigToken();
         };
         (1, true)
-    }) {
+    } {
     | ErrorComun(_) => {
         let (__, nuevaIndentacion) = _Any(lexer.lookAhead(), msgError, fnErrorLexer, fnEOF);
         (nuevaIndentacion, hayNuevaLinea^);
@@ -156,10 +160,10 @@ let parseTokens = (lexer: lexer) => {
             let (nuevoNivel, hayNuevaLinea) = obtSigIndentacion(lexer, "Se esperaba una expresion luego del signo '='.", None, None);
 
             if (hayNuevaLinea && nuevoNivel <= nivel) {
-                raise(ErrorComun("La expresión actual está incompleta. Se esperaba una expresión indentada."));
+                raise(ErrorComun({j|La expresión actual está incompleta. Se esperaba una expresión indentada.|j}));
             }
 
-            switch (sigExpresion (nuevoNivel, hayNuevaLinea, 0, Izq)) {
+            switch (sigExpresion (nuevoNivel, true, 0, Izq)) {
             | PEOF => PError("Se esperaba una expresión luego de la asignacion.");
             | PError(err) => PError({j|Se esperaba una expresión luego de la asignación: $err|j});
             | PExito(exprFinal) =>
@@ -181,7 +185,7 @@ let parseTokens = (lexer: lexer) => {
     and sigExprOperador = (exprIzq, infoOp: infoToken(string), nivel, precedencia, asociatividad) => {
         let valorOp = infoOp.valor
         let (precOp1, asocOp1) = obtInfoOp(valorOp);
-        switch (sigExpresion(0, false, precOp1, asocOp1)) {
+        switch (sigExpresion(nivel, false, precOp1, asocOp1)) {
         | PEOF => PError({j|Se esperaba una expresión a la derecha del operador $valorOp|j})
         | PError(err) => PError({j|Se esperaba una expresion a la derecha del operador $valorOp :\n$err.|j});
         | PExito(exprFinal) => {
@@ -261,7 +265,7 @@ let parseTokens = (lexer: lexer) => {
         };
     }
 
-    and sigExprIdentificador = (infoId, nivel, precedencia, asociatividad) => {
+    and sigExprIdentificador = (infoId: infoToken(string), nivel, precedencia, asociatividad) => {
         let primeraExprId = EIdentificador {
             signatura: Indefinida,
             valor: infoId
@@ -295,6 +299,9 @@ let parseTokens = (lexer: lexer) => {
                     lexer.retroceder();
                     PExito(primeraExprId);
                 }
+            }
+            | TNuevaLinea(info) => {
+                PExito(primeraExprId);
             }
             | _ => {
                 lexer.retroceder();
@@ -341,68 +348,61 @@ let parseTokens = (lexer: lexer) => {
         };
     }
 
-    and sigExpresion = (nivel, aceptarExprMismoNivel, precedencia, asociatividad) => {
+    and sigExpresion = (nivel, iniciarIndentacionEnToken, precedencia, asociatividad) => {
+
+        let obtNuevoNivel = (infoToken) => {
+            let res = if (iniciarIndentacionEnToken) {
+                infoToken.inicio - infoToken.posInicioLinea
+            } else {
+                nivel
+            };
+            // Js.log({j|El sig nivel es $res|j});
+            res;
+        };
 
         let resultado = lexer.sigToken();
 
-        let sigExprActual = {
-            switch resultado {
-            | EOF => PEOF
-            | ErrorLexer(err) => PError(err)
-            | Token(token, _) => {
-                switch token {
-                | PC_SEA(_) => sigExprDeclaracion(nivel)
-                | PC_MUT(infoPC) => {
-                    let textoErr = generarTextoError(infoPC);
-                    PError({j|No se esperaba la palabra clave 'mut' aquí.\n\n$textoErr|j});
-                }
-                | TComentario(_) => sigExpresion(nivel, aceptarExprMismoNivel, precedencia, asociatividad)
-                | TNumero(infoNumero) => PExito(ENumero(infoNumero))
-                | TTexto(infoTexto) => PExito(ETexto(infoTexto))
-                | TBool(infoBool) => PExito(EBool(infoBool))
-                | TIdentificador(infoId) => sigExprIdentificador(infoId, nivel, precedencia, asociatividad)
-                | TParenAb(infoParen) => sigExprParen(infoParen, nivel)
-                | TParenCer(infoParen) => {
-                    let textoErr = generarTextoError(infoParen);
-                    PError({j|No se esperaba un parentesis aquí. No hay ningún parentesis a cerrar.\n\n$textoErr|j});
-                }
-                | TNuevaLinea(_) => sigExpresion(nivel, aceptarExprMismoNivel, precedencia, asociatividad)
-                | TAgrupAb(_) | TAgrupCer(_) => PError({j|Otros signos de agrupación aun no estan soportados.|j})
-                | TGenerico(_) => PError({j|Los genericos aun no estan soportados.|j})
-                | TOperador(infoOp) => {
-                    let textoErr = generarTextoError(infoOp);
-                    PError({j|No se puede usar un operador como expresión. Si esa es tu intención, rodea el operador en paréntesis, por ejemplo: (+)\n\n$textoErr|j});
-                }
-                };
+        switch resultado {
+        | EOF => PEOF
+        | ErrorLexer(err) => PError(err)
+        | Token(token, _) => {
+            switch token {
+            | PC_SEA(infoSea) => {
+                sigExprDeclaracion(obtNuevoNivel(infoSea));
             }
-            };
-        };
-
-        switch (sigExprActual) {
-        | PEOF => sigExprActual
-        | PError(_) => sigExprActual
-        | PExito(exprAct) => {
-            try {
-                let (sigNivelIndentacion, _) = obtSigIndentacion(lexer, "", Some(x => OpInvalida(x)), None);
-                if (aceptarExprMismoNivel && sigNivelIndentacion == nivel) {
-                    let sigExprTop = sigExpresion(nivel, aceptarExprMismoNivel, precedencia, asociatividad);
-                    switch sigExprTop {
-                    | PError(err) => PError(err)
-                    | PEOF => sigExprActual
-                    | PExito(expr) =>
-                        PExito (switch expr {
-                                | EBloque(exprs) =>
-                                    EBloque([exprAct, ...exprs])
-                                | _ =>
-                                    EBloque([exprAct, expr])
-                                })
-                    };
-                } else {
-                    sigExprActual
-                };
-            } {
-            | OpInvalida(err) => PError(err)
-            | _ => sigExprActual
+            | PC_MUT(infoPC) => {
+                let textoErr = generarTextoError(infoPC);
+                PError({j|No se esperaba la palabra clave 'mut' aquí.\n\n$textoErr|j});
+            }
+            | TComentario(_) => sigExpresion(nivel, iniciarIndentacionEnToken, precedencia, asociatividad)
+            | TNumero(infoNumero) => {
+                PExito(ENumero(infoNumero));
+            }
+            | TTexto(infoTexto) => {
+                PExito(ETexto(infoTexto));
+            }
+            | TBool(infoBool) => {
+                PExito(EBool(infoBool));
+            }
+            | TIdentificador(infoId) => {
+                sigExprIdentificador(infoId, obtNuevoNivel(infoId), precedencia, asociatividad);
+            }
+            | TParenAb(infoParen) => {
+                sigExprParen(infoParen, obtNuevoNivel(infoParen));
+            }
+            | TParenCer(infoParen) => {
+                let textoErr = generarTextoError(infoParen);
+                PError({j|No se esperaba un parentesis aquí. No hay ningún parentesis a cerrar.\n\n$textoErr|j});
+            }
+            | TNuevaLinea(_) => {
+                sigExpresion(nivel, iniciarIndentacionEnToken, precedencia, asociatividad);
+            }
+            | TAgrupAb(_) | TAgrupCer(_) => PError({j|Otros signos de agrupación aun no estan soportados.|j})
+            | TGenerico(_) => PError({j|Los genericos aun no estan soportados.|j})
+            | TOperador(infoOp) => {
+                let textoErr = generarTextoError(infoOp);
+                PError({j|No se puede usar un operador como expresión. Si esa es tu intención, rodea el operador en paréntesis, por ejemplo: (+)\n\n$textoErr|j});
+            }
             };
         }
         };
