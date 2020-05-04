@@ -144,6 +144,11 @@ type lexer = {
 };
 
 
+/* TODO: Agregar funcion que permita obtener el sig. token:
+ *  luego de encontrar una nueva linea, saltandose todas las
+ *  nuevas lineas y/o indentaciones.
+ * Luego, debe ser posible regresar a la posición inicial.
+ */
 let crearLexer = (entrada: string) => {
 
     let tamanoEntrada = String.length(entrada);

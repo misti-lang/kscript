@@ -209,9 +209,6 @@ let parseTokens = (lexer: lexer) => {
                     lexer.retroceder();
                     PExito(exprOpRes);
                 }
-                | TNuevaLinea(_) => {
-                    PExito(exprOpRes);
-                }
                 | TIdentificador(_) | TNumero(_) | TTexto(_) | TBool(_) => {
                     let infoOp2 = obtInfoFunAppl(false);
                     // TODO: revisar si aqui se necesita agrupar la aplicacion dependiendo
@@ -258,6 +255,10 @@ let parseTokens = (lexer: lexer) => {
                     let textoError = generarTextoError(info);
                     PError({j|Este signo de agrupación aun no está soportado.\n\n$textoError|j});
                 }
+                | TNuevaLinea(_) => {
+                    Js.log({j|El nivel de la expresion es $nivel|j});
+                    PExito(exprOpRes);
+                }
                 };
             }
             };
@@ -301,6 +302,7 @@ let parseTokens = (lexer: lexer) => {
                 }
             }
             | TNuevaLinea(info) => {
+                lexer.retroceder();
                 PExito(primeraExprId);
             }
             | _ => {
