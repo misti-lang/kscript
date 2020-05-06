@@ -157,7 +157,7 @@ let crearLexer = (entrada: string) => {
     let posAbsInicioLinea = ref(0);
     let posActual = ref(0);
     let indentacionActual = ref(0);
-    let lookAhead = ref(None: option(resLexer));
+    let tokensRestantes = ref([]: list(resLexer));
     let ultimoToken = ref(None: option(resLexer));
 
     let rec sigTokenLuegoDeIdentacion = posActual => {
@@ -166,8 +166,7 @@ let crearLexer = (entrada: string) => {
         | Error(_) => (Nada, -1)
         | Exito(ex) =>
             switch (ex.tipo) {
-            | Indentacion =>
-                sigTokenLuegoDeIdentacion(ex.posFinal);
+            | Indentacion => sigTokenLuegoDeIdentacion(ex.posFinal);
             | _ => (ex.tipo, posActual);
             };
         };
@@ -281,39 +280,48 @@ let crearLexer = (entrada: string) => {
 
     let sigToken = () => {
         let tokenRespuesta =
-            switch (lookAhead^) {
-            | Some(token) => {
-                lookAhead := None;
-                token
+            switch (tokensRestantes^) {
+            | [] => extraerToken();
+            | [token, ...resto] => {
+                tokensRestantes := resto;
+                token;
+            }
             };
-            | None => extraerToken();
-            };
-        
+
         ultimoToken := Some(tokenRespuesta);
         tokenRespuesta;
     };
 
+    let lookAhead = () => {
+        switch (tokensRestantes^) {
+        | [] => {
+            let sigToken = sigToken();
+            tokensRestantes := [sigToken];
+            sigToken;
+        }
+        | [token, ..._] => token;
+        };
+    };
+
+    let retroceder = () => {
+        switch (tokensRestantes^) {
+        | [] => {
+            switch (ultimoToken^) {
+            | Some(token) => {
+                tokensRestantes := [token]
+            }
+            | None => ();
+            }
+        }
+        | [_, ..._] => ()
+        }
+    };
+
     {
-        entrada: entrada,
-        sigToken: sigToken,
-        lookAhead: () => {
-            switch (lookAhead^) {
-            | Some(token) => token
-            | None => {
-                let sigToken = sigToken();
-                lookAhead := Some(sigToken);
-                sigToken;
-            };
-            }
-        },
-        retroceder: () => {
-            switch (lookAhead^) {
-            | Some(_) => ()
-            | None => {
-                lookAhead := ultimoToken^
-            }
-            };
-        },
+        entrada,
+        sigToken,
+        lookAhead,
+        retroceder,
         hayTokens: () => posActual^ < String.length(entrada)
     }
 };
