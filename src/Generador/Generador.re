@@ -9,7 +9,7 @@ let rec generarJs = (expr: expresion, toplevel, nivel) => {
     let indentacionNivelAnt =
         if (nivel == 0)  ""
         else String.make((nivel - 1) * 4, ' ');
-    
+
     let generarJS_ENumero = (info: infoToken(float)) => Js.Float.toString(info.valor);
 
     let generarJS_ETexto = (info: infoToken(string)) => "\"" ++ info.valor ++ "\""
@@ -17,24 +17,24 @@ let rec generarJs = (expr: expresion, toplevel, nivel) => {
     let generarJS_EBool = (info: infoToken(bool)) => if (info.valor) "true" else "false";
 
     let generarJS_EIdentificador = (identificador: eIdentificador) =>
-        identificador.valor.valor
+        identificador.valorId.valor
 
     let generarJS_EDeclaracion = dec => {
         let inicio = if (dec.mut) "let" else "const";
         let id = generarJS_EIdentificador(dec.id);
-        let valor = generarJs(dec.valor, false, (nivel + 1));
-        switch (dec.valor) {
+        let strJs = generarJs(dec.valorDec, false, (nivel + 1));
+        switch (dec.valorDec) {
         | EDeclaracion(_) =>
-            inicio ++ " " ++ id ++ " = " ++ "(() => {\n" ++ indentacionNivelSig ++ valor ++ "\n" 
+            inicio ++ " " ++ id ++ " = " ++ "(() => {\n" ++ indentacionNivelSig ++ strJs ++ "\n" 
             ++ indentacionNivelSig ++ "return undefined;\n" ++ indentacionNivel ++ "})()";
         | _ =>
-            inicio ++ " " ++ id ++ " = " ++ valor
+            inicio ++ " " ++ id ++ " = " ++ strJs
         };
     };
 
     let generarJS_EOperadorApl = (eOpApl: eOperadorApl) => {
         let {op, izq, der} = eOpApl;
-        let operador = op.valor.valor;
+        let operador = op.valorOp.valor;
         let jsExprIzq = generarJs(izq, false, nivel);
         let jsExprDer = generarJs(der, false, nivel);
         "(" ++ jsExprIzq ++ ") " ++ operador ++ " (" ++ jsExprDer ++ ")"

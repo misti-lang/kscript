@@ -16,12 +16,12 @@ type signatura =
 
 type eIdentificador = {
     signatura: signatura,
-    valor: infoToken(string)
+    valorId: infoToken(string)
 }
 
 and eOperador = {
-    signatura: signatura,
-    valor: infoToken(string)
+    signaturaOp: signatura,
+    valorOp: infoToken(string)
 }
 
 and eOperadorApl = {
@@ -33,7 +33,7 @@ and eOperadorApl = {
 and eDeclaracion = {
     mut: bool,
     id: eIdentificador,
-    valor: expresion
+    valorDec: expresion
 }
 
 and expresion =
@@ -171,9 +171,9 @@ let parseTokens = (lexer: lexer) => {
                     mut: esMut^,
                     id: {
                         signatura: Indefinida,
-                        valor: infoTokenId
+                        valorId: infoTokenId
                     },
-                    valor: exprFinal
+                    valorDec: exprFinal
                 }))
             };
 
@@ -189,7 +189,7 @@ let parseTokens = (lexer: lexer) => {
         | PEOF => PError({j|Se esperaba una expresión a la derecha del operador $valorOp|j})
         | PError(err) => PError({j|Se esperaba una expresion a la derecha del operador $valorOp :\n$err.|j});
         | PExito(exprFinal) => {
-            let eOperadorRes: eOperador = { signatura: Indefinida, valor: infoOp }
+            let eOperadorRes: eOperador = { signaturaOp: Indefinida, valorOp: infoOp }
             let exprOpRes = EOperadorApl({
                 op: eOperadorRes,
                 izq: exprIzq,
@@ -232,7 +232,7 @@ let parseTokens = (lexer: lexer) => {
                     | PExito(expr) => {
                         let infoOpFunApl = obtInfoFunAppl(false);
                         PExito(EOperadorApl {
-                            op: { signatura: Indefinida, valor: infoOpFunApl },
+                            op: { signaturaOp: Indefinida, valorOp: infoOpFunApl },
                             izq: exprOpRes,
                             der: expr
                         });
@@ -269,7 +269,7 @@ let parseTokens = (lexer: lexer) => {
     and sigExprIdentificador = (infoId: infoToken(string), nivel, precedencia, asociatividad) => {
         let primeraExprId = EIdentificador {
             signatura: Indefinida,
-            valor: infoId
+            valorId: infoId
         };
 
         switch (lexer.sigToken()) {
