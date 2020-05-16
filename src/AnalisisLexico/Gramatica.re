@@ -84,7 +84,15 @@ let parseIdentificadorTipo =
     mapP(((c, s)) => c ++ s, parseMayuscula |>>| parseRestoIdentificador);
 
 
-let parseNuevaLinea = parseCaracter("\n");
+let parseNuevaLinea = {
+
+    let parseNuevaLCarac = parseCaracter("\n");
+    let parseNuevoWin = parseCaracter("\r");
+
+    let parseNuevaLineaWin = mapP(((s1, s2)) => s1 ++ s2, parseNuevoWin |>>| parseNuevaLCarac);
+
+    parseNuevaLCarac <|> parseNuevaLineaWin;
+}
 
 
 

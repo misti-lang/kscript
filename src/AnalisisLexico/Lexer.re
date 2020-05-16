@@ -391,7 +391,9 @@ let parseVariasOpciones = parsers => {
                 | _ => inner2(ps)
                 };
 
-            | [] => Error("Ningun parser se adapta a la entrada.");
+            | [] => {
+                Error({j|Ningun parser se adapta a la entrada. En la posicíon $pos.|j});
+            }
             };
 
 
