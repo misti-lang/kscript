@@ -26,7 +26,8 @@ let flujoPrincipal = entrada => {
     switch (expresion) {
     | ErrorParser(err) => err
     | ExitoParser(expr) => {
-        Generador.generarJs(expr, true, 0);
+        let (js, _) = Generador.generarJs(expr, true, 0);
+        js
     }
     };
 };
