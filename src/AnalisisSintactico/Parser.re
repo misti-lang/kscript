@@ -7,6 +7,10 @@ open Expect;
 //  Expresion
 // ===================================
 
+type asociatividad =
+    | Izq
+    | Der
+
 type signatura =
     | Indefinida
     | Simple(string)
@@ -21,7 +25,9 @@ type eIdentificador = {
 
 and eOperador = {
     signaturaOp: signatura,
-    valorOp: infoToken(string)
+    valorOp: infoToken(string),
+    precedencia: int,
+    asociatividad
 }
 
 and eOperadorApl = {
@@ -57,10 +63,6 @@ type resParser =
     | ExitoParser(expresion)
     | ErrorParser(string)
 
-
-type asociatividad =
-    | Izq
-    | Der
 
 
 let obtInfoFunAppl = esCurry => ({
@@ -189,7 +191,13 @@ let parseTokens = (lexer: lexer) => {
         | PEOF => PError({j|Se esperaba una expresión a la derecha del operador $valorOp|j})
         | PError(err) => PError({j|Se esperaba una expresion a la derecha del operador $valorOp :\n$err.|j});
         | PExito(exprFinal) => {
-            let eOperadorRes: eOperador = { signaturaOp: Indefinida, valorOp: infoOp }
+
+            let eOperadorRes: eOperador = { 
+                signaturaOp: Indefinida, 
+                valorOp: infoOp, 
+                precedencia: precOp1,
+                asociatividad: asocOp1
+            }
             let exprOpRes = EOperadorApl({
                 op: eOperadorRes,
                 izq: exprIzq,
@@ -231,8 +239,14 @@ let parseTokens = (lexer: lexer) => {
                     | PEOF => PError("Hay un parentesis sin cerrar.")
                     | PExito(expr) => {
                         let infoOpFunApl = obtInfoFunAppl(false);
+                        let (precedenciaOpFunApl, asociatividadOpFunApl) = obtInfoOp(infoOpFunApl.valor);
                         PExito(EOperadorApl {
-                            op: { signaturaOp: Indefinida, valorOp: infoOpFunApl },
+                            op: { 
+                                signaturaOp: Indefinida, 
+                                valorOp: infoOpFunApl, 
+                                precedencia: precedenciaOpFunApl,
+                                asociatividad: asociatividadOpFunApl
+                            },
                             izq: exprOpRes,
                             der: expr
                         });
