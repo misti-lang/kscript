@@ -75,28 +75,6 @@ let obtInfoFunAppl = esCurry => ({
 });
 
 
-// TODO: Mover esta funcion al lexer propio, para que se integre con lookAhead
-//       O, en todo caso, eliminar el uso de esta funcion.
-//          Se podria conseguir haciendo que todos los parsers continuen parseando,
-//          similar a como lo hace sigExprOperador
-let obtSigIndentacion = (lexer: lexer, msgError, fnErrorLexer, fnEOF) => {
-    let hayNuevaLinea = ref(false);
-    try {
-        while (true) {
-            let _ = _TNuevaLinea(lexer.lookAhead(), None, "");
-            hayNuevaLinea := true;
-            let _ = lexer.sigToken();
-        };
-        (1, true)
-    } {
-    | ErrorComun(_) => {
-        let (__, nuevaIndentacion) = _Any(lexer.lookAhead(), msgError, fnErrorLexer, fnEOF);
-        (nuevaIndentacion, hayNuevaLinea^);
-    }
-    };
-};
-
-
 /**
  * El operador ñ representa aplicacion de funcion.
  * El operador Ñ representa aplicacion de funcion con currying.
@@ -161,10 +139,14 @@ let parseTokens = (lexer: lexer) => {
             let _ = _TOperador(lexer.sigToken(), Some("="), "Se esperaba el operador de asignación '=' luego del indentificador.");
 
             // let (nuevoNivel, hayNuevaLinea) = obtSigIndentacion(lexer, "Se esperaba una expresion luego del signo '='.", None, None);
-            let (_, nuevoNivel, hayNuevaLinea, _) = lexer.lookAheadSignificativo();
+            let (_, nuevoNivel, hayNuevaLinea, fnEstablecer) = lexer.lookAheadSignificativo();
 
             if (hayNuevaLinea && nuevoNivel <= nivel) {
                 raise(ErrorComun({j|La expresión actual está incompleta. Se esperaba una expresión indentada.|j}));
+            }
+
+            if (hayNuevaLinea) {
+                fnEstablecer();
             }
 
             switch (sigExpresion (nuevoNivel, true, 0, Izq)) {
@@ -415,7 +397,6 @@ let parseTokens = (lexer: lexer) => {
             | TNuevaLinea(_) => {
                 lexer.retroceder();
                 let (_, sigNivel, _, fnEstablecer) = lexer.lookAheadSignificativo();
-                Js.log({j|actual es $nivel y sig es $sigNivel|j});
                 if (sigNivel >= nivel) {
                     fnEstablecer();
                     sigExpresion(nivel, iniciarIndentacionEnToken, precedencia, asociatividad);
