@@ -148,7 +148,8 @@ type lexer = {
     sigToken: unit => resLexer,
     lookAhead: unit => resLexer,
     retroceder: unit => unit,
-    hayTokens: unit => bool
+    hayTokens: unit => bool,
+    lookAheadSignificativo: unit => (resLexer, unit => unit)
 };
 
 
@@ -325,11 +326,47 @@ let crearLexer = (entrada: string) => {
         }
     };
 
+    /**
+     * Retrocede el parser, y busca el sig token que no sea nueva linea.
+     * Devuelve ese token, y una funcion que permite hacer permantes los cambios.
+     */
+    let lookAheadSignificativo = (): (resLexer, unit => unit) => {
+        retroceder();
+        let tokenNoEncontrado = ref(true);
+        let tokenRespuesta = ref(None: option(resLexer));
+
+        let rec obtSigTokenSign = (tokensList) => {
+            let sigToken = extraerToken();
+            switch (sigToken) {
+            | ErrorLexer(_) | EOF => {
+                (sigToken, tokensList);
+            }
+            | Token(token, _) => {
+                switch (token) {
+                | TNuevaLinea(_) => {
+                    obtSigTokenSign(tokensList @ [sigToken]);
+                }
+                | _ => {
+                    (sigToken, tokensList);
+                }
+                };
+            }
+            }
+        };
+
+        let (token, listaRestante) = obtSigTokenSign(tokensRestantes^);
+        tokensRestantes := listaRestante;
+        (token, () => {
+            tokensRestantes := [];
+        });
+    };
+
     {
         entrada,
         sigToken,
         lookAhead,
         retroceder,
+        lookAheadSignificativo,
         hayTokens: () => posActual^ < String.length(entrada)
     }
 };
