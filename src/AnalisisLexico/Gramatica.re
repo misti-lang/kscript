@@ -356,7 +356,7 @@ let crearLexer = (entrada: string) => {
         let (token, nivelIndentacion, hayNuevaLinea, listaRestante) = obtSigTokenSign(tokensRestantes^, false);
         tokensRestantes := listaRestante;
         (token, nivelIndentacion, hayNuevaLinea, () => {
-            tokensRestantes := [];
+            tokensRestantes := [token];
         });
     };
 

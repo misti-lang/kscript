@@ -58,6 +58,7 @@ type exprRes =
     | PExito(expresion)
     | PError(string)
     | PEOF
+    | PReturn
 
 type resParser =
     | ExitoParser(expresion)
@@ -189,7 +190,7 @@ let parseTokens = (lexer: lexer) => {
         let valorOp = infoOp.valor
         let (precOp1, asocOp1) = obtInfoOp(valorOp);
         switch (sigExpresion(nivel, false, precOp1, asocOp1)) {
-        | PEOF => PError({j|Se esperaba una expresión a la derecha del operador $valorOp|j})
+        | PEOF | PReturn => PError({j|Se esperaba una expresión a la derecha del operador $valorOp|j})
         | PError(err) => PError({j|Se esperaba una expresion a la derecha del operador $valorOp :\n$err.|j});
         | PExito(exprFinal) => {
 
@@ -412,7 +413,15 @@ let parseTokens = (lexer: lexer) => {
                 PError({j|No se esperaba un parentesis aquí. No hay ningún parentesis a cerrar.\n\n$textoErr|j});
             }
             | TNuevaLinea(_) => {
-                sigExpresion(nivel, iniciarIndentacionEnToken, precedencia, asociatividad);
+                lexer.retroceder();
+                let (_, sigNivel, _, fnEstablecer) = lexer.lookAheadSignificativo();
+                Js.log({j|actual es $nivel y sig es $sigNivel|j});
+                if (sigNivel >= nivel) {
+                    fnEstablecer();
+                    sigExpresion(nivel, iniciarIndentacionEnToken, precedencia, asociatividad);
+                } else {
+                    PReturn
+                }
             }
             | TAgrupAb(_) | TAgrupCer(_) => PError({j|Otros signos de agrupación aun no estan soportados.|j})
             | TGenerico(_) => PError({j|Los genericos aun no estan soportados.|j})
