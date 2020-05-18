@@ -149,8 +149,8 @@ let parseTokens = (lexer: lexer) => {
                 fnEstablecer();
             }
 
-            switch (sigExpresion (nuevoNivel, true, 0, Izq)) {
-            | PEOF => PError("Se esperaba una expresión luego de la asignacion.");
+            switch (sigExpresion (nuevoNivel, nivel, true, 0, Izq)) {
+            | PEOF | PReturn => PError("Se esperaba una expresión luego de la asignacion.");
             | PError(err) => PError({j|Se esperaba una expresión luego de la asignación: $err|j});
             | PExito(exprFinal) =>
                 PExito(EDeclaracion({
@@ -171,7 +171,7 @@ let parseTokens = (lexer: lexer) => {
     and sigExprOperador = (exprIzq, infoOp: infoToken(string), nivel, precedencia, asociatividad) => {
         let valorOp = infoOp.valor
         let (precOp1, asocOp1) = obtInfoOp(valorOp);
-        switch (sigExpresion(nivel, false, precOp1, asocOp1)) {
+        switch (sigExpresion(nivel, nivel, false, precOp1, asocOp1)) {
         | PEOF | PReturn => PError({j|Se esperaba una expresión a la derecha del operador $valorOp|j})
         | PError(err) => PError({j|Se esperaba una expresion a la derecha del operador $valorOp :\n$err.|j});
         | PExito(exprFinal) => {
@@ -217,7 +217,7 @@ let parseTokens = (lexer: lexer) => {
                     PExito(exprOpRes);
                 }
                 | TParenAb(infoParen) => {
-                    let sigExpr = sigExprParen(infoParen, nivel);
+                    let sigExpr = sigExprParen(infoParen, nivel, nivel);
                     switch sigExpr {
                     | PError(err) => PError(err)
                     | PEOF => PError("Hay un parentesis sin cerrar.")
@@ -312,9 +312,12 @@ let parseTokens = (lexer: lexer) => {
         };
     }
 
-    and sigExprParen = (infoParen, nivel) => {
-        let sigToken = sigExpresion(nivel, false, 0, Izq);
+    //: TODO: Para que funcione debe estar implementado el lookaheadsignificativo en el
+    //  resto de parsers.
+    and sigExprParen = (infoParen, nivel, nivelPadre) => {
+        let sigToken = sigExpresion(nivelPadre, nivelPadre, false, 0, Izq);
         switch sigToken {
+        | PReturn => PError("Error de indentación. El parentesis no ha sido cerrado.")
         | PError(_) => sigToken
         | PEOF => {
             let textoErr = generarTextoError(infoParen);
@@ -348,7 +351,7 @@ let parseTokens = (lexer: lexer) => {
         };
     }
 
-    and sigExpresion = (nivel, iniciarIndentacionEnToken, precedencia, asociatividad) => {
+    and sigExpresion = (nivel, nivelPadre, iniciarIndentacionEnToken, precedencia, asociatividad) => {
 
         let obtNuevoNivel = (infoToken) => {
             let res = if (iniciarIndentacionEnToken) {
@@ -374,7 +377,7 @@ let parseTokens = (lexer: lexer) => {
                 let textoErr = generarTextoError(infoPC);
                 PError({j|No se esperaba la palabra clave 'mut' aquí.\n\n$textoErr|j});
             }
-            | TComentario(_) => sigExpresion(nivel, iniciarIndentacionEnToken, precedencia, asociatividad)
+            | TComentario(_) => sigExpresion(nivel, nivel, iniciarIndentacionEnToken, precedencia, asociatividad)
             | TNumero(infoNumero) => {
                 PExito(ENumero(infoNumero));
             }
@@ -388,7 +391,7 @@ let parseTokens = (lexer: lexer) => {
                 sigExprIdentificador(infoId, obtNuevoNivel(infoId), precedencia, asociatividad);
             }
             | TParenAb(infoParen) => {
-                sigExprParen(infoParen, obtNuevoNivel(infoParen));
+                sigExprParen(infoParen, obtNuevoNivel(infoParen), nivelPadre);
             }
             | TParenCer(infoParen) => {
                 let textoErr = generarTextoError(infoParen);
@@ -399,7 +402,7 @@ let parseTokens = (lexer: lexer) => {
                 let (_, sigNivel, _, fnEstablecer) = lexer.lookAheadSignificativo();
                 if (sigNivel >= nivel) {
                     fnEstablecer();
-                    sigExpresion(nivel, iniciarIndentacionEnToken, precedencia, asociatividad);
+                    sigExpresion(nivel, nivel, iniciarIndentacionEnToken, precedencia, asociatividad);
                 } else {
                     PReturn
                 }
@@ -416,7 +419,7 @@ let parseTokens = (lexer: lexer) => {
     };
 
 
-    let exprRe = sigExpresion(0, true, 0, Izq);
+    let exprRe = sigExpresion(0, 0, true, 0, Izq);
     switch (exprRe) {
     | PError(err) => ErrorParser(err);
     | PExito(expr) => ExitoParser(expr);
