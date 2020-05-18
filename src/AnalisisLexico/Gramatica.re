@@ -149,7 +149,7 @@ type lexer = {
     lookAhead: unit => resLexer,
     retroceder: unit => unit,
     hayTokens: unit => bool,
-    lookAheadSignificativo: unit => (resLexer, unit => unit)
+    lookAheadSignificativo: unit => (resLexer, int, bool, unit => unit)
 };
 
 
@@ -327,36 +327,35 @@ let crearLexer = (entrada: string) => {
     };
 
     /**
-     * Retrocede el parser, y busca el sig token que no sea nueva linea.
+     * Busca el sig token que no sea nueva linea.
      * Devuelve ese token, y una funcion que permite hacer permantes los cambios.
+     * El cliente es responsable de retroceder el parser si desea volver a 
+     * esa pesicion anterior.
      */
-    let lookAheadSignificativo = (): (resLexer, unit => unit) => {
-        retroceder();
-        let tokenNoEncontrado = ref(true);
-        let tokenRespuesta = ref(None: option(resLexer));
+    let lookAheadSignificativo = (): (resLexer, int, bool, unit => unit) => {
 
-        let rec obtSigTokenSign = (tokensList) => {
+        let rec obtSigTokenSign = (tokensList, hayNuevaLinea) => {
             let sigToken = extraerToken();
             switch (sigToken) {
             | ErrorLexer(_) | EOF => {
-                (sigToken, tokensList);
+                (sigToken, -1, hayNuevaLinea, tokensList);
             }
-            | Token(token, _) => {
+            | Token(token, indentacion) => {
                 switch (token) {
                 | TNuevaLinea(_) => {
-                    obtSigTokenSign(tokensList @ [sigToken]);
+                    obtSigTokenSign(tokensList @ [sigToken], true);
                 }
                 | _ => {
-                    (sigToken, tokensList);
+                    (sigToken, indentacion, hayNuevaLinea, tokensList @ [sigToken]);
                 }
                 };
             }
             }
         };
 
-        let (token, listaRestante) = obtSigTokenSign(tokensRestantes^);
+        let (token, nivelIndentacion, hayNuevaLinea, listaRestante) = obtSigTokenSign(tokensRestantes^, false);
         tokensRestantes := listaRestante;
-        (token, () => {
+        (token, nivelIndentacion, hayNuevaLinea, () => {
             tokensRestantes := [];
         });
     };

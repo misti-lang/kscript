@@ -159,7 +159,8 @@ let parseTokens = (lexer: lexer) => {
             let infoTokenId = _TIdentificador(preTokenId^, None, "Se esperaba un identificador");
             let _ = _TOperador(lexer.sigToken(), Some("="), "Se esperaba el operador de asignación '=' luego del indentificador.");
 
-            let (nuevoNivel, hayNuevaLinea) = obtSigIndentacion(lexer, "Se esperaba una expresion luego del signo '='.", None, None);
+            // let (nuevoNivel, hayNuevaLinea) = obtSigIndentacion(lexer, "Se esperaba una expresion luego del signo '='.", None, None);
+            let (_, nuevoNivel, hayNuevaLinea, _) = lexer.lookAheadSignificativo();
 
             if (hayNuevaLinea && nuevoNivel <= nivel) {
                 raise(ErrorComun({j|La expresión actual está incompleta. Se esperaba una expresión indentada.|j}));
