@@ -1,5 +1,5 @@
 {
-  "name": "kan-comp",
+  "name": "kei-lang",
   "version": "0.0.2",
   "scripts": {
     "build": "bsb -make-world",
@@ -10,9 +10,9 @@
     "watch": "bsb -make-world -w"
   },
   "keywords": [
-    "BuckleScript"
+    "javascript language compiler"
   ],
-  "author": "Araozu",
+  "author": "araozu",
   "license": "MIT",
   "devDependencies": {
     "bs-platform": "^7.2.2"

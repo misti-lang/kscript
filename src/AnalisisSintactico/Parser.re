@@ -301,6 +301,11 @@ let parseTokens = (lexer: lexer) => {
             }
             | TNuevaLinea(info) => {
                 lexer.retroceder();
+
+                let (tokenSign, indent, _, fnEstablecer) = lexer.lookAheadSignificativo();
+                
+
+                lexer.retroceder();
                 PExito(primeraExprId);
             }
             | _ => {
