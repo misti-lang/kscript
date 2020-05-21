@@ -1,6 +1,6 @@
 {
-  "name": "kei-lang",
-  "version": "0.0.2",
+  "name": "misti",
+  "version": "0.0.3",
   "scripts": {
     "build": "bsb -make-world",
     "start": "node ./lib/js/src/Inicio.bs.js",
