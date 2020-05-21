@@ -46,7 +46,7 @@ type token2 =
     | TParenCer(infoToken(string)) // Parentesis cerrado
     | TAgrupAb(infoToken(string))
     | TAgrupCer(infoToken(string))
-    | PC_SEA(infoToken(string))
+    | PC_LET(infoToken(string))
     | PC_MUT(infoToken(string))
 
 

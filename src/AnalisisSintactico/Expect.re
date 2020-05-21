@@ -63,10 +63,10 @@ let _TIdentificador = (resLexer, valorOpc, msgError) => {
 };
 
 
-let _PC_SEA = (resLexer, valorOpc, msgError) => {
+let _PC_LET = (resLexer, valorOpc, msgError) => {
     let preToken = extraerToken(resLexer, msgError);
     switch (preToken) {
-    | PC_SEA(infoToken) =>
+    | PC_LET(infoToken) =>
         switch (valorOpc) {
         | Some(v) =>
             if (infoToken.valor == v) infoToken

@@ -237,9 +237,9 @@ let parseTokens = (lexer: lexer) => {
                     }
                     };
                 }
-                | PC_SEA(info) => {
+                | PC_LET(info) => {
                     let textoError = generarTextoError(info);
-                    PError({j|No se esperaba la palabra clave 'sea' luego de la aplicación del operador.\n\n$textoError|j})
+                    PError({j|No se esperaba la palabra clave 'let' luego de la aplicación del operador.\n\n$textoError|j})
                 }
                 | PC_MUT(info) => {
                     let textoError = generarTextoError(info);
@@ -375,7 +375,7 @@ let parseTokens = (lexer: lexer) => {
         | ErrorLexer(err) => PError(err)
         | Token(token, _) => {
             switch token {
-            | PC_SEA(infoSea) => {
+            | PC_LET(infoSea) => {
                 sigExprDeclaracion(obtNuevoNivel(infoSea));
             }
             | PC_MUT(infoPC) => {
