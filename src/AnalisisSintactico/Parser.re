@@ -81,7 +81,7 @@ let obtInfoFunAppl = esCurry => ({
  */
 let obtInfoOp = (operador) => {
     let strEneMinuscula = {j|ñ|j};
-    let strEneMayuscula = {j|Ñ|j}
+    let strEneMayuscula = {j|Ñ|j};
     switch (operador) {
     | "," => (1, Izq)
     | "=" | "+=" | "-=" | "*=" | "/=" | "%=" | "^=" => (2, Izq)
@@ -95,7 +95,7 @@ let obtInfoOp = (operador) => {
     | "+" | "-" => (10, Izq)
     | "*" | "/" | "%" => (11, Izq)
     | "^" => (12, Der)
-    | "." => (15, Izq)
+    | "." | "?." => (15, Izq)
     | _ => {
         if (operador == strEneMayuscula || operador == strEneMinuscula) {
             (14, Izq)

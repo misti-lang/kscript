@@ -37,10 +37,42 @@ let rec generarJs = (expr: expresion, toplevel, nivel): (string, int) => {
     let generarJS_EOperadorApl = (eOpApl: eOperadorApl) => {
         let {op, izq, der} = eOpApl;
         let operador = op.valorOp.valor;
-        let (jsExprIzq, _) = generarJs(izq, false, nivel);
-        let (jsExprDer, _) = generarJs(der, false, nivel);
-        let jsRetorno = "(" ++ jsExprIzq ++ ") " ++ operador ++ " (" ++ jsExprDer ++ ")";
-        (jsRetorno, op.precedencia);
+        let precedenciaOp = op.precedencia;
+        let (jsExprIzq, precedenciaJsIzq) = generarJs(izq, false, nivel);
+        let (jsExprDer, precedenciaJsDer) = generarJs(der, false, nivel);
+
+        let jsIzqFinal = 
+            if (precedenciaJsIzq > 0 && precedenciaJsIzq < precedenciaOp) {
+                {j|($jsExprIzq)|j};
+            } else {
+                jsExprIzq;
+            };
+
+        let exprDerFinal =
+            if (precedenciaJsDer > 0 && precedenciaJsDer < precedenciaOp) {
+                {j|($jsExprDer)|j};
+            } else {
+                jsExprDer;
+            };
+
+        let jsOpFinal = {
+            let strEneMinuscula = {j|ñ|j};
+            let strEneMayuscula = {j|Ñ|j};
+            switch (operador) {
+            | "." | "?." => operador
+            | "," => operador ++ " "
+            | _ => {
+                if (operador == strEneMinuscula || operador == strEneMayuscula) {
+                    " "
+                } else {
+                    " " ++ operador ++ " "
+                };
+            }
+            };
+        };
+
+        let jsRetorno = jsIzqFinal ++ jsOpFinal ++ exprDerFinal;
+        (jsRetorno, precedenciaOp);
     };
 
 
