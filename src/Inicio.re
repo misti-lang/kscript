@@ -16,7 +16,7 @@ let tknToStr = token2 => {
     | TAgrupAb(_) => "TAgrupAb"
     | TAgrupCer(_) => "TAgrupCer"
     | PC_LET(_) => "PC_LET"
-    | PC_MUT(_) => "PC_MUT"
+    | PC_CONST(_) => "PC_CONST"
     };
 };
 

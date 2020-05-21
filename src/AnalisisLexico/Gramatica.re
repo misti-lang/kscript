@@ -254,7 +254,7 @@ let crearLexer = (entrada: string) => {
                 | "true" => crearToken2(x => TBool(x), true);
                 | "false" => crearToken2(x => TBool(x), false);
                 | "let" => crearToken2(x => PC_LET(x), "sea");
-                | "mut" => crearToken2(x => PC_MUT(x), "mut");
+                | "const" => crearToken2(x => PC_CONST(x), "const");
                 | _ => crearToken2(x => TIdentificador(x), ex.res);
                 };
             };

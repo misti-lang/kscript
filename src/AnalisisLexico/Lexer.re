@@ -47,7 +47,7 @@ type token2 =
     | TAgrupAb(infoToken(string))
     | TAgrupCer(infoToken(string))
     | PC_LET(infoToken(string))
-    | PC_MUT(infoToken(string))
+    | PC_CONST(infoToken(string))
 
 
 type resultado('A) =

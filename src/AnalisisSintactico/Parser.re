@@ -121,22 +121,20 @@ let parseTokens = (lexer: lexer) => {
         {j|$strIndicadorNumLinea$substr\n$espacioBlancoIndicador$strIndicador\n|j};
     }
 
-    let rec sigExprDeclaracion = nivel => {
+    let rec sigExprDeclaracion = (nivel, esMut) => {
         try {
-            let esMut = ref(false);
-            let token2 = lexer.sigToken();
-            let preTokenId = ref(token2);
+            let tokenIdentificador = lexer.sigToken();
 
-            try {
-                let _ = _PC_MUT(token2, None, "");
-                esMut := true;
-                preTokenId := lexer.sigToken();
-            } {
-            | _ => ()
-            };
-
-            let infoTokenId = _TIdentificador(preTokenId^, None, "Se esperaba un identificador");
-            let _ = _TOperador(lexer.sigToken(), Some("="), "Se esperaba el operador de asignación '=' luego del indentificador.");
+            let infoTokenId = _TIdentificador(
+                tokenIdentificador, 
+                None, 
+                "Se esperaba un identificador"
+            );
+            let _ = _TOperador(
+                lexer.sigToken(), 
+                Some("="), 
+                "Se esperaba el operador de asignación '=' luego del indentificador."
+            );
 
             // let (nuevoNivel, hayNuevaLinea) = obtSigIndentacion(lexer, "Se esperaba una expresion luego del signo '='.", None, None);
             let (_, nuevoNivel, hayNuevaLinea, fnEstablecer) = lexer.lookAheadSignificativo();
@@ -154,7 +152,7 @@ let parseTokens = (lexer: lexer) => {
             | PError(err) => PError({j|Se esperaba una expresión luego de la asignación: $err|j});
             | PExito(exprFinal) =>
                 PExito(EDeclaracion({
-                    mut: esMut^,
+                    mut: esMut,
                     id: {
                         signatura: Indefinida,
                         valorId: infoTokenId
@@ -241,9 +239,9 @@ let parseTokens = (lexer: lexer) => {
                     let textoError = generarTextoError(info);
                     PError({j|No se esperaba la palabra clave 'let' luego de la aplicación del operador.\n\n$textoError|j})
                 }
-                | PC_MUT(info) => {
+                | PC_CONST(info) => {
                     let textoError = generarTextoError(info);
-                    PError({j|No se esperaba la palabra clave 'mut' luego de la aplicación del operador.\n\n$textoError|j})
+                    PError({j|No se esperaba la palabra clave 'const' luego de la aplicación del operador.\n\n$textoError|j})
                 }
                 | TAgrupAb(info) => {
                     let textoError = generarTextoError(info);
@@ -376,11 +374,10 @@ let parseTokens = (lexer: lexer) => {
         | Token(token, _) => {
             switch token {
             | PC_LET(infoSea) => {
-                sigExprDeclaracion(obtNuevoNivel(infoSea));
+                sigExprDeclaracion(obtNuevoNivel(infoSea), true);
             }
-            | PC_MUT(infoPC) => {
-                let textoErr = generarTextoError(infoPC);
-                PError({j|No se esperaba la palabra clave 'mut' aquí.\n\n$textoErr|j});
+            | PC_CONST(infoConst) => {
+                sigExprDeclaracion(obtNuevoNivel(infoConst), false);
             }
             | TComentario(_) => sigExpresion(nivel, nivel, iniciarIndentacionEnToken, precedencia, asociatividad)
             | TNumero(infoNumero) => {

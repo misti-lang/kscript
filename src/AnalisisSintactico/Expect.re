@@ -79,10 +79,10 @@ let _PC_LET = (resLexer, valorOpc, msgError) => {
 };
 
 
-let _PC_MUT = (resLexer, valorOpc, msgError) => {
+let _PC_CONST = (resLexer, valorOpc, msgError) => {
     let preToken = extraerToken(resLexer, msgError);
     switch (preToken) {
-    | PC_MUT(infoToken) =>
+    | PC_CONST(infoToken) =>
         switch (valorOpc) {
         | Some(v) =>
             if (infoToken.valor == v) infoToken
