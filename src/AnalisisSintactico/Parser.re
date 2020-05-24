@@ -252,22 +252,24 @@ let parseTokens = (lexer: lexer) => {
                 }
                 | TNuevaLinea(_) => {
 
+                    // Si la expr anterior llamó a lookAheadSign y no limpió, la sig
+                    // llamada se salta ese resultado
                     lexer.retroceder();
                     let (resLexer, indentacion, hayNuevaLinea, fnEstablecer) = 
                         lexer.lookAheadSignificativo();
-                    
+
                     if (indentacion < nivel) {
+                        Js.log({j|$indentacion para $nivel|j});
+                        Js.log(resLexer);
                         PExito(exprOpRes);
                     } else if (indentacion == nivel) {
-                        Js.log("lul");
+                        Js.log("TODO parser 267");
                         PExito(exprOpRes);
                     } else {
                         Js.log({j|Añuña|j});
                         PExito(exprOpRes);
                     }
 
-                    Js.log({j|El nivel de la expresion es $nivel|j});
-                    PExito(exprOpRes);
                 }
                 };
             }
@@ -313,13 +315,12 @@ let parseTokens = (lexer: lexer) => {
                         PExito(primeraExprId);
                     }
                 }
-                | TNuevaLinea(info) when !aceptarSoloOperador => {
+                | TNuevaLinea(_) when !aceptarSoloOperador => {
                     lexer.retroceder();
 
                     let (tokenSig, indentacion, _, fnEstablecer) =
                         lexer.lookAheadSignificativo();
 
-                    Js.log({j|Nivel actual: $nivel - nivel nuevo: $indentacion|j});
                     let expresionRespuesta = PExito(primeraExprId);
                     if (indentacion < nivel) {
                         PExito(primeraExprId);

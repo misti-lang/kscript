@@ -163,6 +163,7 @@ let crearLexer = (entrada: string) => {
     let indentacionActual = ref(0);
     let tokensRestantes = ref([]: list(resLexer));
     let ultimoToken = ref(None: option(resLexer));
+    let resultadoLookAheadSignificativo = ref(None: option((resLexer, int, bool, unit => unit)));
 
     let rec sigTokenLuegoDeIdentacion = posActual => {
         let sigToken = run(parserGeneral, entrada, posActual);
@@ -348,11 +349,20 @@ let crearLexer = (entrada: string) => {
             }
         };
 
-        let (token, nivelIndentacion, hayNuevaLinea, listaRestante) = obtSigTokenSign(tokensRestantes^, false);
-        tokensRestantes := listaRestante;
-        (token, nivelIndentacion, hayNuevaLinea, () => {
-            tokensRestantes := [token];
-        });
+        switch resultadoLookAheadSignificativo^ {
+        | Some(resultado) => resultado
+        | None => {
+            let (token, nivelIndentacion, hayNuevaLinea, listaRestante) = obtSigTokenSign(tokensRestantes^, false);
+            tokensRestantes := listaRestante;
+            let resultado = (token, nivelIndentacion, hayNuevaLinea, () => {
+                resultadoLookAheadSignificativo := None;
+                tokensRestantes := [token];
+            });
+            resultadoLookAheadSignificativo := Some(resultado);
+            resultado;
+        }
+        };
+
     };
 
     {
