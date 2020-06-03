@@ -149,7 +149,8 @@ type lexer = {
     lookAhead: unit => resLexer,
     retroceder: unit => unit,
     hayTokens: unit => bool,
-    lookAheadSignificativo: unit => (resLexer, int, bool, unit => unit)
+    lookAheadSignificativo: unit => (resLexer, int, bool, unit => unit),
+    debug: unit => unit
 };
 
 
@@ -365,13 +366,30 @@ let crearLexer = (entrada: string) => {
 
     };
 
+    let debug = () => {
+        Js.log("\n-----------------------------");
+        Js.log("Estado actual del lexer:");
+        let v = esInicioDeLinea^;
+        Js.log({j|esInicioDeLinea: $v|j});
+        let v = posActual^;
+        Js.log({j|posActual: $v|j});
+        let v = tokensRestantes^;
+        Js.log({j|tokensRestantes:|j});
+        Js.log(v);
+        let v = ultimoToken^;
+        Js.log({j|ultimoToken:|j});
+        Js.log(v);
+        Js.log("-----------------------------\n");
+    };
+
     {
         entrada,
         sigToken,
         lookAhead,
         retroceder,
         lookAheadSignificativo,
-        hayTokens: () => posActual^ < String.length(entrada)
+        hayTokens: () => posActual^ < String.length(entrada),
+        debug
     }
 };
 
