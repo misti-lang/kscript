@@ -258,7 +258,6 @@ let parseTokens = (lexer: lexer) => {
 
                         lexer.retroceder();
                         let (resLexer, indentacion, _, fnEstablecer) = lexer.lookAheadSignificativo(true);
-                        lexer.debug();
 
                         let expresionRespuesta = PExito(exprOpRes);
 
@@ -267,7 +266,7 @@ let parseTokens = (lexer: lexer) => {
                             if (indentacion < nivel) {
                                 expresionRespuesta;
                             } else if (indentacion == nivel) {
-                                Js.log({j|Es Expr Prin? $esExprPrincipal|j});
+                                // Js.log({j|Es Expr Prin? $esExprPrincipal|j});
                                 let nuevaFnEst = () => {
                                     fnEstablecer();
                                     ignore(lexer.sigToken());
@@ -297,7 +296,7 @@ let parseTokens = (lexer: lexer) => {
                                 funDesicion(resLexer, true, nuevaFnEst, funSiNoEsOp);
 
                             } else {
-                                Js.log({j|Añuña|j});
+                                // Js.log({j|Añuña|j});
                                 // PExito(exprOpRes);
                                 fnEstablecer();
                                 funDesicion(lexer.sigToken(), false, () => (), () => PReturn);
@@ -309,7 +308,7 @@ let parseTokens = (lexer: lexer) => {
 
                     }
                     | _ => {
-                        Js.log("Llamando fun defecto...");
+                        // Js.log("Llamando fun defecto...");
                         funValorDefecto();
                     }
                     };
@@ -360,11 +359,9 @@ let parseTokens = (lexer: lexer) => {
                     }
                 }
                 | TNuevaLinea(_) when !aceptarSoloOperador => {
-                    lexer.debug();
+                    
                     lexer.retroceder();
-                    lexer.debug();
                     let (tokenSig, indentacion, _, fnEstablecer) = lexer.lookAheadSignificativo(true);
-                    lexer.debug();
 
                     let expresionRespuesta = PExito(primeraExprId);
                     if (esExprPrincipal) {

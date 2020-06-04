@@ -429,7 +429,6 @@ let crearLexer = (entrada: string) => {
 
             tokensRestantes := listaRestante;
             let resultado = (token, nivelIndentacion, hayNuevaLinea, () => {
-                Js.log("LookAheadSign aplicado!");
                 resultadoLookAheadSignificativo := None;
                 tokensRestantes := [token];
             });
