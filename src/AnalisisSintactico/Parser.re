@@ -160,6 +160,8 @@ let parseTokens = (lexer: lexer) => {
                 }))
             };
 
+            // TODO: Hacer que aquí se parseen las siguientes expresiones.
+
         } {
         | ErrorComun(err) => PError(err)
         };
