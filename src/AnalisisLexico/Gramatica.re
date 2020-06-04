@@ -136,6 +136,7 @@ let parserGeneral = parseVariasOpciones([
     mapTipo(parseSignoAgrupacionCer, AgrupacionCer)
 ]);
 
+exception EstadoInvalido(unit);
 
 type resLexer =
     | Token(token2, int)
@@ -149,10 +150,28 @@ type lexer = {
     lookAhead: unit => resLexer,
     retroceder: unit => unit,
     hayTokens: unit => bool,
-    lookAheadSignificativo: unit => (resLexer, int, bool, unit => unit),
+    lookAheadSignificativo: bool => (resLexer, int, bool, unit => unit),
     debug: unit => unit
 };
 
+let tknToStr = token2 => {
+    switch (token2) {
+    | TNuevaLinea(_) => "TNuevaLinea"
+    | TIdentificador(i: infoToken(string)) => i.valor
+    | TGenerico(_) => "TGenerico"
+    | TComentario(_) => "TComentario"
+    | TNumero(_) => "TNumero"
+    | TTexto(_) => "TTexto"
+    | TBool(_) => "TBool"
+    | TOperador(i: infoToken(string)) => i.valor
+    | TParenAb(_) => "TParenAb"
+    | TParenCer(_) => "TParenCer"
+    | TAgrupAb(_) => "TAgrupAb"
+    | TAgrupCer(_) => "TAgrupCer"
+    | PC_LET(_) => "PC_LET"
+    | PC_CONST(_) => "PC_CONST"
+    };
+};
 
 let crearLexer = (entrada: string) => {
 
@@ -165,6 +184,25 @@ let crearLexer = (entrada: string) => {
     let tokensRestantes = ref([]: list(resLexer));
     let ultimoToken = ref(None: option(resLexer));
     let resultadoLookAheadSignificativo = ref(None: option((resLexer, int, bool, unit => unit)));
+
+    let tokensRestantesAStr = () => {
+        let rec inner = (tokens, acc) => {
+            switch tokens {
+            | [x, ...xs] => {
+                let stdAdc =
+                    switch x {
+                    | Token(t, _) => tknToStr(t);
+                    | ErrorLexer(err) => {j|ErrorLexer($err)|j}
+                    | EOF => "EOF"
+                    };
+                inner(xs, acc ++ stdAdc ++ ", ");
+            }
+            | [] => acc;
+            }
+        };
+
+        inner(tokensRestantes^, "");
+    };
 
     let rec sigTokenLuegoDeIdentacion = posActual => {
         let sigToken = run(parserGeneral, entrada, posActual);
@@ -284,14 +322,20 @@ let crearLexer = (entrada: string) => {
         };
     }};
 
+    tokensRestantes := [extraerToken()];
+
     let sigToken = () => {
         let tokenRespuesta =
             switch (tokensRestantes^) {
-            | [] => extraerToken();
-            | [token, ...resto] => {
-                tokensRestantes := resto;
+            | [token1, token2, ...resto] => {
+                tokensRestantes := [token2] @ resto;
+                token1;
+            }
+            | [token] => {
+                tokensRestantes := [extraerToken()];
                 token;
             }
+            | [] => raise(EstadoInvalido());
             };
 
         ultimoToken := Some(tokenRespuesta);
@@ -300,26 +344,23 @@ let crearLexer = (entrada: string) => {
 
     let lookAhead = () => {
         switch (tokensRestantes^) {
-        | [] => {
-            let sigToken = sigToken();
-            tokensRestantes := [sigToken];
-            sigToken;
-        }
         | [token, ..._] => token;
+        | [] => raise(EstadoInvalido());
         };
     };
 
     let retroceder = () => {
         switch (tokensRestantes^) {
-        | [] => {
+        | [token] => {
             switch (ultimoToken^) {
-            | Some(token) => {
-                tokensRestantes := [token]
+            | Some(tokenAnt) => {
+                tokensRestantes := [tokenAnt, token]
             }
             | None => ();
             }
         }
         | [_, ..._] => ()
+        | [] => raise(EstadoInvalido());
         }
     };
 
@@ -329,18 +370,18 @@ let crearLexer = (entrada: string) => {
      * El cliente es responsable de retroceder el parser si desea volver a 
      * esa pesicion anterior.
      */
-    let lookAheadSignificativo = (): (resLexer, int, bool, unit => unit) => {
+    let lookAheadSignificativo = (ignorarPrimerToken): (resLexer, int, bool, unit => unit) => {
 
         let rec obtSigTokenSign = (tokensList, hayNuevaLinea) => {
             let sigToken = extraerToken();
             switch (sigToken) {
             | ErrorLexer(_) | EOF => {
-                (sigToken, -1, hayNuevaLinea, tokensList);
+                (sigToken, -1, hayNuevaLinea, tokensList @ [sigToken]);
             }
             | Token(token, indentacion) => {
                 switch (token) {
                 | TNuevaLinea(_) => {
-                    obtSigTokenSign(tokensList @ [sigToken], true);
+                    obtSigTokenSign(tokensList, true);
                 }
                 | _ => {
                     (sigToken, indentacion, hayNuevaLinea, tokensList @ [sigToken]);
@@ -350,17 +391,51 @@ let crearLexer = (entrada: string) => {
             }
         };
 
+        let rec pre = (tokensAct, hayNuevaLinea) => {
+            switch tokensAct {
+            | [t, ...resto] => {
+                switch t {
+                | ErrorLexer(_) | EOF => (t, -1, hayNuevaLinea, tokensAct);
+                | Token(token, indentacion) => {
+                    switch token {
+                    | TNuevaLinea(_) => pre(resto, true);
+                    | _ => (t, indentacion, hayNuevaLinea, tokensAct);
+                    }
+                }
+                }
+            }
+            | [] => {
+                obtSigTokenSign([], hayNuevaLinea);
+            }
+            }
+        };
+
         switch resultadoLookAheadSignificativo^ {
         | Some(resultado) => resultado
         | None => {
-            let (token, nivelIndentacion, hayNuevaLinea, listaRestante) = obtSigTokenSign(tokensRestantes^, false);
+
+            let (token, nivelIndentacion, hayNuevaLinea, listaRestante) =
+                switch tokensRestantes^ {
+                | [primerToken, ...resto] => {
+                    if (ignorarPrimerToken) {
+                        let (token, nivelIndentacion, hayNuevaLinea, listaRestante) = pre(resto, false);
+                        (token, nivelIndentacion, hayNuevaLinea, [primerToken] @ listaRestante)
+                    } else {
+                        pre(tokensRestantes^, false);
+                    }
+                }
+                | _ => raise(EstadoInvalido());
+                }
+
             tokensRestantes := listaRestante;
             let resultado = (token, nivelIndentacion, hayNuevaLinea, () => {
+                Js.log("LookAheadSign aplicado!");
                 resultadoLookAheadSignificativo := None;
                 tokensRestantes := [token];
             });
             resultadoLookAheadSignificativo := Some(resultado);
             resultado;
+
         }
         };
 
@@ -373,9 +448,8 @@ let crearLexer = (entrada: string) => {
         Js.log({j|esInicioDeLinea: $v|j});
         let v = posActual^;
         Js.log({j|posActual: $v|j});
-        let v = tokensRestantes^;
-        Js.log({j|tokensRestantes:|j});
-        Js.log(v);
+        let v = tokensRestantesAStr();
+        Js.log({j|tokensRestantes: [$v]|j});
         let v = ultimoToken^;
         Js.log({j|ultimoToken:|j});
         Js.log(v);

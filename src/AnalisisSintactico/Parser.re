@@ -136,7 +136,7 @@ let parseTokens = (lexer: lexer) => {
                 "Se esperaba el operador de asignación '=' luego del indentificador."
             );
 
-            let (_, nuevoNivel, hayNuevaLinea, fnEstablecer) = lexer.lookAheadSignificativo();
+            let (_, nuevoNivel, hayNuevaLinea, fnEstablecer) = lexer.lookAheadSignificativo(false);
 
             if (hayNuevaLinea && nuevoNivel <= nivel) {
                 raise(ErrorComun({j|La expresión actual está incompleta. Se esperaba una expresión indentada.|j}));
@@ -169,8 +169,6 @@ let parseTokens = (lexer: lexer) => {
         let valorOp = infoOp.valor
         let (precOp1, asocOp1) = obtInfoOp(valorOp);
 
-        Js.log("Parseando op...");
-
         switch (sigExpresion(nivel, nivel, false, precOp1, asocOp1, false)) {
         | PEOF | PReturn => PError({j|Se esperaba una expresión a la derecha del operador $valorOp|j})
         | PError(err) => PError({j|Se esperaba una expresion a la derecha del operador $valorOp :\n$err.|j});
@@ -197,8 +195,6 @@ let parseTokens = (lexer: lexer) => {
                     switch token {
                     | TOperador(infoOp2) => {
                         fnEnOp();
-                        Js.log(token);
-                        lexer.debug();
                         let (precOp, asocOp) = obtInfoOp(infoOp2.valor);
                         sigExprOperador(exprOpRes, infoOp2, nivel, precOp, asocOp, esExprPrincipal);
                     }
@@ -260,24 +256,19 @@ let parseTokens = (lexer: lexer) => {
                     }
                     | TNuevaLinea(_) when !aceptarSoloOp => {
 
-                        lexer.retroceder()
-                        
+                        lexer.retroceder();
+                        let (resLexer, indentacion, _, fnEstablecer) = lexer.lookAheadSignificativo(true);
+                        lexer.debug();
+
+                        let expresionRespuesta = PExito(exprOpRes);
 
                         if (esExprPrincipal) {
-                            let (resLexer, indentacion, _, fnEstablecer) = 
-                                lexer.lookAheadSignificativo();
 
-                            let expresionRespuesta = PExito(exprOpRes);
                             if (indentacion < nivel) {
-                                Js.log({j|$indentacion para $nivel|j});
-                                Js.log(resLexer);
-                                PExito(exprOpRes);
+                                expresionRespuesta;
                             } else if (indentacion == nivel) {
                                 Js.log({j|Es Expr Prin? $esExprPrincipal|j});
-                                Js.log(token);
-                                Js.log(resLexer);
                                 let nuevaFnEst = () => {
-                                    Js.log("Dentro de op!!!!1!!");
                                     fnEstablecer();
                                     ignore(lexer.sigToken());
                                 };
@@ -304,14 +295,16 @@ let parseTokens = (lexer: lexer) => {
                                     };
                                 };
                                 funDesicion(resLexer, true, nuevaFnEst, funSiNoEsOp);
-                                
+
                             } else {
                                 Js.log({j|Añuña|j});
-                                PExito(exprOpRes);
+                                // PExito(exprOpRes);
+                                fnEstablecer();
+                                funDesicion(lexer.sigToken(), false, () => (), () => PReturn);
                             }
+
                         } else {
-                            Js.log({j|Añuña (no es defecto)|j});
-                            PExito(exprOpRes);
+                            expresionRespuesta;
                         }
 
                     }
@@ -334,8 +327,6 @@ let parseTokens = (lexer: lexer) => {
             signatura: Indefinida,
             valorId: infoId
         };
-
-        Js.log("Parseando ID...");
 
         let rec funDesicion = (lexerRes, aceptarSoloOperador, fnEnOp, funValorDefecto) => {
             switch (lexerRes) {
@@ -369,15 +360,14 @@ let parseTokens = (lexer: lexer) => {
                     }
                 }
                 | TNuevaLinea(_) when !aceptarSoloOperador => {
+                    lexer.debug();
                     lexer.retroceder();
-                    Js.log("Nueva linea en ID");
-                    Js.log(token);
-                    let (tokenSig, indentacion, _, fnEstablecer) =
-                            lexer.lookAheadSignificativo();
+                    lexer.debug();
+                    let (tokenSig, indentacion, _, fnEstablecer) = lexer.lookAheadSignificativo(true);
+                    lexer.debug();
 
                     let expresionRespuesta = PExito(primeraExprId);
                     if (esExprPrincipal) {
-                        
                         if (indentacion < nivel) {
                             expresionRespuesta;
                         } else if (indentacion == nivel) {
@@ -412,12 +402,11 @@ let parseTokens = (lexer: lexer) => {
                         } else {
                             fnEstablecer();
                             funDesicion(lexer.sigToken(), false, () => (), () => PReturn);
-                        };
+                        }
                     } else {
-                        Js.log("Rechazado...");
                         expresionRespuesta;
                     }
-                    
+
                 }
                 | _ when !aceptarSoloOperador => {
                     lexer.retroceder();
@@ -486,12 +475,7 @@ let parseTokens = (lexer: lexer) => {
             res;
         };
 
-        Js.log("Parseando SigExpr...");
-        Js.log("Antes de sigToken:");
-        lexer.debug();
         let resultado = lexer.sigToken();
-        Js.log("Despues de sigToken:");
-        lexer.debug();
 
         switch resultado {
         | EOF => PEOF
@@ -526,7 +510,7 @@ let parseTokens = (lexer: lexer) => {
             }
             | TNuevaLinea(_) => {
                 lexer.retroceder();
-                let (_, sigNivel, _, fnEstablecer) = lexer.lookAheadSignificativo();
+                let (_, sigNivel, _, fnEstablecer) = lexer.lookAheadSignificativo(true);
                 if (sigNivel >= nivel) {
                     fnEstablecer();
                     sigExpresion(nivel, nivel, iniciarIndentacionEnToken, precedencia, asociatividad, esExprPrincipal);
