@@ -149,18 +149,35 @@ let parseTokens = (lexer: lexer) => {
             switch (sigExpresion(nuevoNivel, nivel, true, 0, Izq, true)) {
             | PEOF | PReturn => PError("Se esperaba una expresión luego de la asignacion.");
             | PError(err) => PError({j|Se esperaba una expresión luego de la asignación: $err|j});
-            | PExito(exprFinal) =>
-                PExito(EDeclaracion({
+            | PExito(exprFinal) => {
+
+                let exprDeclaracion = EDeclaracion {
                     mut: esMut,
                     id: {
                         signatura: Indefinida,
                         valorId: infoTokenId
                     },
                     valorDec: exprFinal
-                }))
-            };
+                };
+                let exprRespuesta = PExito(exprDeclaracion);
 
-            // TODO: Hacer que aquí se parseen las siguientes expresiones.
+                let sigExpresionRaw = sigExpresion(nivel, nivel, true, 0, Izq, true);
+                switch sigExpresionRaw {
+                | PError(err) => PError(err);
+                | PReturn | PEOF => exprRespuesta
+                | PExito(nuevaExpr) => {
+                    switch nuevaExpr {
+                    | EBloque(exprs) => {
+                        PExito(EBloque([exprDeclaracion, ...exprs]));
+                    }
+                    | _ => {
+                        PExito(EBloque([exprDeclaracion, nuevaExpr]));
+                    }
+                    }
+                }
+                };
+            }
+            };
 
         } {
         | ErrorComun(err) => PError(err)

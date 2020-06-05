@@ -332,6 +332,8 @@ let crearLexer = (entrada: string) => {
                 token1;
             }
             | [token] => {
+                // Limpiar el lookaheadsignificativo si ya se recurrieron los tokens que este almacenaba
+                resultadoLookAheadSignificativo := None
                 tokensRestantes := [extraerToken()];
                 token;
             }

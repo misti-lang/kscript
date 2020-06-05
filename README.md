@@ -1,4 +1,24 @@
-# Lenguaje de programación Kei
 
-En construcción. Básicamente JavaScript sin parentesis/punto_y_coma/llaves.
+# Kei
 
+[![Build Status](https://travis-ci.com/Araozu/misti.svg?branch=master)](https://travis-ci.com/Araozu/misti)
+
+Kei es un lenguaje de programación funcional que se compila a JavaScript, permitiendo usar estructuras funcionales
+con código JavaScript existente, y una fuerte interoperabilidad.
+
+# Documentacion
+
+La documentación se encuentra [aquí](https://misti.araozu.pro/)
+
+# Estado
+
+Altamente inestable, en construcción. Al momento soporta las siguientes caracteristicas:
+
+- Constantes
+- Variables
+- number
+- string
+- boolean
+- Funciones
+- Operadores
+- Constantes/Variables anidadas

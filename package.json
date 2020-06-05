@@ -1,13 +1,14 @@
 {
   "name": "misti",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "scripts": {
     "build": "bsb -make-world",
     "start": "node ./lib/js/src/Inicio.bs.js",
     "clean": "bsb -clean-world",
     "repl": "node ./src/index.js --repl",
     "compile": "node ./src/index.js -c",
-    "watch": "bsb -make-world -w"
+    "watch": "bsb -make-world -w",
+    "test": "bsb -make-world"
   },
   "keywords": [
     "javascript language compiler"
