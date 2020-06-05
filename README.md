@@ -6,11 +6,11 @@
 Kei es un lenguaje de programación funcional que se compila a JavaScript, permitiendo usar estructuras funcionales
 con código JavaScript existente, y una fuerte interoperabilidad.
 
-# Documentacion
+## Documentacion
 
 La documentación se encuentra [aquí](https://misti.araozu.pro/)
 
-# Estado
+## Estado
 
 Altamente inestable, en construcción. Al momento soporta las siguientes caracteristicas:
 

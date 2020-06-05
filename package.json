@@ -1,6 +1,11 @@
 {
   "name": "misti",
   "version": "0.0.4",
+  "description": "Lenguaje de programación funcional que se compila a JavaScript.",
+  "homepage": "https://misti.araozu.pro/",
+  "bugs": {
+    "url": "https://github.com/Araozu/misti/issues"
+  },
   "scripts": {
     "build": "bsb -make-world",
     "start": "node ./lib/js/src/Inicio.bs.js",
@@ -8,13 +13,24 @@
     "repl": "node ./src/index.js --repl",
     "compile": "node ./src/index.js -c",
     "watch": "bsb -make-world -w",
-    "test": "bsb -make-world"
+    "test": "bsb -make-world",
+    "prepare": "bsb -make-world"
   },
+  "files": [
+    "*.js",
+    "*.bs.js"
+  ],
+  "main": "./src/index.js",
+  "bin": "./src/index.js",
   "keywords": [
     "javascript language compiler"
   ],
-  "author": "araozu",
-  "license": "MIT",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/Araozu/misti.git"
+  },
+  "author": "araozu <fernando.araozu@gmail.com>",
+  "license": "GPL-3.0",
   "devDependencies": {
     "bs-platform": "^7.2.2"
   }

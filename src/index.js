@@ -1,3 +1,4 @@
+#!usr/bin/env node
 const flujoREPL = require("./Utils/repl").flujoREPL;
 const compilar  = require("./Utils/compile").compilar;
 
@@ -40,4 +41,4 @@ const main = () => {
     }
 };
 
-main();
+export default main;
