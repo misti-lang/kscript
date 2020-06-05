@@ -1,4 +1,4 @@
-#!usr/bin/env node
+#!/usr/bin/env node
 const flujoREPL = require("./Utils/repl").flujoREPL;
 const compilar  = require("./Utils/compile").compilar;
 
@@ -7,10 +7,10 @@ const strAyuda = `Uso:
   -c, --compile FILE   Compila el archivo FILE e imprime en stdout.
   -h, --help           Muestra esta información`;
 
-const main = () => {
+const main = function () {
     if (process.argv.length <= 2) {
         console.log(strAyuda);
-        return;
+        process.exit(0);
     }
 
     const comando = process.argv[2];
@@ -18,7 +18,7 @@ const main = () => {
         case "-h":
         case "--help": {
             console.log(strAyuda);
-            break;
+            process.exit(0);
         }
         case "--repl": {
             flujoREPL();
@@ -33,12 +33,13 @@ const main = () => {
                 console.log("Tienes que introducir una ruta a un archivo " +
                 "luego de usar " + comando + ".");
             }
-            break;
+            process.exit(0);
         }
         default: {
             console.log("Comando no reconocido. Usa -h para mas información.");
+            process.exit(0);
         }
     }
 };
 
-export default main;
+module.exports = main;

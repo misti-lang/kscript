@@ -10,6 +10,7 @@ const repl = () => {
     rl.question("> ", (respuesta) => {
         if (respuesta === ":s") {
             rl.close();
+            process.exit(0);
         } else {
             const jsResultado = flujoPrincipal(respuesta);
             console.log(jsResultado);
