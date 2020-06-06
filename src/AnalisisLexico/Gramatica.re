@@ -56,11 +56,24 @@ let parseTexto = {
 
 let parseComentario = {
     let parseBarra = parseCaracter("/");
-    let parseInicio = mapP(((x1, x2)) => x1 ++ x2, parseBarra |>>| parseBarra);
+    let parseInicio = (((x1, x2)) => x1 ++ x2) <!> (parseBarra |>>| parseBarra);
 
-    let parseResto = mapP(charListToStr, parseVarios(parseCualquierMenos("\n")));
+    let parseResto = charListToStr <!> parseVarios(parseCualquierMenos("\n"));
 
     parseInicio >>| parseResto;
+};
+
+
+let parseComentarioMulti = {
+    let parseBarra = parseCaracter("/");
+    let parseAst = parseCaracter("*");
+
+    let parseInicio = ((_) => "") <!> (parseBarra |>>| parseAst);
+    let parseFinal  = ((_) => "") <!> (parseAst |>>| parseBarra);
+
+    let parseResto  = charListToStr <!> parseVarios(parseCualquierMenos2("*", "/"));
+
+    parseInicio >>| parseResto |>> parseFinal ;
 };
 
 
@@ -125,10 +138,11 @@ let parseSignoAgrupacionCer = escoger([parseParenCer, parseLlaveCer, parseCorche
 let parserGeneral = parseVariasOpciones([
     mapTipo(parseIndentacion, Indentacion),
     mapTipo(parseNuevaLinea, NuevaLinea),
+    mapTipo(parseComentarioMulti, Comentario),
+    mapTipo(parseComentario, Comentario),
     mapTipo(parseIdentificadorTipo, IdentificadorTipo),
     mapTipo(parseIdentificador, Identificador),
     mapTipo(parseGenerico, Generico),
-    mapTipo(parseComentario, Comentario),
     mapTipo(parseNumero, Numero),
     mapTipo(parseTexto, Texto),
     mapTipo(parseOperadores, Operadores),

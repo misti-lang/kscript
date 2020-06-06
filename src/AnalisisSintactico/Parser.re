@@ -65,6 +65,14 @@ type resParser =
     | ErrorParser(string)
 
 
+// M t -> (t -> M u) -> M u
+let (>>=) = (a: exprRes, f: expresion => exprRes) => {
+    switch a {
+    | PExito(expr) => f(expr);
+    | _ => a;
+    }
+};
+
 
 let obtInfoFunAppl = esCurry => ({
     valor: if (esCurry) {j|Ñ|j} else {j|ñ|j},
@@ -233,8 +241,8 @@ let parseTokens = (lexer: lexer) => {
                         let textoError = generarTextoError(infoGen);
                         PError({j|No se esperaba un genérico luego de la aplicación del operador.\n\n$textoError|j})
                     }
-                    | TComentario(_) when !aceptarSoloOp => {
-                        PExito(exprOpRes);
+                    | TComentario(_) => {
+                        funDesicion(lexerRes, aceptarSoloOp, fnEnOp, funValorDefecto);
                     }
                     | TParenAb(infoParen) when !aceptarSoloOp => {
                         let sigExpr = sigExprParen(infoParen, nivel, nivel);
@@ -424,9 +432,53 @@ let parseTokens = (lexer: lexer) => {
                     }
 
                 }
-                | _ when !aceptarSoloOperador => {
+                | TComentario(_) => {
+                    funDesicion(lexerRes, aceptarSoloOperador, fnEnOp, funValorDefecto);
+                }
+                | TParenAb(infoParen) when !aceptarSoloOperador => {
+                    let sigExpr = sigExprParen(infoParen, nivel, nivel);
+                    switch sigExpr {
+                    | PError(_) | PReturn | PEOF =>
+                        PError("Hay un parentesis sin cerrar.")
+                    | PExito(expr) => {
+                        let infoOpFunApl = obtInfoFunAppl(false);
+                        let (precedenciaOpFunApl, asociatividadOpFunApl) = obtInfoOp(infoOpFunApl.valor);
+                        PExito(EOperadorApl {
+                            op: { 
+                                signaturaOp: Indefinida, 
+                                valorOp: infoOpFunApl, 
+                                precedencia: precedenciaOpFunApl,
+                                asociatividad: asociatividadOpFunApl
+                            },
+                            izq: primeraExprId,
+                            der: expr
+                        });
+                    }
+                    };
+                }
+                | TParenCer(_) when !aceptarSoloOperador => {
                     lexer.retroceder();
-                    PExito(primeraExprId)
+                    PExito(primeraExprId);
+                }
+                | PC_LET(info) => {
+                        let textoError = generarTextoError(info);
+                        PError({j|No se esperaba la palabra clave 'let' luego de la aplicación del operador.\n\n$textoError|j})
+                    }
+                | PC_CONST(info) => {
+                    let textoError = generarTextoError(info);
+                    PError({j|No se esperaba la palabra clave 'const' luego de la aplicación del operador.\n\n$textoError|j})
+                }
+                | TAgrupAb(info) => {
+                    let textoError = generarTextoError(info);
+                    PError({j|Este signo de agrupación aun no está soportado.\n\n$textoError|j});
+                }
+                | TAgrupCer(info) => {
+                    let textoError = generarTextoError(info);
+                    PError({j|Este signo de agrupación aun no está soportado.\n\n$textoError|j});
+                }
+                | TGenerico(infoGen) when !aceptarSoloOperador => {
+                    let textoError = generarTextoError(infoGen);
+                    PError({j|No se esperaba un genérico luego del identificador.\n\n$textoError|j})
                 }
                 | _ => {
                     funValorDefecto();

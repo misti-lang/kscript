@@ -121,7 +121,7 @@ let mapP = (f, p) => {
 };
 
 let ( <!> ) = mapP
-let ( |>> ) = (x: parser('a), f: 'a => 'b) => mapP(f, x);
+let ( |>> ) = (x, f) => mapP(f, x);
 
 
 let applyP = (fP, xP) =>
@@ -345,8 +345,60 @@ let parseCualquierMenos = caracter => {
             }
         }
     };
-        
-        
+
+
+    Parser(inner);
+};
+
+let parseCualquierMenos2 = (carac1, carac2) => {
+
+    let inner = (entrada, inicio) => {
+        if (entrada == "" || inicio >= String.length(entrada)) {
+            Error("Entrada terminada");
+        } else {
+            let c1 = String.sub(entrada, inicio, 1);
+            if (c1 == carac1) {
+
+                if (inicio + 1 <= String.length(entrada)) {
+
+                    let c2 = String.sub(entrada, inicio + 1, 1);
+                    if (c2 == carac2) {
+                        Error("Caracteres encontrados.")
+                    } else if (c2 != carac1 && carac1 != carac2) {
+                        Exito {
+                            res: carac1 ++ carac2,
+                            posInicio: inicio,
+                            posFinal: inicio + 2,
+                            tipo: Nada
+                        }
+                    } else {
+                        Exito {
+                            res: c2,
+                            posInicio: inicio,
+                            posFinal: inicio + 1,
+                            tipo: Nada
+                        }
+                    }
+                } else {
+                    Exito {
+                        res: c1,
+                        posInicio: inicio,
+                        posFinal: inicio + 1,
+                        tipo: Nada
+                    }
+                }
+
+            } else {
+                Exito {
+                    res: c1,
+                    posInicio: inicio,
+                    posFinal: inicio + 1,
+                    tipo: Nada
+                }
+            }
+        }
+    };
+
     Parser(inner);
 };
 
