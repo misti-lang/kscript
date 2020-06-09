@@ -302,7 +302,7 @@ let crearLexer = (entrada: string) => {
                 switch (ex.res) {
                 | "true" => crearToken2(x => TBool(x), true);
                 | "false" => crearToken2(x => TBool(x), false);
-                | "let" => crearToken2(x => PC_LET(x), "sea");
+                | "let" => crearToken2(x => PC_LET(x), "let");
                 | "const" => crearToken2(x => PC_CONST(x), "const");
                 | _ => crearToken2(x => TIdentificador(x), ex.res);
                 };
