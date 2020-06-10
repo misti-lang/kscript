@@ -54,13 +54,24 @@ let parseTexto = {
 };
 
 
+let parseNuevaLinea = {
+
+    let parseNuevaLCarac = parseCaracter("\n");
+    let parseNuevoWin = parseCaracter("\r");
+
+    let parseNuevaLineaWin = mapP(((s1, s2)) => s1 ++ s2, parseNuevoWin |>>| parseNuevaLCarac);
+
+    parseNuevaLCarac <|> parseNuevaLineaWin;
+}
+
+
 let parseComentario = {
     let parseBarra = parseCaracter("/");
-    let parseInicio = (((x1, x2)) => x1 ++ x2) <!> (parseBarra |>>| parseBarra);
+    let parseInicio = ((_) => "//") <!> (parseBarra |>>| parseBarra);
 
-    let parseResto = charListToStr <!> parseVarios(parseCualquierMenos("\n"));
+    let parseResto = charListToStr <!> parseVarios(parseCualquierMenosP(parseNuevaLinea));
 
-    parseInicio >>| parseResto;
+    (((s1, s2)) => s1 ++ s2) <!> (parseInicio |>>| parseResto);
 };
 
 
@@ -68,12 +79,12 @@ let parseComentarioMulti = {
     let parseBarra = parseCaracter("/");
     let parseAst = parseCaracter("*");
 
-    let parseInicio = ((_) => "") <!> (parseBarra |>>| parseAst);
-    let parseFinal  = ((_) => "") <!> (parseAst |>>| parseBarra);
+    let parseInicio = ((_) => "/*") <!> (parseBarra |>>| parseAst);
+    let parseFinal  = ((_) => "*/") <!> (parseAst |>>| parseBarra);
 
-    let parseResto  = charListToStr <!> parseVarios(parseCualquierMenos2("*", "/"));
+    let parseResto  = charListToStr <!> parseVarios(parseCualquierMenosP(parseFinal));
 
-    parseInicio >>| parseResto |>> parseFinal ;
+    ((((s1, s2), s3)) => s1 ++ s2 ++ s3) <!> (parseInicio |>>| parseResto |>>| parseFinal);
 };
 
 
@@ -95,17 +106,6 @@ let parseIdentificador =
 
 let parseIdentificadorTipo =
     mapP(((c, s)) => c ++ s, parseMayuscula |>>| parseRestoIdentificador);
-
-
-let parseNuevaLinea = {
-
-    let parseNuevaLCarac = parseCaracter("\n");
-    let parseNuevoWin = parseCaracter("\r");
-
-    let parseNuevaLineaWin = mapP(((s1, s2)) => s1 ++ s2, parseNuevoWin |>>| parseNuevaLCarac);
-
-    parseNuevaLCarac <|> parseNuevaLineaWin;
-}
 
 
 
@@ -216,6 +216,21 @@ let crearLexer = (entrada: string) => {
         };
 
         inner(tokensRestantes^, "");
+    };
+    
+    let debug = () => {
+        Js.log("\n-----------------------------");
+        Js.log("Estado actual del lexer:");
+        let v = esInicioDeLinea^;
+        Js.log({j|esInicioDeLinea: $v|j});
+        let v = posActual^;
+        Js.log({j|posActual: $v|j});
+        let v = tokensRestantesAStr();
+        Js.log({j|tokensRestantes: [$v]|j});
+        let v = ultimoToken^;
+        Js.log({j|ultimoToken:|j});
+        Js.log(v);
+        Js.log("-----------------------------\n");
     };
 
     let rec sigTokenLuegoDeIdentacion = posActual => {
@@ -456,28 +471,13 @@ let crearLexer = (entrada: string) => {
 
     };
 
-    let debug = () => {
-        Js.log("\n-----------------------------");
-        Js.log("Estado actual del lexer:");
-        let v = esInicioDeLinea^;
-        Js.log({j|esInicioDeLinea: $v|j});
-        let v = posActual^;
-        Js.log({j|posActual: $v|j});
-        let v = tokensRestantesAStr();
-        Js.log({j|tokensRestantes: [$v]|j});
-        let v = ultimoToken^;
-        Js.log({j|ultimoToken:|j});
-        Js.log(v);
-        Js.log("-----------------------------\n");
-    };
-
     {
         entrada,
         sigToken,
         lookAhead,
         retroceder,
         lookAheadSignificativo,
-        hayTokens: () => posActual^ < String.length(entrada),
+        hayTokens: () => posActual^ <= String.length(entrada),
         debug
     }
 };

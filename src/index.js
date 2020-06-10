@@ -7,6 +7,13 @@ const strAyuda = `Uso:
   -c, --compile FILE   Compila el archivo FILE e imprime en stdout.
   -h, --help           Muestra esta información`;
 
+
+process.on("SIGINT", () => {
+    console.log("Recibida señal de detención.");
+    process.exit(1);
+});
+
+
 const main = function () {
     if (process.argv.length <= 2) {
         console.log(strAyuda);

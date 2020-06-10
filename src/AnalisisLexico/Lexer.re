@@ -346,9 +346,30 @@ let parseCualquierMenos = caracter => {
         }
     };
 
-
     Parser(inner);
 };
+
+let parseCualquierMenosP = (parserAEvitar) => {
+
+    let inner = (entrada, inicio) => {
+        if (entrada == "" || inicio >= String.length(entrada)) {
+            Error("Entrada terminada");
+        } else {
+            let resultado = run(parserAEvitar, entrada, inicio);
+            switch resultado {
+            | Error(_) => Exito {
+                res: String.sub(entrada, inicio, 1),
+                posInicio: inicio,
+                posFinal: inicio + 1,
+                tipo: Nada
+            };
+            | Exito(_) => Error("Parser cumplido");
+            }
+        }
+    };
+
+    Parser(inner);
+}
 
 let parseCualquierMenos2 = (carac1, carac2) => {
 
@@ -364,13 +385,6 @@ let parseCualquierMenos2 = (carac1, carac2) => {
                     let c2 = String.sub(entrada, inicio + 1, 1);
                     if (c2 == carac2) {
                         Error("Caracteres encontrados.")
-                    } else if (c2 != carac1 && carac1 != carac2) {
-                        Exito {
-                            res: carac1 ++ carac2,
-                            posInicio: inicio,
-                            posFinal: inicio + 2,
-                            tipo: Nada
-                        }
                     } else {
                         Exito {
                             res: c2,
@@ -379,6 +393,7 @@ let parseCualquierMenos2 = (carac1, carac2) => {
                             tipo: Nada
                         }
                     }
+
                 } else {
                     Exito {
                         res: c1,

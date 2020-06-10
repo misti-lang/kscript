@@ -5,8 +5,12 @@ const fs = require("fs");
 const compilar = ruta => {
     const data = fs.readFileSync(ruta, "utf-8");
 
-    const jsResultado = flujoPrincipal(data);
-    console.log(jsResultado);
+    try {
+        const jsResultado = flujoPrincipal(data);
+        console.log(jsResultado);
+    } catch (e) {
+        console.error(e);
+    }
     process.exit(0);
 
 };

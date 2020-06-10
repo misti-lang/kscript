@@ -242,7 +242,7 @@ let parseTokens = (lexer: lexer) => {
                         PError({j|No se esperaba un genérico luego de la aplicación del operador.\n\n$textoError|j})
                     }
                     | TComentario(_) => {
-                        funDesicion(lexerRes, aceptarSoloOp, fnEnOp, funValorDefecto);
+                        funDesicion(lexer.sigToken(), aceptarSoloOp, fnEnOp, funValorDefecto);
                     }
                     | TParenAb(infoParen) when !aceptarSoloOp => {
                         let sigExpr = sigExprParen(infoParen, nivel, nivel);
@@ -433,7 +433,8 @@ let parseTokens = (lexer: lexer) => {
 
                 }
                 | TComentario(_) => {
-                    funDesicion(lexerRes, aceptarSoloOperador, fnEnOp, funValorDefecto);
+                    Js.log("Atorado en parser?");
+                    funDesicion(lexer.sigToken(), aceptarSoloOperador, fnEnOp, funValorDefecto);
                 }
                 | TParenAb(infoParen) when !aceptarSoloOperador => {
                     let sigExpr = sigExprParen(infoParen, nivel, nivel);

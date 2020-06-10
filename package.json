@@ -1,6 +1,6 @@
 {
   "name": "misti",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Lenguaje de programación funcional que se compila a JavaScript.",
   "homepage": "https://misti.araozu.pro/",
   "bugs": {
