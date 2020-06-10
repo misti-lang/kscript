@@ -47,9 +47,10 @@ let _TNuevaLinea = (resLexer, valorOpc, msgError) => {
 };
 
 
-let _TIdentificador = (resLexer, valorOpc, msgError) => {
-    let preToken = extraerToken(resLexer, msgError);
+let rec _TIdentificador = (fnObtToken, valorOpc, msgError) => {
+    let preToken = extraerToken(fnObtToken(), msgError);
     switch (preToken) {
+    | TComentario(_) => _TIdentificador(fnObtToken, valorOpc, msgError);
     | TIdentificador(infoToken) =>
         switch (valorOpc) {
         | Some(v) =>
@@ -95,9 +96,10 @@ let _PC_CONST = (resLexer, valorOpc, msgError) => {
 };
 
 
-let _TOperador = (resLexer, valorOpc, msgError) => {
-    let preToken = extraerToken(resLexer, msgError);
-    switch (preToken) {
+let rec _TOperador = (fnObtToken, valorOpc, msgError) => {
+    let preToken = extraerToken(fnObtToken(), msgError);
+    switch preToken {
+    | TComentario(_) => _TOperador(fnObtToken, valorOpc, msgError);
     | TOperador(infoToken) =>
         switch (valorOpc) {
         | Some(v) =>

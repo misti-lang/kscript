@@ -131,15 +131,14 @@ let parseTokens = (lexer: lexer) => {
 
     let rec sigExprDeclaracion = (nivel, esMut) => {
         try {
-            let tokenIdentificador = lexer.sigToken();
 
             let infoTokenId = _TIdentificador(
-                tokenIdentificador, 
+                lexer.sigToken, 
                 None, 
                 "Se esperaba un identificador"
             );
             let _ = _TOperador(
-                lexer.sigToken(), 
+                lexer.sigToken, 
                 Some("="), 
                 "Se esperaba el operador de asignación '=' luego del indentificador."
             );
