@@ -32,3 +32,15 @@ let flujoPrincipal = entrada => {
     };
 };
 
+let flujo2 = (entrada, nombreArchivo, fn) => {
+    let lexer = Gramatica.crearLexer(entrada);
+    let expresion = Parser.parseTokens(lexer);
+    switch (expresion) {
+    | ErrorParser(_) => fn(0, 0, None, [|""|])
+    | ExitoParser(expr) => {
+        let (res, _) = Generador2.crearCodeWithSourceMap(expr, true, 0, nombreArchivo);
+        res;
+    }
+    };
+};
+

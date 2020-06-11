@@ -1,6 +1,6 @@
 {
   "name": "misti",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "Lenguaje de programación funcional que se compila a JavaScript.",
   "homepage": "https://misti.araozu.pro/",
   "bugs": {
@@ -22,12 +22,13 @@
     "javascript language compiler"
   ],
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/Araozu/misti.git"
+    "type": "git",
+    "url": "https://github.com/Araozu/misti.git"
   },
   "author": "araozu <fernando.araozu@gmail.com>",
   "license": "GPL-3.0",
   "dependencies": {
-    "bs-platform": "^7.2.2"
+    "bs-platform": "^7.2.2",
+    "source-map": "^0.7.3"
   }
 }
