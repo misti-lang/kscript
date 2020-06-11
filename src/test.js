@@ -4,7 +4,19 @@ const SourceNode = SourceMap.SourceNode;
 
 const fnCrear = (p1, p2, p3, p4) => new SourceNode(p1, p2, p3, p4);
 
-const resultado = flujo2("const holaMundo = hola + mundo * adios.we", "test.misti", fnCrear)
+const str = `
+/* nombreCompleto: string
+ * Un string representando el nombre completo.
+ * Consta de un string como nombre y un string como apellido.
+ */
+const nombreCompleto =
+    const nombre = "Juan"
+    const apellido = "Perez"
+
+    nombre <> apellido
+`;
+
+const resultado = flujo2(str, "test.misti", fnCrear)
     .toStringWithSourceMap({ file: "test.misti" });
 
 console.log(resultado);

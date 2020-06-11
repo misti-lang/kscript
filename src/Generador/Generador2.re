@@ -28,13 +28,17 @@ type _SourceNode = {
     | `SN(_SourceNode)
     | `SNR(array(_SourceNode))
     | `SS((string, _SourceNode, string))
+    | `S1((string, _SourceNode, string))
+    | `S2(string, _SourceNode, string, string, _SourceNode)
+    | `S3(string, _SourceNode, string, string, string)
+    | `S4((string, string, _SourceNode, string))
     | `SST(string, string, _SourceNode, string, string, string, _SourceNode,
             string, string, string, string, string)
     | `SSTT(string, string, _SourceNode, string, _SourceNode)
   ]) => _SourceNode = "SourceNode";
 
 
-let rec crearCodeWithSourceMap = (expr, toplevel, nivel, nombreArchivo) => {
+let crearCodeWithSourceMap = (expr, toplevel, nivel, nombreArchivo) => {
 
     let nombreArchivo = {
         switch (nombreArchivo) {
@@ -48,6 +52,51 @@ let rec crearCodeWithSourceMap = (expr, toplevel, nivel, nombreArchivo) => {
         let indentacionNivel = String.make(nivel * 4, ' ');
         let indentacionNivelSig = String.make((nivel + 1) * 4, ' ');
         let indentacionNivelAnt = if (nivel == 0)  "" else String.make((nivel - 1) * 4, ' ');
+
+        let generarJS_EBloque = (exprs, toplevel) => {
+
+            let rec generarInner = exprs: _SourceNode => {
+                
+                switch (exprs) {
+                | [e, ...es] when List.length(es) == 0 => {
+                    if (toplevel) {
+                        let (snJs, _) = inner(e, false, nivel);
+                        fnCSN(snJs.line, snJs.column, nombreArchivo, `S1(indentacionNivel, snJs, ";"));
+                    } else {
+                        switch (e) {
+                        | EDeclaracion(_) => {
+                            let (snJs, _) = inner(e, false, nivel);
+                            let codigoRes = `S3(indentacionNivel, snJs, ";\n", indentacionNivel, "return undefined;");
+                            fnCSN(snJs.line, snJs.column, nombreArchivo, codigoRes);
+                        }
+                        | _ => {
+                            let (snJs, _) = inner(e, false, nivel);
+                            let codigoRes = `S4(indentacionNivel, "return ", snJs, ";");
+                            fnCSN(snJs.line, snJs.column, nombreArchivo, codigoRes);
+                        }
+                        }
+                    }
+                }
+                | [e, ...es] => {
+                    let (snJs, _) = inner(e, false, nivel);
+                    let codigoRes = `S2(indentacionNivel, snJs, ";", "\n", generarInner(es));
+                    fnCSN(snJs.line, snJs.column, nombreArchivo, codigoRes);
+                }
+                | [] => fnCSN(0, 0, nombreArchivo, `Str(""));
+                };
+
+            };
+
+            let jsRestorno = 
+                if (toplevel) generarInner(exprs)
+                else {
+                    let jsGen = generarInner(exprs);
+                    let codigoRes = `S3("(() => {\n", jsGen, "\n", indentacionNivelAnt, "})()");
+                    fnCSN(jsGen.line, jsGen.column, nombreArchivo, codigoRes);
+                };
+
+            (jsRestorno, 0);
+        };
 
         let generarJS_ENumero = (info: infoToken(float)) => {
             let valor = Js.Float.toString(info.valor);
@@ -137,6 +186,7 @@ let rec crearCodeWithSourceMap = (expr, toplevel, nivel, nombreArchivo) => {
         };
 
         switch (expr) {
+        | EBloque(exprs) => generarJS_EBloque(exprs, toplevel)
         | ENumero(infoToken) => generarJS_ENumero(infoToken)
         | ETexto(info) => generarJS_ETexto(info)
         | EBool(info) => generarJS_EBool(info)
