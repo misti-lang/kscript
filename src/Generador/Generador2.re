@@ -28,6 +28,9 @@ type _SourceNode = {
     | `SN(_SourceNode)
     | `SNR(array(_SourceNode))
     | `SS((string, _SourceNode, string))
+    | `SST(string, string, _SourceNode, string, string, string, _SourceNode,
+            string, string, string, string, string)
+    | `SSTT(string, string, _SourceNode, string, _SourceNode)
   ]) => _SourceNode = "SourceNode";
 
 
@@ -41,6 +44,11 @@ let rec crearCodeWithSourceMap = (expr, toplevel, nivel, nombreArchivo) => {
     };
 
     let rec inner = (expr, toplevel, nivel): (_SourceNode, int) => {
+
+        let indentacionNivel = String.make(nivel * 4, ' ');
+        let indentacionNivelSig = String.make((nivel + 1) * 4, ' ');
+        let indentacionNivelAnt = if (nivel == 0)  "" else String.make((nivel - 1) * 4, ' ');
+
         let generarJS_ENumero = (info: infoToken(float)) => {
             let valor = Js.Float.toString(info.valor);
             (fnCSN(info.numLinea, info.inicio - info.posInicioLinea, nombreArchivo, `Str(valor)), 0);
@@ -65,6 +73,25 @@ let rec crearCodeWithSourceMap = (expr, toplevel, nivel, nombreArchivo) => {
                 `Str(strRes)
             ), 0);
         }
+
+        let generarJS_EDeclaracion = dec => {
+            let inicio = if (dec.mut) "let" else "const";
+            let (snId, _) = generarJS_EIdentificador(dec.id);
+            let (snResto, _) = inner(dec.valorDec, false, (nivel + 1));
+            switch (dec.valorDec) {
+            | EDeclaracion(_) => {
+                let codigoRes = `SST(inicio, " ", snId, " = ", "(() => {\n", indentacionNivelSig, snResto, "\n", indentacionNivelSig, 
+                                "return undefined;\n", indentacionNivel, "})()");
+                let res = fnCSN(dec.id.valorId.numLinea, dec.id.valorId.inicio - dec.id.valorId.posInicioLinea, nombreArchivo, codigoRes);
+                (res, 0);
+            }
+            | _ => {
+                let codigoRes = `SSTT(inicio, " ", snId, " = ", snResto);
+                let res = fnCSN(dec.id.valorId.numLinea, dec.id.valorId.inicio - dec.id.valorId.posInicioLinea, nombreArchivo, codigoRes);
+                (res, 0)
+            }
+            };
+        };
 
         let generarJS_EOperadorApl = (eOpApl: eOperadorApl) => {
             let {op, izq, der} = eOpApl;
@@ -114,6 +141,7 @@ let rec crearCodeWithSourceMap = (expr, toplevel, nivel, nombreArchivo) => {
         | ETexto(info) => generarJS_ETexto(info)
         | EBool(info) => generarJS_EBool(info)
         | EIdentificador(datos) => generarJS_EIdentificador(datos)
+        | EDeclaracion(dec) => generarJS_EDeclaracion(dec)
         | EOperadorApl(eOpApl) => generarJS_EOperadorApl(eOpApl)
         | _ => (fnCSN(0, 0, nombreArchivo, `Str("")), 0)
         };
