@@ -1,9 +1,10 @@
 
-# Kei
+# Misti
 
 [![Build Status](https://travis-ci.com/Araozu/misti.svg?branch=master)](https://travis-ci.com/Araozu/misti)
+[![npm version](https://badge.fury.io/js/misti.svg)](https://badge.fury.io/js/misti)
 
-Kei es un lenguaje de programación funcional que se compila a JavaScript, permitiendo usar estructuras funcionales
+Misti es un lenguaje de programación funcional que se compila a JavaScript, permitiendo usar estructuras funcionales
 con código JavaScript existente, y una fuerte interoperabilidad.
 
 ## Documentacion
