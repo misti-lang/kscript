@@ -23,7 +23,6 @@ type exito('A) = {
 };
 
 
-
 type infoToken('A) = {
     valor:          'A,
     inicio:         int,

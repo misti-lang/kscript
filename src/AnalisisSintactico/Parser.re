@@ -39,7 +39,10 @@ and eOperadorApl = {
 and eDeclaracion = {
     mut: bool,
     id: eIdentificador,
-    valorDec: expresion
+    valorDec: expresion,
+    inicioDec: int,
+    numLineaDec: int,
+    posInicioLineaDec: int
 }
 
 and expresion =
@@ -60,9 +63,69 @@ type exprRes =
     | PEOF
     | PReturn
 
+
 type resParser =
     | ExitoParser(expresion)
     | ErrorParser(string)
+
+
+type posExpr = {
+    inicioPE: int,
+    numLineaPE: int,
+    posInicioLineaPE: int
+}
+
+
+let rec obtPosExpr = (ex: expresion) => {
+    switch ex {
+    | EIdentificador(infoId) => {
+        inicioPE: infoId.valorId.inicio,
+        numLineaPE: infoId.valorId.numLinea,
+        posInicioLineaPE: infoId.valorId.posInicioLinea
+    }
+    | EUnidad(info) => {
+        inicioPE: info.inicio,
+        numLineaPE: info.numLinea,
+        posInicioLineaPE: info.posInicioLinea
+    }
+    | ENumero(info) => {
+        inicioPE: info.inicio,
+        numLineaPE: info.numLinea,
+        posInicioLineaPE: info.posInicioLinea
+    }
+    | ETexto(info) => {
+        inicioPE: info.inicio,
+        numLineaPE: info.numLinea,
+        posInicioLineaPE: info.posInicioLinea
+    }
+    | EBool(info) => {
+        inicioPE: info.inicio,
+        numLineaPE: info.numLinea,
+        posInicioLineaPE: info.posInicioLinea
+    }
+    | EOperador(info) => {
+        inicioPE: info.inicio,
+        numLineaPE: info.numLinea,
+        posInicioLineaPE: info.posInicioLinea
+    }
+    | EOperadorApl(eOp) => obtPosExpr(eOp.izq)
+    | EDeclaracion(eDec) => {
+        inicioPE: eDec.inicioDec,
+        numLineaPE: eDec.numLineaDec,
+        posInicioLineaPE: eDec.posInicioLineaDec
+    }
+    | EBloque(exprs) => {
+        switch exprs {
+        | [e, ..._] => obtPosExpr(e)
+        | [] => {
+            inicioPE: 0,
+            numLineaPE: 0,
+            posInicioLineaPE: 0
+        }
+        };
+    }
+    };
+};
 
 
 // M t -> (t -> M u) -> M u
@@ -74,12 +137,12 @@ let (>>=) = (a: exprRes, f: expresion => exprRes) => {
 };
 
 
-let obtInfoFunAppl = esCurry => ({
+let obtInfoFunAppl = (esCurry, inicio, numLinea, posInicioLinea) => ({
     valor: if (esCurry) {j|Ñ|j} else {j|ñ|j},
-    inicio: -1,
-    final: -1,
-    numLinea: -1,
-    posInicioLinea: -1
+    inicio,
+    final: inicio + 1,
+    numLinea,
+    posInicioLinea
 });
 
 
@@ -164,7 +227,10 @@ let parseTokens = (lexer: lexer) => {
                         signatura: Indefinida,
                         valorId: infoTokenId
                     },
-                    valorDec: exprFinal
+                    valorDec: exprFinal,
+                    inicioDec: infoTokenId.inicio,
+                    numLineaDec: infoTokenId.numLinea,
+                    posInicioLineaDec: infoTokenId.posInicioLinea
                 };
                 let exprRespuesta = PExito(exprDeclaracion);
 
@@ -229,9 +295,9 @@ let parseTokens = (lexer: lexer) => {
                         PExito(exprOpRes);
                     }
                     | TIdentificador(_) | TNumero(_) | TTexto(_) | TBool(_) when !aceptarSoloOp => {
-                        let infoOp2 = obtInfoFunAppl(false);
-                        // TODO: revisar si aqui se necesita agrupar la aplicacion dependiendo
-                        //  de la precedencia.
+                        let posEI = obtPosExpr(exprIzq);
+                        let infoOp2 = obtInfoFunAppl(false, posEI.inicioPE, posEI.numLineaPE, posEI.posInicioLineaPE);
+
                         let (precOpFunApl, asocOpFunApl) = obtInfoOp(infoOp2.valor);
                         lexer.retroceder();
                         sigExprOperador(exprOpRes, infoOp2, nivel, precOpFunApl, asocOpFunApl, esExprPrincipal);
@@ -249,7 +315,8 @@ let parseTokens = (lexer: lexer) => {
                         | PError(_) | PReturn | PEOF =>
                             PError("Hay un parentesis sin cerrar.")
                         | PExito(expr) => {
-                            let infoOpFunApl = obtInfoFunAppl(false);
+                            let posEI = obtPosExpr(exprIzq);
+                            let infoOpFunApl = obtInfoFunAppl(false, posEI.inicioPE, posEI.numLineaPE, posEI.posInicioLineaPE);
                             let (precedenciaOpFunApl, asociatividadOpFunApl) = obtInfoOp(infoOpFunApl.valor);
                             PExito(EOperadorApl {
                                 op: { 
@@ -363,10 +430,10 @@ let parseTokens = (lexer: lexer) => {
                     lexer.retroceder();
                     let (precFunApl, asocFunApl) = (14, Izq);
                     if (precFunApl > precedencia) {
-                        let infoOpFunApl = obtInfoFunAppl(false);
+                        let infoOpFunApl = obtInfoFunAppl(false, infoId.inicio, infoId.numLinea, infoId.posInicioLinea);
                         sigExprOperador(primeraExprId, infoOpFunApl, nivel, precFunApl, asocFunApl, esExprPrincipal);
                     } else if (precFunApl == precedencia && asocFunApl == Der) {
-                        let infoOpFunApl = obtInfoFunAppl(false);
+                        let infoOpFunApl = obtInfoFunAppl(false, infoId.inicio, infoId.numLinea, infoId.posInicioLinea);
                         sigExprOperador(primeraExprId, infoOpFunApl, nivel, precFunApl, asocFunApl, esExprPrincipal);
                     } else {
                         PExito(primeraExprId);
@@ -441,7 +508,7 @@ let parseTokens = (lexer: lexer) => {
                     | PError(_) | PReturn | PEOF =>
                         PError("Hay un parentesis sin cerrar.")
                     | PExito(expr) => {
-                        let infoOpFunApl = obtInfoFunAppl(false);
+                        let infoOpFunApl = obtInfoFunAppl(false, infoId.inicio, infoId.numLinea, infoId.posInicioLinea);
                         let (precedenciaOpFunApl, asociatividadOpFunApl) = obtInfoOp(infoOpFunApl.valor);
                         PExito(EOperadorApl {
                             op: { 

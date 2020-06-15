@@ -5,15 +5,7 @@ const SourceNode = SourceMap.SourceNode;
 const fnCrear = (p1, p2, p3, p4) => new SourceNode(p1, p2, p3, p4);
 
 const str = `
-/* nombreCompleto: string
- * Un string representando el nombre completo.
- * Consta de un string como nombre y un string como apellido.
- */
-const nombreCompleto =
-    const nombre = "Juan"
-    const apellido = "Perez"
-
-    nombre <> apellido
+console.log "Hola mundo"
 `;
 
 const resultado = flujo2(str, "test.misti", fnCrear)
