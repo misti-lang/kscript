@@ -12,6 +12,7 @@ let parseMayuscula = cualquier(mayusculas);
 let parseMinuscula = cualquier(minusculas);
 let parseGuionBajo = parseCaracter("_");
 let parseComillaSimple = parseCaracter("'");
+let parseDolar = parseCaracter("$");
 
 let charListToStr = caracteres => {
     let rec inner = (acc, param) => {
@@ -89,7 +90,7 @@ let parseComentarioMulti = {
 
 
 let parseRestoIdentificador = {
-    let pTest = parseDigito <|> parseMayuscula <|> parseMinuscula <|> parseGuionBajo <|> parseComillaSimple;
+    let pTest = parseDigito <|> parseMayuscula <|> parseMinuscula <|> parseGuionBajo <|> parseComillaSimple <|> parseDolar;
     mapP(charListToStr, parseVarios(pTest));
 };
 
@@ -101,7 +102,7 @@ let parseGenerico = {
 
 
 let parseIdentificador =
-    mapP(((c, s)) => c ++ s, parseGuionBajo <|> parseMinuscula |>>| parseRestoIdentificador);
+    mapP(((c, s)) => c ++ s, parseGuionBajo <|> parseMinuscula <|> parseDolar |>>| parseRestoIdentificador);
 
 
 let parseIdentificadorTipo =

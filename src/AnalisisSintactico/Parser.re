@@ -60,12 +60,14 @@ and expresion =
 type exprRes =
     | PExito(expresion)
     | PError(string)
+    | PErrorLexer(string)
     | PEOF
     | PReturn
 
 
 type resParser =
     | ExitoParser(expresion)
+    | ErrorLexerP(string)
     | ErrorParser(string)
 
 
@@ -218,6 +220,7 @@ let parseTokens = (lexer: lexer) => {
 
             switch (sigExpresion(nuevoNivel, nivel, true, 0, Izq, true)) {
             | PEOF | PReturn => PError("Se esperaba una expresión luego de la asignacion.");
+            | PErrorLexer(err) => PErrorLexer(err)
             | PError(err) => PError({j|Se esperaba una expresión luego de la asignación: $err|j});
             | PExito(exprFinal) => {
 
@@ -236,7 +239,8 @@ let parseTokens = (lexer: lexer) => {
 
                 let sigExpresionRaw = sigExpresion(nivel, nivel, true, 0, Izq, true);
                 switch sigExpresionRaw {
-                | PError(err) => PError(err);
+                | PError(err) => PError(err)
+                | PErrorLexer(err) => PErrorLexer(err)
                 | PReturn | PEOF => exprRespuesta
                 | PExito(nuevaExpr) => {
                     switch nuevaExpr {
@@ -263,6 +267,7 @@ let parseTokens = (lexer: lexer) => {
 
         switch (sigExpresion(nivel, nivel, false, precOp1, asocOp1, false)) {
         | PEOF | PReturn => PError({j|Se esperaba una expresión a la derecha del operador $valorOp|j})
+        | PErrorLexer(err) => PErrorLexer(err)
         | PError(err) => PError({j|Se esperaba una expresion a la derecha del operador $valorOp :\n$err.|j});
         | PExito(exprFinal) => {
 
@@ -312,6 +317,7 @@ let parseTokens = (lexer: lexer) => {
                     | TParenAb(infoParen) when !aceptarSoloOp => {
                         let sigExpr = sigExprParen(infoParen, nivel, nivel);
                         switch sigExpr {
+                        | PErrorLexer(_) => sigExpr
                         | PError(_) | PReturn | PEOF =>
                             PError("Hay un parentesis sin cerrar.")
                         | PExito(expr) => {
@@ -371,6 +377,7 @@ let parseTokens = (lexer: lexer) => {
                                     let sigExpresionRaw = sigExpresion(nivel, nivel, false, 0, Izq, true);
                                     switch sigExpresionRaw {
                                     | PError(err) => PError(err);
+                                    | PErrorLexer(_) => sigExpresionRaw
                                     | PReturn | PEOF => {
                                         primeraExpresion
                                     }
@@ -472,6 +479,7 @@ let parseTokens = (lexer: lexer) => {
                                 let sigExpresionRaw = sigExpresion(nivel, nivel, false, 0, Izq, true);
                                 switch sigExpresionRaw {
                                 | PError(err) => PError(err);
+                                | PErrorLexer(_) => sigExpresionRaw
                                 | PReturn | PEOF => {
                                     primeraExpresion
                                 }
@@ -507,6 +515,7 @@ let parseTokens = (lexer: lexer) => {
                     switch sigExpr {
                     | PError(_) | PReturn | PEOF =>
                         PError("Hay un parentesis sin cerrar.")
+                    | PErrorLexer(_) => sigExpr
                     | PExito(expr) => {
                         let infoOpFunApl = obtInfoFunAppl(false, infoId.inicio, infoId.numLinea, infoId.posInicioLinea);
                         let (precedenciaOpFunApl, asociatividadOpFunApl) = obtInfoOp(infoOpFunApl.valor);
@@ -565,6 +574,7 @@ let parseTokens = (lexer: lexer) => {
         let sigToken = sigExpresion(nivelPadre, nivelPadre, false, 0, Izq, true);
         switch sigToken {
         | PReturn => PError("Error de indentación. El parentesis no ha sido cerrado.")
+        | PErrorLexer(_) => sigToken
         | PError(_) => sigToken
         | PEOF => {
             let textoErr = generarTextoError(infoParen);
@@ -614,7 +624,7 @@ let parseTokens = (lexer: lexer) => {
 
         switch resultado {
         | EOF => PEOF
-        | ErrorLexer(err) => PError(err)
+        | ErrorLexer(err) => PErrorLexer(err)
         | Token(token, _) => {
             switch token {
             | PC_LET(infoSea) => {
@@ -667,8 +677,9 @@ let parseTokens = (lexer: lexer) => {
 
     let exprRe = sigExpresion(0, 0, true, 0, Izq, true);
     switch (exprRe) {
-    | PError(err) => ErrorParser(err);
     | PExito(expr) => ExitoParser(expr);
+    | PError(err) => ErrorParser(err);
+    | PErrorLexer(err) => ErrorLexerP(err);
     | PEOF | PReturn => ExitoParser(EBloque([]));
     };
 
