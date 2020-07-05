@@ -430,7 +430,7 @@ let parseTokens = (lexer: lexer) => {
         let rec funDesicion = (lexerRes, aceptarSoloOperador, fnEnOp, funValorDefecto) => {
             switch (lexerRes) {
             | EOF => PExito(primeraExprId)
-            | ErrorLexer(err) => PError(err)
+            | ErrorLexer(err) => PErrorLexer(err)
             | Token (token, _) => {
                 switch token {
                 | TIdentificador(_) | TNumero(_) | TTexto(_) | TBool(_) when !aceptarSoloOperador => {
@@ -565,7 +565,119 @@ let parseTokens = (lexer: lexer) => {
         };
 
         funDesicion(lexer.sigToken(), false, () => (), () => PReturn);
+    }
+
+    and sigExprLiteral = (exprLiteral: expresion, nivel, precedencia, esExprPrincipal) => {
         
+        let rec funDesicion = (lexerRes, aceptarSoloOperador, fnEnOp, funValorDefecto) => {
+            switch (lexerRes) {
+            | EOF => PExito(exprLiteral)
+            | ErrorLexer(err) => PErrorLexer(err)
+            | Token (token, _) => {
+                switch token {
+                | TIdentificador(_) | TNumero(_) | TTexto(_) | TBool(_) when !aceptarSoloOperador => {
+                    PError("Error. No se puede usar un literal como función.");
+                }
+                | TOperador(infoOp) => {
+                    fnEnOp();
+                    let (precOp, asocOp) = obtInfoOp(infoOp.valor);
+                    if (precOp > precedencia) {
+                        sigExprOperador(exprLiteral, infoOp, nivel, precOp, asocOp, esExprPrincipal);
+                    } else if (precOp == precedencia && asocOp == Der) {
+                        sigExprOperador(exprLiteral, infoOp, nivel, precOp, asocOp, esExprPrincipal);
+                    } else {
+                        lexer.retroceder();
+                        PExito(exprLiteral);
+                    }
+                }
+                | TNuevaLinea(_) when !aceptarSoloOperador => {
+                    
+                    lexer.retroceder();
+                    let (tokenSig, indentacion, _, fnEstablecer) = lexer.lookAheadSignificativo(true);
+
+                    let expresionRespuesta = PExito(exprLiteral);
+                    if (esExprPrincipal) {
+                        if (indentacion < nivel) {
+                            expresionRespuesta;
+                        } else if (indentacion == nivel) {
+                            let nuevaFnEst = () => {
+                                fnEstablecer();
+                                ignore(lexer.sigToken());
+                            };
+                            
+                            let funSiNoEsOp = () => {
+                                let primeraExpresion = expresionRespuesta;
+                                fnEstablecer();
+                                let sigExpresionRaw = sigExpresion(nivel, nivel, false, 0, Izq, true);
+                                switch sigExpresionRaw {
+                                | PError(err) => PError(err);
+                                | PErrorLexer(_) => sigExpresionRaw
+                                | PReturn | PEOF => {
+                                    primeraExpresion
+                                }
+                                | PExito(nuevaExpr) => {
+                                    switch nuevaExpr {
+                                    | EBloque(exprs) => {
+                                        PExito(EBloque([exprLiteral, ...exprs]));
+                                    }
+                                    | _ => {
+                                        PExito(EBloque([exprLiteral, nuevaExpr]));
+                                    }
+                                    }
+                                }
+                                };
+                            };
+                            funDesicion(tokenSig, true, nuevaFnEst, funSiNoEsOp);
+                            
+                        } else {
+                            fnEstablecer();
+                            funDesicion(lexer.sigToken(), false, () => (), () => PReturn);
+                        }
+                    } else {
+                        expresionRespuesta;
+                    }
+
+                }
+                | TComentario(_) => {
+                    Js.log("Atorado en parser?");
+                    funDesicion(lexer.sigToken(), aceptarSoloOperador, fnEnOp, funValorDefecto);
+                }
+                | TParenAb(infoParen) when !aceptarSoloOperador => {
+                    PError("Error. No se puede usar un literal como funcion.");
+                }
+                | TParenCer(_) when !aceptarSoloOperador => {
+                    lexer.retroceder();
+                    PExito(exprLiteral);
+                }
+                | PC_LET(info) => {
+                        let textoError = generarTextoError(info);
+                        PError({j|No se esperaba la palabra clave 'let' luego de la aplicación del operador.\n\n$textoError|j})
+                    }
+                | PC_CONST(info) => {
+                    let textoError = generarTextoError(info);
+                    PError({j|No se esperaba la palabra clave 'const' luego de la aplicación del operador.\n\n$textoError|j})
+                }
+                | TAgrupAb(info) => {
+                    let textoError = generarTextoError(info);
+                    PError({j|Este signo de agrupación aun no está soportado.\n\n$textoError|j});
+                }
+                | TAgrupCer(info) => {
+                    let textoError = generarTextoError(info);
+                    PError({j|Este signo de agrupación aun no está soportado.\n\n$textoError|j});
+                }
+                | TGenerico(infoGen) when !aceptarSoloOperador => {
+                    let textoError = generarTextoError(infoGen);
+                    PError({j|No se esperaba un genérico luego del literal.\n\n$textoError|j})
+                }
+                | _ => {
+                    funValorDefecto();
+                }
+                };
+            };
+            };
+        };
+
+        funDesicion(lexer.sigToken(), false, () => (), () => PReturn);
     }
 
     //: TODO: Para que funcione debe estar implementado el lookaheadsignificativo en el
@@ -635,13 +747,13 @@ let parseTokens = (lexer: lexer) => {
             }
             | TComentario(_) => sigExpresion(nivel, nivel, iniciarIndentacionEnToken, precedencia, asociatividad, esExprPrincipal)
             | TNumero(infoNumero) => {
-                PExito(ENumero(infoNumero));
+                sigExprLiteral(ENumero(infoNumero), obtNuevoNivel(infoNumero), precedencia, esExprPrincipal);
             }
             | TTexto(infoTexto) => {
-                PExito(ETexto(infoTexto));
+                sigExprLiteral(ETexto(infoTexto), obtNuevoNivel(infoTexto), precedencia, esExprPrincipal);
             }
             | TBool(infoBool) => {
-                PExito(EBool(infoBool));
+                sigExprLiteral(EBool(infoBool), obtNuevoNivel(infoBool), precedencia, esExprPrincipal);
             }
             | TIdentificador(infoId) => {
                 sigExprIdentificador(infoId, obtNuevoNivel(infoId), precedencia, asociatividad, esExprPrincipal);
