@@ -77,6 +77,12 @@ type posExpr = {
     posInicioLineaPE: int
 }
 
+type exprIdInfo = {
+    expr: expresion,
+    infoInicio: int,
+    infoNumLinea: int,
+    infoPosInicioLinea: int
+}
 
 let rec obtPosExpr = (ex: expresion) => {
     switch ex {
@@ -261,7 +267,7 @@ let parseTokens = (lexer: lexer) => {
         };
     }
 
-    and sigExprOperador = (exprIzq, infoOp: infoToken(string), nivel, precedencia, asociatividad, esExprPrincipal) => {
+    and sigExprOperador = (exprIzq, infoOp: infoToken(string), nivel, precedencia, _, esExprPrincipal) => {
         let valorOp = infoOp.valor
         let (precOp1, asocOp1) = obtInfoOp(valorOp);
 
@@ -426,11 +432,12 @@ let parseTokens = (lexer: lexer) => {
         };
     }
 
-    and sigExprIdentificador = (infoId: infoToken(string), nivel, precedencia, _, esExprPrincipal) => {
-        let primeraExprId = EIdentificador {
-            signatura: Indefinida,
-            valorId: infoId
-        };
+    and sigExprIdentificador = (exprIdInfo: exprIdInfo, nivel, precedencia, _, esExprPrincipal) => {
+
+        let primeraExprId = exprIdInfo.expr;
+        let infoIdInicio = exprIdInfo.infoInicio;
+        let infoIdNumLinea = exprIdInfo.infoNumLinea;
+        let infoIdPosInicioLinea = exprIdInfo.infoPosInicioLinea;
 
         let rec funDesicion = (lexerRes, aceptarSoloOperador, fnEnOp, funValorDefecto) => {
             switch (lexerRes) {
@@ -442,10 +449,10 @@ let parseTokens = (lexer: lexer) => {
                     lexer.retroceder();
                     let (precFunApl, asocFunApl) = (14, Izq);
                     if (precFunApl > precedencia) {
-                        let infoOpFunApl = obtInfoFunAppl(false, infoId.inicio, infoId.numLinea, infoId.posInicioLinea);
+                        let infoOpFunApl = obtInfoFunAppl(false, infoIdInicio, infoIdNumLinea, infoIdPosInicioLinea);
                         sigExprOperador(primeraExprId, infoOpFunApl, nivel, precFunApl, asocFunApl, esExprPrincipal);
                     } else if (precFunApl == precedencia && asocFunApl == Der) {
-                        let infoOpFunApl = obtInfoFunAppl(false, infoId.inicio, infoId.numLinea, infoId.posInicioLinea);
+                        let infoOpFunApl = obtInfoFunAppl(false, infoIdInicio, infoIdNumLinea, infoIdPosInicioLinea);
                         sigExprOperador(primeraExprId, infoOpFunApl, nivel, precFunApl, asocFunApl, esExprPrincipal);
                     } else {
                         PExito(primeraExprId);
@@ -524,7 +531,7 @@ let parseTokens = (lexer: lexer) => {
                             PError("Hay un parentesis sin cerrar.")
                         | PErrorLexer(_) => sigExpr
                         | PExito(expr) => {
-                            let infoOpFunApl = obtInfoFunAppl(false, infoId.inicio, infoId.numLinea, infoId.posInicioLinea);
+                            let infoOpFunApl = obtInfoFunAppl(false, infoIdInicio, infoIdNumLinea, infoIdPosInicioLinea);
                             let (precedenciaOpFunApl, asociatividadOpFunApl) = obtInfoOp(infoOpFunApl.valor);
                             PExito(EOperadorApl {
                                 op: { 
@@ -565,120 +572,6 @@ let parseTokens = (lexer: lexer) => {
                 | TGenerico(infoGen) when !aceptarSoloOperador => {
                     let textoError = generarTextoError(infoGen);
                     PError({j|No se esperaba un genérico luego del identificador.\n\n$textoError|j})
-                }
-                | _ => {
-                    funValorDefecto();
-                }
-                };
-            };
-            };
-        };
-
-        funDesicion(lexer.sigToken(), false, () => (), () => PReturn);
-    }
-
-    and sigExprLiteral = (exprLiteral: expresion, nivel, precedencia, esExprPrincipal) => {
-
-        let rec funDesicion = (lexerRes, aceptarSoloOperador, fnEnOp, funValorDefecto) => {
-            switch (lexerRes) {
-            | EOF => PExito(exprLiteral)
-            | ErrorLexer(err) => PErrorLexer(err)
-            | Token (token, _) => {
-                switch token {
-                | TIdentificador(_) | TNumero(_) | TTexto(_) | TBool(_) when !aceptarSoloOperador => {
-                    lexer.retroceder();
-                    PExito(exprLiteral);
-                }
-                | TOperador(infoOp) => {
-                    fnEnOp();
-                    let (precOp, asocOp) = obtInfoOp(infoOp.valor);
-                    if (precOp > precedencia) {
-                        sigExprOperador(exprLiteral, infoOp, nivel, precOp, asocOp, esExprPrincipal);
-                    } else if (precOp == precedencia && asocOp == Der) {
-                        sigExprOperador(exprLiteral, infoOp, nivel, precOp, asocOp, esExprPrincipal);
-                    } else {
-                        lexer.retroceder();
-                        PExito(exprLiteral);
-                    }
-                }
-                | TNuevaLinea(_) when !aceptarSoloOperador => {
-                    
-                    lexer.retroceder();
-                    let (tokenSig, indentacion, _, fnEstablecer) = lexer.lookAheadSignificativo(true);
-
-                    let expresionRespuesta = PExito(exprLiteral);
-                    if (esExprPrincipal) {
-                        if (indentacion < nivel) {
-                            expresionRespuesta;
-                        } else if (indentacion == nivel) {
-                            let nuevaFnEst = () => {
-                                fnEstablecer();
-                                ignore(lexer.sigToken());
-                            };
-                            
-                            let funSiNoEsOp = () => {
-                                let primeraExpresion = expresionRespuesta;
-                                fnEstablecer();
-                                let sigExpresionRaw = sigExpresion(nivel, nivel, false, 0, Izq, true);
-                                switch sigExpresionRaw {
-                                | PError(err) => PError(err);
-                                | PErrorLexer(_) => sigExpresionRaw
-                                | PReturn | PEOF => {
-                                    primeraExpresion
-                                }
-                                | PExito(nuevaExpr) => {
-                                    switch nuevaExpr {
-                                    | EBloque(exprs) => {
-                                        PExito(EBloque([exprLiteral, ...exprs]));
-                                    }
-                                    | _ => {
-                                        PExito(EBloque([exprLiteral, nuevaExpr]));
-                                    }
-                                    }
-                                }
-                                };
-                            };
-                            funDesicion(tokenSig, true, nuevaFnEst, funSiNoEsOp);
-                            
-                        } else {
-                            fnEstablecer();
-                            funDesicion(lexer.sigToken(), false, () => (), () => PReturn);
-                        }
-                    } else {
-                        expresionRespuesta;
-                    }
-
-                }
-                | TComentario(_) => {
-                    funDesicion(lexer.sigToken(), aceptarSoloOperador, fnEnOp, funValorDefecto);
-                }
-                | TParenAb(_) when !aceptarSoloOperador => {
-                    lexer.retroceder();
-                    PExito(exprLiteral);
-                }
-                | TParenCer(_) when !aceptarSoloOperador => {
-                    lexer.retroceder();
-                    PExito(exprLiteral);
-                }
-                | PC_LET(info) => {
-                        let textoError = generarTextoError(info);
-                        PError({j|No se esperaba la palabra clave 'let' luego de la aplicación del operador.\n\n$textoError|j})
-                    }
-                | PC_CONST(info) => {
-                    let textoError = generarTextoError(info);
-                    PError({j|No se esperaba la palabra clave 'const' luego de la aplicación del operador.\n\n$textoError|j})
-                }
-                | TAgrupAb(info) => {
-                    let textoError = generarTextoError(info);
-                    PError({j|Este signo de agrupación aun no está soportado.\n\n$textoError|j});
-                }
-                | TAgrupCer(info) => {
-                    let textoError = generarTextoError(info);
-                    PError({j|Este signo de agrupación aun no está soportado.\n\n$textoError|j});
-                }
-                | TGenerico(infoGen) when !aceptarSoloOperador => {
-                    let textoError = generarTextoError(infoGen);
-                    PError({j|No se esperaba un genérico luego del literal.\n\n$textoError|j})
                 }
                 | _ => {
                     funValorDefecto();
@@ -758,16 +651,46 @@ let parseTokens = (lexer: lexer) => {
             }
             | TComentario(_) => sigExpresion(nivel, nivel, iniciarIndentacionEnToken, precedencia, asociatividad, esExprPrincipal)
             | TNumero(infoNumero) => {
-                sigExprLiteral(ENumero(infoNumero), obtNuevoNivel(infoNumero), precedencia, esExprPrincipal);
+                let exprIdInfo = {
+                    expr: ENumero(infoNumero),
+                    infoInicio: infoNumero.inicio,
+                    infoNumLinea: infoNumero.numLinea,
+                    infoPosInicioLinea: infoNumero.posInicioLinea
+                };
+                sigExprIdentificador(exprIdInfo, obtNuevoNivel(infoNumero), precedencia, asociatividad, esExprPrincipal);
+                // sigExprLiteral(ENumero(infoNumero), obtNuevoNivel(infoNumero), precedencia, esExprPrincipal);
             }
             | TTexto(infoTexto) => {
-                sigExprLiteral(ETexto(infoTexto), obtNuevoNivel(infoTexto), precedencia, esExprPrincipal);
+                let exprIdInfo = {
+                    expr: ETexto(infoTexto),
+                    infoInicio: infoTexto.inicio,
+                    infoNumLinea: infoTexto.numLinea,
+                    infoPosInicioLinea: infoTexto.posInicioLinea
+                };
+                sigExprIdentificador(exprIdInfo, obtNuevoNivel(infoTexto), precedencia, asociatividad, esExprPrincipal);
+                // sigExprLiteral(ETexto(infoTexto), obtNuevoNivel(infoTexto), precedencia, esExprPrincipal);
             }
             | TBool(infoBool) => {
-                sigExprLiteral(EBool(infoBool), obtNuevoNivel(infoBool), precedencia, esExprPrincipal);
+                let exprIdInfo = {
+                    expr: EBool(infoBool),
+                    infoInicio: infoBool.inicio,
+                    infoNumLinea: infoBool.numLinea,
+                    infoPosInicioLinea: infoBool.posInicioLinea
+                };
+                sigExprIdentificador(exprIdInfo, obtNuevoNivel(infoBool), precedencia, asociatividad, esExprPrincipal);
+                // sigExprLiteral(EBool(infoBool), obtNuevoNivel(infoBool), precedencia, esExprPrincipal);
             }
             | TIdentificador(infoId) => {
-                sigExprIdentificador(infoId, obtNuevoNivel(infoId), precedencia, asociatividad, esExprPrincipal);
+                let exprIdInfo = {
+                    expr: EIdentificador {
+                        signatura: Indefinida,
+                        valorId: infoId
+                    },
+                    infoInicio: infoId.inicio,
+                    infoNumLinea: infoId.numLinea,
+                    infoPosInicioLinea: infoId.posInicioLinea
+                };
+                sigExprIdentificador(exprIdInfo, obtNuevoNivel(infoId), precedencia, asociatividad, esExprPrincipal);
             }
             | TParenAb(infoParen) => {
                 sigExprParen(infoParen, obtNuevoNivel(infoParen), nivelPadre);
