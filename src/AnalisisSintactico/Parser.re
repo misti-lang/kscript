@@ -426,7 +426,7 @@ let parseTokens = (lexer: lexer) => {
         };
     }
 
-    and sigExprIdentificador = (infoId: infoToken(string), nivel, precedencia, asociatividad, esExprPrincipal) => {
+    and sigExprIdentificador = (infoId: infoToken(string), nivel, precedencia, _, esExprPrincipal) => {
         let primeraExprId = EIdentificador {
             signatura: Indefinida,
             valorId: infoId
@@ -650,7 +650,6 @@ let parseTokens = (lexer: lexer) => {
 
                 }
                 | TComentario(_) => {
-                    Js.log("Atorado en parser?");
                     funDesicion(lexer.sigToken(), aceptarSoloOperador, fnEnOp, funValorDefecto);
                 }
                 | TParenAb(_) when !aceptarSoloOperador => {
