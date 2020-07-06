@@ -315,27 +315,32 @@ let parseTokens = (lexer: lexer) => {
                         funDesicion(lexer.sigToken(), aceptarSoloOp, fnEnOp, funValorDefecto);
                     }
                     | TParenAb(infoParen) when !aceptarSoloOp => {
-                        let sigExpr = sigExprParen(infoParen, nivel, nivel);
-                        switch sigExpr {
-                        | PErrorLexer(_) => sigExpr
-                        | PError(_) | PReturn | PEOF =>
-                            PError("Hay un parentesis sin cerrar.")
-                        | PExito(expr) => {
-                            let posEI = obtPosExpr(exprIzq);
-                            let infoOpFunApl = obtInfoFunAppl(false, posEI.inicioPE, posEI.numLineaPE, posEI.posInicioLineaPE);
-                            let (precedenciaOpFunApl, asociatividadOpFunApl) = obtInfoOp(infoOpFunApl.valor);
-                            PExito(EOperadorApl {
-                                op: { 
-                                    signaturaOp: Indefinida, 
-                                    valorOp: infoOpFunApl, 
-                                    precedencia: precedenciaOpFunApl,
-                                    asociatividad: asociatividadOpFunApl
-                                },
-                                izq: exprOpRes,
-                                der: expr
-                            });
-                        }
-                        };
+                        let (precFunApl, asocFunApl) = (14, Izq);
+                        if (precFunApl > precedencia || (precFunApl == precedencia && asocFunApl == Der)) {
+                            let sigExpr = sigExprParen(infoParen, nivel, nivel);
+                            switch sigExpr {
+                            | PErrorLexer(_) => sigExpr
+                            | PError(_) | PReturn | PEOF =>
+                                PError("Hay un parentesis sin cerrar.")
+                            | PExito(expr) => {
+                                let posEI = obtPosExpr(exprIzq);
+                                let infoOpFunApl = obtInfoFunAppl(false, posEI.inicioPE, posEI.numLineaPE, posEI.posInicioLineaPE);
+                                let (precedenciaOpFunApl, asociatividadOpFunApl) = obtInfoOp(infoOpFunApl.valor);
+                                PExito(EOperadorApl {
+                                    op: { 
+                                        signaturaOp: Indefinida, 
+                                        valorOp: infoOpFunApl, 
+                                        precedencia: precedenciaOpFunApl,
+                                        asociatividad: asociatividadOpFunApl
+                                    },
+                                    izq: exprOpRes,
+                                    der: expr
+                                });
+                            }
+                            };
+                        } else {
+                            PExito(exprOpRes);
+                        };                        
                     }
                     | PC_LET(info) when !aceptarSoloOp => {
                         let textoError = generarTextoError(info);
@@ -511,25 +516,30 @@ let parseTokens = (lexer: lexer) => {
                     funDesicion(lexer.sigToken(), aceptarSoloOperador, fnEnOp, funValorDefecto);
                 }
                 | TParenAb(infoParen) when !aceptarSoloOperador => {
-                    let sigExpr = sigExprParen(infoParen, nivel, nivel);
-                    switch sigExpr {
-                    | PError(_) | PReturn | PEOF =>
-                        PError("Hay un parentesis sin cerrar.")
-                    | PErrorLexer(_) => sigExpr
-                    | PExito(expr) => {
-                        let infoOpFunApl = obtInfoFunAppl(false, infoId.inicio, infoId.numLinea, infoId.posInicioLinea);
-                        let (precedenciaOpFunApl, asociatividadOpFunApl) = obtInfoOp(infoOpFunApl.valor);
-                        PExito(EOperadorApl {
-                            op: { 
-                                signaturaOp: Indefinida, 
-                                valorOp: infoOpFunApl, 
-                                precedencia: precedenciaOpFunApl,
-                                asociatividad: asociatividadOpFunApl
-                            },
-                            izq: primeraExprId,
-                            der: expr
-                        });
-                    }
+                    let (precFunApl, asocFunApl) = (14, Izq);
+                    if (precFunApl > precedencia || (precFunApl == precedencia && asocFunApl == Der)) {
+                        let sigExpr = sigExprParen(infoParen, nivel, nivel);
+                        switch sigExpr {
+                        | PError(_) | PReturn | PEOF =>
+                            PError("Hay un parentesis sin cerrar.")
+                        | PErrorLexer(_) => sigExpr
+                        | PExito(expr) => {
+                            let infoOpFunApl = obtInfoFunAppl(false, infoId.inicio, infoId.numLinea, infoId.posInicioLinea);
+                            let (precedenciaOpFunApl, asociatividadOpFunApl) = obtInfoOp(infoOpFunApl.valor);
+                            PExito(EOperadorApl {
+                                op: { 
+                                    signaturaOp: Indefinida, 
+                                    valorOp: infoOpFunApl, 
+                                    precedencia: precedenciaOpFunApl,
+                                    asociatividad: asociatividadOpFunApl
+                                },
+                                izq: primeraExprId,
+                                der: expr
+                            });
+                        }
+                        };
+                    } else {
+                        PExito(primeraExprId);
                     };
                 }
                 | TParenCer(_) when !aceptarSoloOperador => {
@@ -568,7 +578,7 @@ let parseTokens = (lexer: lexer) => {
     }
 
     and sigExprLiteral = (exprLiteral: expresion, nivel, precedencia, esExprPrincipal) => {
-        
+
         let rec funDesicion = (lexerRes, aceptarSoloOperador, fnEnOp, funValorDefecto) => {
             switch (lexerRes) {
             | EOF => PExito(exprLiteral)
@@ -576,7 +586,8 @@ let parseTokens = (lexer: lexer) => {
             | Token (token, _) => {
                 switch token {
                 | TIdentificador(_) | TNumero(_) | TTexto(_) | TBool(_) when !aceptarSoloOperador => {
-                    PError("Error. No se puede usar un literal como función.");
+                    lexer.retroceder();
+                    PExito(exprLiteral);
                 }
                 | TOperador(infoOp) => {
                     fnEnOp();
@@ -642,8 +653,9 @@ let parseTokens = (lexer: lexer) => {
                     Js.log("Atorado en parser?");
                     funDesicion(lexer.sigToken(), aceptarSoloOperador, fnEnOp, funValorDefecto);
                 }
-                | TParenAb(infoParen) when !aceptarSoloOperador => {
-                    PError("Error. No se puede usar un literal como funcion.");
+                | TParenAb(_) when !aceptarSoloOperador => {
+                    lexer.retroceder();
+                    PExito(exprLiteral);
                 }
                 | TParenCer(_) when !aceptarSoloOperador => {
                     lexer.retroceder();
