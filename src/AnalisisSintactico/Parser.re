@@ -321,8 +321,10 @@ let parseTokens = (lexer: lexer) => {
                         funDesicion(lexer.sigToken(), aceptarSoloOp, fnEnOp, funValorDefecto);
                     }
                     | TParenAb(infoParen) when !aceptarSoloOp => {
+                        Js.log("ohohoh");
+                        Js.log(precedencia);
                         let (precFunApl, asocFunApl) = (14, Izq);
-                        if (precFunApl > precedencia || (precFunApl == precedencia && asocFunApl == Der)) {
+                        if (true || precFunApl > precedencia || (precFunApl == precedencia && asocFunApl == Der)) {
                             let sigExpr = sigExprParen(infoParen, nivel, nivel);
                             switch sigExpr {
                             | PErrorLexer(_) => sigExpr
@@ -524,7 +526,7 @@ let parseTokens = (lexer: lexer) => {
                 }
                 | TParenAb(infoParen) when !aceptarSoloOperador => {
                     let (precFunApl, asocFunApl) = (14, Izq);
-                    if (precFunApl > precedencia || (precFunApl == precedencia && asocFunApl == Der)) {
+                    if (true || precFunApl > precedencia || (precFunApl == precedencia && asocFunApl == Der)) {
                         let sigExpr = sigExprParen(infoParen, nivel, nivel);
                         switch sigExpr {
                         | PError(_) | PReturn | PEOF =>
@@ -546,6 +548,8 @@ let parseTokens = (lexer: lexer) => {
                         }
                         };
                     } else {
+                        Js.log("hmmphh");
+                        lexer.retroceder();
                         PExito(primeraExprId);
                     };
                 }
@@ -587,6 +591,7 @@ let parseTokens = (lexer: lexer) => {
     //: TODO: Para que funcione debe estar implementado el lookaheadsignificativo en el
     //  resto de parsers.
     and sigExprParen = (infoParen, nivel, nivelPadre) => {
+        Js.log("Sig paren...");
         let sigToken = sigExpresion(nivelPadre, nivelPadre, false, 0, Izq, true);
         switch sigToken {
         | PReturn => PError("Error de indentación. El parentesis no ha sido cerrado.")
