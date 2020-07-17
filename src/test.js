@@ -5,7 +5,7 @@ const SourceNode = SourceMap.SourceNode;
 const fnCrear = (p1, p2, p3, p4) => new SourceNode(p1, p2, p3, p4);
 
 const str = `
-console.log "Hola" (20) (hola <> mundo <> mundial)
+const res = console.log "Hola" (20) 50 (hola <> (mundo / mundial) <> mundial) (20) (40) (80) (100)
 `;
 
 const resultado = flujo2(str, "test.misti", fnCrear)
