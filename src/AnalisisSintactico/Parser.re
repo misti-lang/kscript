@@ -188,6 +188,9 @@ let obtInfoOp = (operador) => {
 
 let parseTokens = (lexer: lexer) => {
 
+    // Probablemente esto deberia pasarse como parametro en vez de ser una variable global...
+    let parensAbiertos = ref(0);
+
     let generarTextoError = info => {
         let largo = info.final - info.posInicioLinea;
         let substr = String.sub(lexer.entrada, info.posInicioLinea, largo);
@@ -267,7 +270,7 @@ let parseTokens = (lexer: lexer) => {
         };
     }
 
-    and sigExprOperador = (exprIzq, infoOp: infoToken(string), nivel, precedencia, _, esExprPrincipal) => {
+    and sigExprOperador = (exprIzq, infoOp: infoToken(string), nivel, _, _, esExprPrincipal) => {
         let valorOp = infoOp.valor
         let (precOp1, asocOp1) = obtInfoOp(valorOp);
 
@@ -337,7 +340,6 @@ let parseTokens = (lexer: lexer) => {
                         PError({j|Este signo de agrupación aun no está soportado.\n\n$textoError|j});
                     }
                     | TNuevaLinea(_) when !aceptarSoloOp => {
-
                         lexer.retroceder();
                         let (resLexer, indentacion, _, fnEstablecer) = lexer.lookAheadSignificativo(true);
 
@@ -348,7 +350,6 @@ let parseTokens = (lexer: lexer) => {
                             if (indentacion < nivel) {
                                 expresionRespuesta;
                             } else if (indentacion == nivel) {
-                                // Js.log({j|Es Expr Prin? $esExprPrincipal|j});
                                 let nuevaFnEst = () => {
                                     fnEstablecer();
                                     ignore(lexer.sigToken());
@@ -379,8 +380,6 @@ let parseTokens = (lexer: lexer) => {
                                 funDesicion(resLexer, true, nuevaFnEst, funSiNoEsOp);
 
                             } else {
-                                // Js.log({j|Añuña|j});
-                                // PExito(exprOpRes);
                                 fnEstablecer();
                                 funDesicion(lexer.sigToken(), false, () => (), () => PReturn);
                             }
@@ -391,7 +390,6 @@ let parseTokens = (lexer: lexer) => {
 
                     }
                     | _ => {
-                        // Js.log("Llamando fun defecto...");
                         funValorDefecto();
                     }
                     };
@@ -529,10 +527,9 @@ let parseTokens = (lexer: lexer) => {
         funDesicion(lexer.sigToken(), false, () => (), () => PReturn);
     }
 
-    //: TODO: Para que funcione debe estar implementado el lookaheadsignificativo en el
-    //  resto de parsers.
-    and sigExprParen = (infoParen, nivel, nivelPadre) => {
-        let sigToken = sigExpresion(nivelPadre, nivelPadre, false, 0, Izq, true);
+    and sigExprParen = (infoParen, _, _) => {
+        parensAbiertos := parensAbiertos^ + 1;
+        let sigToken = sigExpresion(0, 0, false, 0, Izq, true);
         switch sigToken {
         | PReturn => PError("Error de indentación. El parentesis no ha sido cerrado.")
         | PErrorLexer(_) => sigToken
@@ -560,7 +557,10 @@ let parseTokens = (lexer: lexer) => {
             }
             | Token (ultimoToken3, _) => {
                 switch ultimoToken3 {
-                | TParenCer(_) => PExito(sigToken2)
+                | TParenCer(_) =>  {
+                    parensAbiertos := parensAbiertos^ - 1;
+                    PExito(sigToken2);
+                }
                 | _ => PError("Se esperaba un cierre de parentesis.")
                 };
             }
@@ -641,8 +641,13 @@ let parseTokens = (lexer: lexer) => {
                 sigExprParen(infoParen, obtNuevoNivel(infoParen), nivelPadre);
             }
             | TParenCer(infoParen) => {
-                let textoErr = generarTextoError(infoParen);
-                PError({j|No se esperaba un parentesis aquí. No hay ningún parentesis a cerrar.\n\n$textoErr|j});
+                if (parensAbiertos^ > 0) {
+                    lexer.retroceder();
+                    PReturn;
+                } else {
+                    let textoErr = generarTextoError(infoParen);
+                    PError({j|No se esperaba un parentesis aquí. No hay ningún parentesis a cerrar.\n\n$textoErr|j});
+                }
             }
             | TNuevaLinea(_) => {
                 lexer.retroceder();
