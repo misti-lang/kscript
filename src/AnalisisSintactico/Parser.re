@@ -529,42 +529,63 @@ let parseTokens = (lexer: lexer) => {
 
     and sigExprParen = (infoParen, _, _) => {
         parensAbiertos := parensAbiertos^ + 1;
-        let sigToken = sigExpresion(0, 0, false, 0, Izq, true);
-        switch sigToken {
-        | PReturn => PError("Error de indentación. El parentesis no ha sido cerrado.")
-        | PErrorLexer(_) => sigToken
-        | PError(_) => sigToken
-        | PEOF => {
-            let textoErr = generarTextoError(infoParen);
-            let numLinea = infoParen.numLinea;
-            let numColumna = infoParen.inicio - infoParen.posInicioLinea;
-            PError({j|El parentesis abierto en $numLinea,$numColumna no está cerrado.\n\n$textoErr|j});
-        }
-        | PExito(sigToken2) => {
-            let ultimoToken = lexer.sigToken();
-            switch ultimoToken {
-            | EOF => {
-                let textoErr = generarTextoError(infoParen);
-                let numLinea = infoParen.numLinea;
-                let numColumna = infoParen.inicio - infoParen.posInicioLinea;
-                PError({j|El parentesis abierto en $numLinea,$numColumna contiene una expresion, pero no está cerrado.\n\n$textoErr|j});
+        switch (lexer.sigToken()) {
+        | EOF => PError("Parentesis sin cerrar.")
+        | ErrorLexer(err) => PError({j|Error lexico: $err\nParentesis sin cerrar.|j})
+        | Token(t, _) => {
+            switch t {
+            | TParenCer(infoParenCer) => {
+                PExito(EIdentificador {
+                    signatura: Indefinida,
+                    valorId: {
+                        ...infoParen,
+                        valor: "()",
+                        final: infoParenCer.final
+                    }
+                })
             }
-            | ErrorLexer(error) => {
-                let textoErr = generarTextoError(infoParen);
-                let numLinea = infoParen.numLinea;
-                let numColumna = infoParen.inicio - infoParen.posInicioLinea;
-                PError({j|El parentesis abierto en $numLinea,$numColumna no está cerrado.\n\n$textoErr\nDebido a un error léxico: $error|j});
-            }
-            | Token (ultimoToken3, _) => {
-                switch ultimoToken3 {
-                | TParenCer(_) =>  {
-                    parensAbiertos := parensAbiertos^ - 1;
-                    PExito(sigToken2);
+            | _ => {
+                lexer.retroceder();
+                let sigToken = sigExpresion(0, 0, false, 0, Izq, true);
+                switch sigToken {
+                | PReturn => PError("Error de indentación. El parentesis no ha sido cerrado.")
+                | PErrorLexer(_) => sigToken
+                | PError(_) => sigToken
+                | PEOF => {
+                    let textoErr = generarTextoError(infoParen);
+                    let numLinea = infoParen.numLinea;
+                    let numColumna = infoParen.inicio - infoParen.posInicioLinea;
+                    PError({j|El parentesis abierto en $numLinea,$numColumna no está cerrado.\n\n$textoErr|j});
                 }
-                | _ => PError("Se esperaba un cierre de parentesis.")
+                | PExito(sigToken2) => {
+                    let ultimoToken = lexer.sigToken();
+                    switch ultimoToken {
+                    | EOF => {
+                        let textoErr = generarTextoError(infoParen);
+                        let numLinea = infoParen.numLinea;
+                        let numColumna = infoParen.inicio - infoParen.posInicioLinea;
+                        PError({j|El parentesis abierto en $numLinea,$numColumna contiene una expresion, pero no está cerrado.\n\n$textoErr|j});
+                    }
+                    | ErrorLexer(error) => {
+                        let textoErr = generarTextoError(infoParen);
+                        let numLinea = infoParen.numLinea;
+                        let numColumna = infoParen.inicio - infoParen.posInicioLinea;
+                        PError({j|El parentesis abierto en $numLinea,$numColumna no está cerrado.\n\n$textoErr\nDebido a un error léxico: $error|j});
+                    }
+                    | Token (ultimoToken3, _) => {
+                        switch ultimoToken3 {
+                        | TParenCer(_) =>  {
+                            parensAbiertos := parensAbiertos^ - 1;
+                            PExito(sigToken2);
+                        }
+                        | _ => PError("Se esperaba un cierre de parentesis.")
+                        };
+                    }
+                    };
+                }
                 };
             }
-            };
+            }
         }
         };
     }
