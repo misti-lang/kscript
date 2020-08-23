@@ -1,5 +1,5 @@
+import { flujo2 } from "../index";
 const readline = require("readline");
-const flujoPrincipal = require("../Inicio.bs").flujoPrincipal;
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -7,23 +7,20 @@ const rl = readline.createInterface({
 });
 
 const repl = () => {
-    rl.question("> ", (respuesta) => {
+    rl.question("> ", (respuesta: string) => {
         if (respuesta === ":s") {
             rl.close();
             process.exit(0);
         } else {
-            const jsResultado = flujoPrincipal(respuesta);
+            const jsResultado = flujo2(respuesta, "");
             console.log(jsResultado);
             repl();
         }
     });
 };
 
-
-const flujoREPL = () => {
-    console.log("Kan v0.0.2");
+export const flujoREPL = () => {
+    console.log("Kan v0.0.17");
     console.log("Para salir del REPL escribe :s o CTRL+C");
     repl();
 };
-
-module.exports.flujoREPL = flujoREPL;

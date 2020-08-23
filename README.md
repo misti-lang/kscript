@@ -1,4 +1,3 @@
-
 # Misti
 
 [![Build Status](https://travis-ci.com/Araozu/misti.svg?branch=master)](https://travis-ci.com/Araozu/misti)
@@ -6,6 +5,8 @@
 
 Misti es un lenguaje de programación funcional que se compila a JavaScript, permitiendo usar estructuras funcionales
 con código JavaScript existente, y una fuerte interoperabilidad.
+
+¡Ahora escrito en TS!
 
 ## Documentacion
 

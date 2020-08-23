@@ -1,17 +1,18 @@
-const flujoPrincipal = require("../Inicio.bs").flujoPrincipal;
+import { flujo2 } from "../index";
+
 const fs = require("fs");
 
-const compilar = (ruta, imprimirEnStdout=false) => {
+const compilar = (ruta: string, imprimirEnStdout = false) => {
     const data = fs.readFileSync(ruta, "utf-8");
 
     try {
-        const jsResultado = flujoPrincipal(data);
+        const jsResultado = flujo2(data, ruta);
 
         if (imprimirEnStdout) {
             console.log(jsResultado);
         }
 
-        fs.open(ruta + ".js", "w", (err, fd) => {
+        fs.open(ruta + ".js", "w", (err: Error, fd: number) => {
             if (err) {
                 console.error(`Error al compilar el archivo ${ruta}:
                                Se compiló el código, pero no se pudo crear el archivo resultado.`);
@@ -19,7 +20,7 @@ const compilar = (ruta, imprimirEnStdout=false) => {
                 process.exit(0);
             }
 
-            fs.write(fd, jsResultado, (err) => {
+            fs.write(fd, jsResultado, (err: Error) => {
                 if (err) {
                     console.error(`Error al compilar el archivo ${ruta}:
                                Se compiló el código, pero no se pudo escribir al archivo ${ruta}.js`);

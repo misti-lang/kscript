@@ -1,20 +1,27 @@
 dependencies:
-  bs-platform: 7.2.2
+  '@types/node': 14.6.0
   source-map: 0.7.3
+  typescript: 3.9.7
 lockfileVersion: 5.1
 packages:
-  /bs-platform/7.2.2:
+  /@types/node/14.6.0:
     dev: false
-    hasBin: true
-    requiresBuild: true
     resolution:
-      integrity: sha512-PWcFfN+jCTtT/rMaHDhKh+W9RUTpaRunmSF9vbLYcrJbpgCNW6aFKAY33u0P3mLxwuhshN3b4FxqGUBPj6exZQ==
+      integrity: sha512-mikldZQitV94akrc4sCcSjtJfsTKt4p+e/s0AGscVA6XArQ9kFclP+ZiYUMnq987rc6QlYxXv/EivqlfSLxpKA==
   /source-map/0.7.3:
     dev: false
     engines:
       node: '>= 8'
     resolution:
       integrity: sha512-CkCj6giN3S+n9qrYiBTX5gystlENnRW5jZeNLHpe6aue+SrHcG5VYwujhW9s4dY31mEGsxBDrHR6oI69fTXsaQ==
+  /typescript/3.9.7:
+    dev: false
+    engines:
+      node: '>=4.2.0'
+    hasBin: true
+    resolution:
+      integrity: sha512-BLbiRkiBzAwsjut4x/dsibSTB6yWpwT5qWmC2OfuCg3GgVQCSgMs4vEctYPhsaGtd0AeuuHMkjZ2h2WG8MSzRw==
 specifiers:
-  bs-platform: ^7.2.2
+  '@types/node': ^14.6.0
   source-map: ^0.7.3
+  typescript: ^3.9.7
