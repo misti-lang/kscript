@@ -14,7 +14,7 @@ export function crearCodeWithSourceMap(
         const indentacionNivelSig = new Array((nivel + 1) * 4).fill(" ").join();
         const indentacionNivelAnt = (nivel == 0) ? "" : new Array((nivel - 1) * 4).fill(" ").join();
 
-        const uncurry = (exprOp: EOperadorApl) => {
+        const uncurry = (exprOp: EOperadorApl): SourceNode => {
             const extraerParams = (exprFn: EOperadorApl, acc: Array<Expresion>): [SourceNode, Array<Expresion>] => {
                 const exprOpCurry = exprFn.izq;
                 const ultimoParam = exprFn.der;
@@ -25,12 +25,12 @@ export function crearCodeWithSourceMap(
                             return extraerParams(exprOpCurry, [ultimoParam, ...acc]);
                         } else {
                             let [nodo, _] = inner(exprOpCurry, toplevel, nivel);
-                            return [nodo, acc];
+                            return [nodo, [ultimoParam, ...acc]];
                         }
                     }
                     default: {
                         const [nodo, _] = inner(exprOpCurry, toplevel, nivel);
-                        return [nodo, acc];
+                        return [nodo, [ultimoParam, ...acc]];
                     }
                 }
             };
@@ -42,7 +42,16 @@ export function crearCodeWithSourceMap(
             };
 
             const nodos = params.map(paramANodo);
-            // TODO
+
+            for (let i = 0; i < nodos.length; i++) {
+                if (i === 0) {
+                    nodoFun.add("(");
+                }
+                nodoFun.add(nodos[i]);
+                nodoFun.add((i + 1 === nodos.length)? ")": ", ");
+            }
+
+            return nodoFun;
         }
 
         function generarJS_EBloque(exprs: Array<Expresion>, toplevel: boolean): [SourceNode, number] {
@@ -136,6 +145,9 @@ export function crearCodeWithSourceMap(
             const {op, izq, der} = eOpApl;
             const operador = op.valorOp.valor;
             const precedenciaOp = op.precedencia;
+            // TODO: Revisar que la precedencia de aplicacion de funciones es 13
+            if (operador === "ñ" || operador === "Ñ") return [uncurry(eOpApl), 13];
+
             const [nodoIzq, precedenciaJsIzq] = inner(izq, false, nivel);
             const [nodoDer, precedenciaJsDer] = inner(der, false, nivel);
 
@@ -155,11 +167,7 @@ export function crearCodeWithSourceMap(
                     case ",":
                         return operador + " ";
                     default: {
-                        if (operador === "ñ" || operador === "Ñ") {
-                            return " ";
-                        } else {
-                            return " " + operador + " ";
-                        }
+                        return " " + operador + " ";
                     }
                 }
             })();

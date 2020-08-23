@@ -110,12 +110,12 @@ export function parseTokens(lexer: Lexer): ResParser {
         try {
 
             const infoTokenId = Expect.TIdentificador(
-                lexer.sigToken,
+                lexer.sigToken.bind(lexer),
                 undefined,
                 "Se esperaba un identificador"
             );
             Expect.TOperador(
-                lexer.sigToken,
+                lexer.sigToken.bind(lexer),
                 "=",
                 "Se esperaba el operador de asignación '=' luego del indentificador."
             );
@@ -539,6 +539,7 @@ export function parseTokens(lexer: Lexer): ResParser {
                             if (!aceptarSoloOperador) {
                                 const infoGen = token.token;
                                 const textoError = generarTextoError(infoGen);
+                                console.error(token);
                                 return new PError(`No se esperaba un genérico luego del identificador.\n\n${textoError}`)
                             } else {
                                 return funValorDefecto();

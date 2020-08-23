@@ -1,7 +1,9 @@
 import { flujo2 } from "./index";
 
 const str = `
-sumar restar multiplicar dividir
+// TODO: En el parser usar bind al pasar funciones del lexer a otras funciones.
+const res1 = console.log "Hola mundo"
+const res2 = sumar (1 / 2) 20
 `;
 
 const resultado = flujo2(str, "test.misti")

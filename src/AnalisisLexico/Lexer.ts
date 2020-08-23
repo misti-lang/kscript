@@ -5,6 +5,7 @@ import {
     TBool,
     TComentario,
     TGenerico,
+    TTexto,
     TIdentificador,
     TNuevaLinea,
     TNumero,
@@ -138,7 +139,7 @@ export class Lexer {
                 case Token.Numero:
                     return crearToken2(x => new TNumero(x), parseFloat(ex.res));
                 case Token.Texto:
-                    return crearToken2(x => new TGenerico(x), ex.res);
+                    return crearToken2(x => new TTexto(x), ex.res);
                 case Token.Operadores:
                     return crearToken2(x => new TOperador(x), ex.res);
                 case Token.AgrupacionAb: {
@@ -165,6 +166,10 @@ export class Lexer {
     }
 
     sigToken() {
+        if (!this) {
+            console.log("wut?");
+            console.log(this);
+        }
         const tokenRespuesta = (() => {
             if (this.tokensRestantes.length >= 2) {
                 const [token1, ...resto] = this.tokensRestantes;
