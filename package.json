@@ -13,7 +13,8 @@
 		"compile": "node ./src/index.js -c",
 		"probar": "node ./src/test.js",
 		"test": "tsc",
-		"prepare": "tsc"
+		"prepare": "tsc",
+    "watch":  "tsc -w"
 	},
 	"main": "./src/index.js",
 	"bin": "./src/bin.js",

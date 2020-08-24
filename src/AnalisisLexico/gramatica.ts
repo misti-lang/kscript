@@ -8,9 +8,7 @@ import {
     parseSegundoOpcional, parseVariasOpciones, parseVarios,
     parseVarios1
 } from "./parsers";
-import { Parser } from "./Parser";
 import { Token } from "./Token";
-import { ErrorRes } from "./Resultado";
 
 
 const operadores = ["+", "-", "=", "*", "!", "\\", "/", "\'", "|", "@", "#", "·", "$", "~", "%", "¦", "&", "?", "¿", "¡", "<", ">", "€", "^", "-", ".", ":", ",", ";"];
@@ -27,6 +25,7 @@ let parseComillaSimple = parseCaracter("'");
 let parseDolar = parseCaracter("$");
 
 const charListToStr = (caracteres: Array<string>) => {
+    if (caracteres.length === 1) return caracteres[0];
     return caracteres.reduce((p, v) => p + v);
 };
 
