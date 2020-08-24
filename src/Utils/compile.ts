@@ -1,4 +1,4 @@
-import { flujo2 } from "../index";
+import {flujo2} from "./flujos";
 
 const fs = require("fs");
 

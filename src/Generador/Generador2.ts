@@ -24,12 +24,12 @@ export function crearCodeWithSourceMap(
                         if (valorOp === "ñ" || valorOp === "Ñ") {
                             return extraerParams(exprOpCurry, [ultimoParam, ...acc]);
                         } else {
-                            let [nodo, _] = inner(exprOpCurry, toplevel, nivel);
+                            let nodo = inner(exprOpCurry, toplevel, nivel)[0];
                             return [nodo, [ultimoParam, ...acc]];
                         }
                     }
                     default: {
-                        const [nodo, _] = inner(exprOpCurry, toplevel, nivel);
+                        const nodo = inner(exprOpCurry, toplevel, nivel)[0];
                         return [nodo, [ultimoParam, ...acc]];
                     }
                 }
@@ -37,8 +37,7 @@ export function crearCodeWithSourceMap(
 
             const [nodoFun, params] = extraerParams(exprOp, []);
             const paramANodo = (param: Expresion): SourceNode => {
-                const [nodo, _] = inner(param, toplevel, nivel);
-                return nodo;
+                return inner(param, toplevel, nivel)[0];
             };
 
             const nodos = params.map(paramANodo);
@@ -145,8 +144,7 @@ export function crearCodeWithSourceMap(
             const {op, izq, der} = eOpApl;
             const operador = op.valorOp.valor;
             const precedenciaOp = op.precedencia;
-            // TODO: Revisar que la precedencia de aplicacion de funciones es 13
-            if (operador === "ñ" || operador === "Ñ") return [uncurry(eOpApl), 13];
+            if (operador === "ñ" || operador === "Ñ") return [uncurry(eOpApl), 14];
 
             const [nodoIzq, precedenciaJsIzq] = inner(izq, false, nivel);
             const [nodoDer, precedenciaJsDer] = inner(der, false, nivel);

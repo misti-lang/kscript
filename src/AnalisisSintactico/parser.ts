@@ -85,9 +85,7 @@ function obtInfoOp(operador: string): [number, Asociatividad] {
 }
 
 const crearString = (largo: number, c: string): string => {
-    let cr = "";
-    for (let i = 0; i < largo; i++) cr.concat(c);
-    return cr;
+    return new Array(largo).fill(c).join("");
 };
 
 export function parseTokens(lexer: Lexer): ResParser {

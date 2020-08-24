@@ -17,14 +17,15 @@ const mayusculas = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", 
 const minusculas = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "ñ"];
 const signosAgrupacion = ["(", ")", "{", "}", "[", "]"];
 
-let parseDigito = cualquier<string>(digitos);
-let parseMayuscula = cualquier<string>(mayusculas);
-let parseMinuscula = cualquier<string>(minusculas);
+let parseDigito = cualquier(digitos);
+let parseMayuscula = cualquier(mayusculas);
+let parseMinuscula = cualquier(minusculas);
 let parseGuionBajo = parseCaracter("_");
 let parseComillaSimple = parseCaracter("'");
 let parseDolar = parseCaracter("$");
 
 const charListToStr = (caracteres: Array<string>) => {
+    if (caracteres.length === 0) return "";
     if (caracteres.length === 1) return caracteres[0];
     return caracteres.reduce((p, v) => p + v);
 };
@@ -35,7 +36,7 @@ const tupla3AStr = ([[s1, s2], s3]: [[string, string], string]) => {
     return s1 + s2 + s3;
 };
 
-let parseOperador = cualquier<string>(operadores);
+let parseOperador = cualquier(operadores);
 let parseOperadores = mapP(charListToStr, parseVarios1(parseOperador));
 
 const parseNumero = (() => {

@@ -72,25 +72,29 @@ export function parseCaracter(caracter: string): Parser<string> {
 }
 
 export function parseLuego<A, B>(p1: Parser<A>, p2: Parser<B>): Parser<[A, B]> {
-    return function (entrada, inicio): Resultado<A> {
+    return function (entrada, inicio): Resultado<[A, B]> {
         const res1 = run(p1, entrada, inicio);
 
-        if (res1 instanceof ErrorRes) return res1;
-        else if (res1 instanceof ExitoRes) {
-            const res2 = run(p2, entrada, res1.exito.posFinal);
-            if (res2 instanceof ErrorRes) return res2;
-            else if (res2 instanceof ExitoRes) {
-                return new ExitoRes({
-                    res: [res1.exito.res, res2.exito.res],
-                    posInicio: inicio,
-                    posFinal: res2.exito.posFinal,
-                    tipo: Token.Nada
-                });
-            } else {
-                throw new Error("");
+        switch (res1.type) {
+            case "ErrorRes": return res1;
+            case "ExitoRes": {
+                const res2 = run(p2, entrada, res1.exito.posFinal);
+                if (res2 instanceof ErrorRes) return res2;
+                else if (res2 instanceof ExitoRes) {
+                    return new ExitoRes({
+                        res: [res1.exito.res, res2.exito.res],
+                        posInicio: inicio,
+                        posFinal: res2.exito.posFinal,
+                        tipo: Token.Nada
+                    });
+                } else {
+                    throw new Error("");
+                }
             }
-        } else {
-            throw new Error("");
+            default:
+                let _: never;
+                _ = res1;
+                return _;
         }
     }
 }
@@ -111,7 +115,7 @@ export function escoger<A>(parsers: Array<Parser<A>>): Parser<A> {
     return parsers.reduce((p, c) => parseOtro(p, c));
 }
 
-export function cualquier<A>(parsers: Array<string>): Parser<A> {
+export function cualquier(parsers: Array<string>): Parser<string> {
     return escoger(parsers.map(parseCaracter));
 }
 

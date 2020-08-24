@@ -1,4 +1,5 @@
-import { flujo2 } from "../index";
+import {flujo2} from "./flujos";
+
 const readline = require("readline");
 
 const rl = readline.createInterface({

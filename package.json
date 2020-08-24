@@ -11,10 +11,10 @@
 		"start": "echo \"no definido\"",
 		"repl": "node ./src/index.js --repl",
 		"compile": "node ./src/index.js -c",
-		"probar": "node ./src/test.js",
-		"test": "tsc",
+		"probar": "node src/prueba.js",
+		"test": "jest",
 		"prepare": "tsc",
-    "watch":  "tsc -w"
+		"watch": "tsc -w"
 	},
 	"main": "./src/index.js",
 	"bin": "./src/bin.js",
@@ -28,8 +28,12 @@
 	"author": "araozu <fernando.araozu@gmail.com>",
 	"license": "GPL-3.0-only",
 	"dependencies": {
+		"source-map": "^0.7.3"
+	},
+	"devDependencies": {
+		"@types/jest": "^26.0.10",
 		"@types/node": "^14.6.0",
-		"source-map": "^0.7.3",
+		"jest": "^26.4.2",
 		"typescript": "^3.9.7"
 	}
 }

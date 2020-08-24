@@ -38,13 +38,17 @@ export class Lexer {
 
     private sigTokenLuegoDeIdentacion(posActual: number): [Token, number] {
         const sigToken = run(parserGeneral, this.entrada, posActual);
-        if (sigToken instanceof ErrorRes) return [Token.Nada, -1]
-        else if (sigToken instanceof ExitoRes) {
-            const ex = sigToken.exito;
-            if (ex.tipo === Token.Indentacion) return this.sigTokenLuegoDeIdentacion(ex.posFinal);
-            else return [ex.tipo, posActual];
-        } else {
-            throw new Error("");
+        switch (sigToken.type) {
+            case "ErrorRes": return [Token.Nada, -1]
+            case "ExitoRes": {
+                const ex = sigToken.exito;
+                if (ex.tipo === Token.Indentacion) return this.sigTokenLuegoDeIdentacion(ex.posFinal);
+                else return [ex.tipo, posActual];
+            }
+            default:
+                let _: never;
+                _ = sigToken;
+                return _;
         }
     }
 
@@ -52,116 +56,119 @@ export class Lexer {
         if (this.posActual >= this.tamanoEntrada) return new EOFLexer();
 
         const resultado = run(parserGeneral, this.entrada, this.posActual);
-        if (resultado instanceof ErrorRes) return new ErrorLexer(resultado.error);
-        else if (resultado instanceof ExitoRes) {
-            const ex = resultado.exito;
+        switch (resultado.type) {
+            case "ErrorRes": return new ErrorLexer(resultado.error);
+            case "ExitoRes": {
+                const ex = resultado.exito;
 
-            const opComun = () => {
-                this.esInicioDeLinea = false;
-                this.posActual = ex.posFinal;
-            };
+                const opComun = () => {
+                    this.esInicioDeLinea = false;
+                    this.posActual = ex.posFinal;
+                };
 
-            const crearToken2 = (fnTipo: (i: InfoToken<any>) => Token2, valor: any) => {
-                opComun();
+                const crearToken2 = (fnTipo: (i: InfoToken<any>) => Token2, valor: any) => {
+                    opComun();
 
-                return new TokenLexer(fnTipo({
-                    valor,
-                    inicio: ex.posInicio,
-                    final: ex.posFinal,
-                    numLinea: this.numLineaActual,
-                    posInicioLinea: this.posAbsInicioLinea
-                }), this.indentacionActual);
-            };
-
-            switch (ex.tipo) {
-                case Token.Nada: {
-                    return new ErrorLexer("Se encontró un token Huerfano");
-                }
-                case Token.Indentacion: {
-                    if (!this.esInicioDeLinea) {
-                        // Se encontró espacios blancos o un Tab en medio de una linea.
-                        this.posActual = ex.posFinal;
-                        return this.extraerToken();
-                    } else {
-                        let [tipo, sigPos] = this.sigTokenLuegoDeIdentacion(ex.posFinal);
-                        switch (tipo) {
-                            case Token.Nada:
-                                return new EOFLexer();
-                            case Token.NuevaLinea: {
-                                this.posActual = sigPos;
-                                this.indentacionActual = 0;
-                                return this.extraerToken();
-                            }
-                            default: {
-                                this.posActual = sigPos;
-                                this.indentacionActual = sigPos - ex.posInicio;
-                                return this.extraerToken();
-                            }
-                        }
-                    }
-                }
-                case Token.NuevaLinea: {
-                    const resultado = new TokenLexer(new TNuevaLinea({
-                        valor: undefined,
+                    return new TokenLexer(fnTipo({
+                        valor,
                         inicio: ex.posInicio,
                         final: ex.posFinal,
                         numLinea: this.numLineaActual,
                         posInicioLinea: this.posAbsInicioLinea
                     }), this.indentacionActual);
-                    this.posActual = ex.posFinal;
-                    this.esInicioDeLinea = true;
-                    this.indentacionActual = 0;
-                    this.numLineaActual = this.numLineaActual + 1;
-                    this.posAbsInicioLinea = ex.posFinal;
-                    return resultado;
-                }
-                case Token.Identificador: {
-                    switch (ex.res) {
-                        case "true":
-                        case "false": {
-                            return crearToken2(x => new TBool(x), ex.res === "true");
-                        }
-                        case "let": {
-                            return crearToken2(x => new PC_LET(x), "let");
-                        }
-                        case "const": {
-                            return crearToken2(x => new PC_CONST(x), "const");
-                        }
-                        default: {
-                            return crearToken2(x => new TIdentificador(x), ex.res)
+                };
+
+                switch (ex.tipo) {
+                    case Token.Nada: {
+                        return new ErrorLexer("Se encontró un token Huerfano");
+                    }
+                    case Token.Indentacion: {
+                        if (!this.esInicioDeLinea) {
+                            // Se encontró espacios blancos o un Tab en medio de una linea.
+                            this.posActual = ex.posFinal;
+                            return this.extraerToken();
+                        } else {
+                            let [tipo, sigPos] = this.sigTokenLuegoDeIdentacion(ex.posFinal);
+                            switch (tipo) {
+                                case Token.Nada:
+                                    return new EOFLexer();
+                                case Token.NuevaLinea: {
+                                    this.posActual = sigPos;
+                                    this.indentacionActual = 0;
+                                    return this.extraerToken();
+                                }
+                                default: {
+                                    this.posActual = sigPos;
+                                    this.indentacionActual = sigPos - ex.posInicio;
+                                    return this.extraerToken();
+                                }
+                            }
                         }
                     }
-                }
-                case Token.Generico:
-                    return crearToken2(x => new TGenerico(x), ex.res);
-                case Token.Comentario:
-                    return crearToken2(x => new TComentario(x), ex.res);
-                case Token.Numero:
-                    return crearToken2(x => new TNumero(x), parseFloat(ex.res));
-                case Token.Texto:
-                    return crearToken2(x => new TTexto(x), ex.res);
-                case Token.Operadores:
-                    return crearToken2(x => new TOperador(x), ex.res);
-                case Token.AgrupacionAb: {
-                    switch (ex.res) {
-                        case "(":
-                            return crearToken2(x => new TParenAb(x), ex.res)
-                        default:
-                            return crearToken2(x => new TAgrupAb(x), ex.res)
+                    case Token.NuevaLinea: {
+                        const resultado = new TokenLexer(new TNuevaLinea({
+                            valor: undefined,
+                            inicio: ex.posInicio,
+                            final: ex.posFinal,
+                            numLinea: this.numLineaActual,
+                            posInicioLinea: this.posAbsInicioLinea
+                        }), this.indentacionActual);
+                        this.posActual = ex.posFinal;
+                        this.esInicioDeLinea = true;
+                        this.indentacionActual = 0;
+                        this.numLineaActual = this.numLineaActual + 1;
+                        this.posAbsInicioLinea = ex.posFinal;
+                        return resultado;
                     }
-                }
-                case Token.AgrupacionCer: {
-                    switch (ex.res) {
-                        case ")":
-                            return crearToken2(x => new TParenCer(x), ex.res)
-                        default:
-                            return crearToken2(x => new TAgrupCer(x), ex.res)
+                    case Token.Identificador: {
+                        switch (ex.res) {
+                            case "true":
+                            case "false": {
+                                return crearToken2(x => new TBool(x), ex.res === "true");
+                            }
+                            case "let": {
+                                return crearToken2(x => new PC_LET(x), "let");
+                            }
+                            case "const": {
+                                return crearToken2(x => new PC_CONST(x), "const");
+                            }
+                            default: {
+                                return crearToken2(x => new TIdentificador(x), ex.res)
+                            }
+                        }
+                    }
+                    case Token.Generico:
+                        return crearToken2(x => new TGenerico(x), ex.res);
+                    case Token.Comentario:
+                        return crearToken2(x => new TComentario(x), ex.res);
+                    case Token.Numero:
+                        return crearToken2(x => new TNumero(x), parseFloat(ex.res));
+                    case Token.Texto:
+                        return crearToken2(x => new TTexto(x), ex.res);
+                    case Token.Operadores:
+                        return crearToken2(x => new TOperador(x), ex.res);
+                    case Token.AgrupacionAb: {
+                        switch (ex.res) {
+                            case "(":
+                                return crearToken2(x => new TParenAb(x), ex.res)
+                            default:
+                                return crearToken2(x => new TAgrupAb(x), ex.res)
+                        }
+                    }
+                    case Token.AgrupacionCer: {
+                        switch (ex.res) {
+                            case ")":
+                                return crearToken2(x => new TParenCer(x), ex.res)
+                            default:
+                                return crearToken2(x => new TAgrupCer(x), ex.res)
+                        }
                     }
                 }
             }
-
-        } else {
-            throw new Error("");
+            default:
+                let _: never;
+                _ = resultado;
+                return _;
         }
     }
 
@@ -219,19 +226,24 @@ export class Lexer {
         function obtSigTokenSign(tokensList: Array<ResLexer>, hayNuevaLinea: boolean)
             : [ResLexer, number, boolean, Array<ResLexer>] {
             const sigToken = extraerToken();
-            if (sigToken instanceof ErrorLexer || sigToken instanceof EOFLexer) {
-                return [sigToken, -1, hayNuevaLinea, tokensList.concat([sigToken])];
-            } else if (sigToken instanceof TokenLexer) {
-                const token = sigToken.token;
-                const indentacion = sigToken.indentacion;
+            switch (sigToken.type) {
+                case "ErrorLexer":
+                case "EOFLexer":
+                    return [sigToken, -1, hayNuevaLinea, tokensList.concat([sigToken])];
+                case "TokenLexer": {
+                    const token = sigToken.token;
+                    const indentacion = sigToken.indentacion;
 
-                if (token instanceof TNuevaLinea) {
-                    return obtSigTokenSign(tokensList, true);
-                } else {
-                    return [sigToken, indentacion, hayNuevaLinea, tokensList.concat([sigToken])];
+                    if (token instanceof TNuevaLinea) {
+                        return obtSigTokenSign(tokensList, true);
+                    } else {
+                        return [sigToken, indentacion, hayNuevaLinea, tokensList.concat([sigToken])];
+                    }
                 }
-            } else {
-                throw new Error("");
+                default:
+                    let _: never;
+                    _ = sigToken;
+                    return _;
             }
         }
 

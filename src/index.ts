@@ -1,46 +1,9 @@
 #!/usr/bin/env node
 import { Token2 } from "./AnalisisLexico/Token2";
-import { Lexer } from "./AnalisisLexico/Lexer";
-import { parseTokens } from "./AnalisisSintactico/parser";
-import { crearCodeWithSourceMap } from "./Generador/Generador2";
-import { SourceNode } from "source-map";
 const flujoREPL = require("./Utils/repl").flujoREPL;
 const compilar  = require("./Utils/compile").compilar;
 
 let tknToStr = (token2: Token2): string => token2.toString();
-
-/*
-let flujoPrincipal = (entrada: string): string => {
-    let lexer = new Lexer(entrada);
-    let expresion = parseTokens(lexer);
-    switch (expresion.type) {
-        case "ErrorParser": return expresion.err;
-        case "ExitoParser": {
-            const expr = expresion.expr;
-            let [js, _] = Generador.generarJs(expr, true, 0);
-            return js;
-        }
-    }
-};
- */
-
-export const flujo2 = (entrada: string, nombreArchivo: string): SourceNode => {
-    const lexer = new Lexer(entrada);
-    const expresion = parseTokens(lexer);
-    switch (expresion.type) {
-        case "ErrorLexerP": {
-            throw new Error(expresion.err);
-        }
-        case "ErrorParser": {
-            console.log(expresion.err);
-            throw new Error(expresion.err);
-        }
-        case "ExitoParser": {
-            const expr = expresion.expr;
-            return crearCodeWithSourceMap(expr, true, 0, nombreArchivo)[0];
-        }
-    }
-};
 
 const strAyuda = `Uso:
   --repl               Inicia el REPL.
@@ -49,14 +12,12 @@ const strAyuda = `Uso:
   -h, --help           Muestra esta información.
   -v, --version        Imprime la versión del compilador.`;
 
-
-process.on("SIGINT", () => {
-    console.log("Recibida señal de detención.");
-    process.exit(1);
-});
-
-
 export default function () {
+    process.on("SIGINT", () => {
+        console.log("Recibida señal de detención.");
+        process.exit(1);
+    });
+
     if (process.argv.length <= 2) {
         console.log(strAyuda);
         process.exit(0);

@@ -1,7 +1,7 @@
-import { flujo2 } from "./index";
+import {flujo2} from "./Utils/flujos";
 
 const str = `
-algo?.basico = algo.complejo
+if (a === b) console.log 20
 `;
 
 const resultado = flujo2(str, "test.misti")
