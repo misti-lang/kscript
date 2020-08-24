@@ -166,10 +166,6 @@ export class Lexer {
     }
 
     sigToken() {
-        if (!this) {
-            console.log("wut?");
-            console.log(this);
-        }
         const tokenRespuesta = (() => {
             if (this.tokensRestantes.length >= 2) {
                 const [token1, ...resto] = this.tokensRestantes;
