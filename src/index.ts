@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Token2 } from "./AnalisisLexico/Token2";
-const flujoREPL = require("./Utils/repl").flujoREPL;
-const compilar  = require("./Utils/compile").compilar;
+import {flujoREPL} from "./Utils/repl";
+import {compilar} from "./Utils/compile";
 
 let tknToStr = (token2: Token2): string => token2.toString();
 

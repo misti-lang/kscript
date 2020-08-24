@@ -14,14 +14,14 @@ const repl = () => {
             process.exit(0);
         } else {
             const jsResultado = flujo2(respuesta, "");
-            console.log(jsResultado);
+            console.log(jsResultado.toString());
             repl();
         }
     });
 };
 
 export const flujoREPL = () => {
-    console.log("Kan v0.0.17");
+    console.log("Misti v0.0.18");
     console.log("Para salir del REPL escribe :s o CTRL+C");
     repl();
 };
