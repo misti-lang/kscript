@@ -10,9 +10,9 @@ export function crearCodeWithSourceMap(
 ): [SourceNode, number] {
 
     function inner(expr: Expresion, toplevel: boolean, nivel: number): [SourceNode, number] {
-        const indentacionNivel = new Array(nivel * 4).fill(" ").join();
-        const indentacionNivelSig = new Array((nivel + 1) * 4).fill(" ").join();
-        const indentacionNivelAnt = (nivel == 0) ? "" : new Array((nivel - 1) * 4).fill(" ").join();
+        const indentacionNivel = new Array(nivel * 4).fill(" ").join("");
+        const indentacionNivelSig = new Array((nivel + 1) * 4).fill(" ").join("");
+        const indentacionNivelAnt = (nivel == 0) ? "" : new Array((nivel - 1) * 4).fill(" ").join("");
 
         const uncurry = (exprOp: EOperadorApl): SourceNode => {
             const extraerParams = (exprFn: EOperadorApl, acc: Array<Expresion>): [SourceNode, Array<Expresion>] => {

@@ -214,7 +214,7 @@ export class Lexer {
      * esa posicion anterior.
      */
     lookAheadSignificativo(ignorarPrimerToken: boolean): [ResLexer, number, boolean, () => void] {
-        const extraerToken = this.extraerToken;
+        const extraerToken = this.extraerToken.bind(this);
 
         function obtSigTokenSign(tokensList: Array<ResLexer>, hayNuevaLinea: boolean)
             : [ResLexer, number, boolean, Array<ResLexer>] {
