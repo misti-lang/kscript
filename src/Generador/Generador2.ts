@@ -6,7 +6,7 @@ export function crearCodeWithSourceMap(
     expr: Expresion,
     toplevel: boolean,
     nivel: number,
-    nombreArchivo: string
+    nombreArchivo: string | null
 ): [SourceNode, number] {
 
     function inner(expr: Expresion, toplevel: boolean, nivel: number): [SourceNode, number] {

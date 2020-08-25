@@ -3,7 +3,7 @@ import { Lexer } from "../AnalisisLexico/Lexer";
 import { parseTokens } from "../AnalisisSintactico/parser";
 import { crearCodeWithSourceMap } from "../Generador/Generador2";
 
-export const flujo2 = (entrada: string, nombreArchivo: string): SourceNode => {
+export const flujo2 = (entrada: string, nombreArchivo: string | null): SourceNode => {
     const lexer = new Lexer(entrada);
     const expresion = parseTokens(lexer);
     switch (expresion.type) {
