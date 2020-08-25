@@ -23,13 +23,13 @@ export const compilar = (ruta: string, imprimirEnStdout = false) => {
         }
     })();
     const nombreSinExtension = nombreArchivo.substr(0, nombreArchivo.length - 6);
-    const restoRuta = fragmentosRuta.join("/");
-    if (restoRuta !== "") restoRuta.concat("/");
+    let restoRuta = fragmentosRuta.join("/");
+    if (restoRuta !== "") restoRuta += "/";
 
     const data = fs.readFileSync(ruta, "utf-8");
 
     try {
-        const jsResultado = flujo2(data, ruta);
+        const jsResultado = flujo2(data, nombreSinExtension + ".misti");
         const codigoConSourceMap = jsResultado.toStringWithSourceMap();
         const codigo = codigoConSourceMap.code + `\n\n//# sourceMappingURL=${nombreSinExtension}.js.map`;
         const sourceMap = codigoConSourceMap.map.toString();
