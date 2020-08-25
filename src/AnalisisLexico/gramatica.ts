@@ -15,11 +15,11 @@ const operadores = ["+", "-", "=", "*", "!", "\\", "/", "\'", "|", "@", "#", "·
 const digitos = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 const mayusculas = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "Ñ"];
 const minusculas = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "ñ"];
-const signosAgrupacion = ["(", ")", "{", "}", "[", "]"];
 
 let parseDigito = cualquier(digitos);
 let parseMayuscula = cualquier(mayusculas);
 let parseMinuscula = cualquier(minusculas);
+let parseMinusculaOMayuscula = cualquier(mayusculas.concat(minusculas));
 let parseGuionBajo = parseCaracter("_");
 let parseComillaSimple = parseCaracter("'");
 let parseDolar = parseCaracter("$");
@@ -103,7 +103,7 @@ const parseGenerico = mapP(
 
 const parseIdentificador = mapP(
     tupla2AStr,
-    parseLuego(parseOtro(parseOtro(parseGuionBajo, parseMinuscula), parseDolar), parseRestoIdentificador)
+    parseLuego(parseOtro(parseOtro(parseGuionBajo, parseMinusculaOMayuscula), parseDolar), parseRestoIdentificador)
 );
 
 // Asume que se encuentra al inicio de la linea
