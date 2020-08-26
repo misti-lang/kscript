@@ -1,40 +1,40 @@
 {
-	"name": "misti",
-	"version": "0.0.21",
-	"description": "Lenguaje de programación funcional que se compila a JavaScript.",
-	"homepage": "https://misti.araozu.pro/",
-	"bugs": {
-		"url": "https://github.com/Araozu/misti/issues"
-	},
-	"scripts": {
-		"build": "tsc",
-		"start": "node src/index.js",
-		"repl": "node ./src/index.js --repl",
-		"compile": "node ./src/index.js -c",
-		"probar": "node src/prueba.js",
-		"test": "jest",
-		"prepare": "tsc",
-		"watch": "tsc -w"
-	},
-	"main": "./src/index.js",
-	"bin": "./src/bin.js",
+  "name": "misti",
+  "version": "0.0.21",
+  "description": "Lenguaje de programación funcional que se compila a JavaScript.",
+  "homepage": "https://misti.araozu.pro/",
+  "bugs": {
+    "url": "https://github.com/Araozu/misti/issues"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node src/index.js",
+    "repl": "node ./src/index.js --repl",
+    "compile": "node ./src/index.js -c",
+    "probar": "node src/prueba.js",
+    "test": "jest",
+    "prepare": "tsc && jest",
+    "watch": "tsc -w"
+  },
+  "main": "./src/index.js",
+  "bin": "./src/bin.js",
   "types": "misti.d.ts",
-	"keywords": [
-		"javascript language compiler"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/Araozu/misti.git"
-	},
-	"author": "araozu <fernando.araozu@gmail.com>",
-	"license": "GPL-3.0-only",
-	"dependencies": {
-		"source-map": "^0.7.3"
-	},
-	"devDependencies": {
-		"@types/jest": "^26.0.10",
-		"@types/node": "^14.6.0",
-		"jest": "^26.4.2",
-		"typescript": "^3.9.7"
-	}
+  "keywords": [
+    "javascript language compiler"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Araozu/misti.git"
+  },
+  "author": "araozu <fernando.araozu@gmail.com>",
+  "license": "GPL-3.0-only",
+  "dependencies": {
+    "source-map": "^0.7.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.10",
+    "@types/node": "^14.6.0",
+    "jest": "^26.4.2",
+    "typescript": "^3.9.7"
+  }
 }

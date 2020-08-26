@@ -4,9 +4,10 @@ npm-debug.log
 .idea/
 tests/
 
+src/**/*.d.ts
+
 *.ts
 *.js.map
-*.d.ts
 tsconfig.json
 .travis.yml
 .editorconfig
