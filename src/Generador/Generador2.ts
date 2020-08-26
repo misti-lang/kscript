@@ -36,19 +36,25 @@ export function crearCodeWithSourceMap(
             };
 
             const [nodoFun, params] = extraerParams(exprOp, []);
-            const paramANodo = (param: Expresion): SourceNode => {
-                return inner(param, toplevel, nivel)[0];
-            };
-
-            const nodos = params.map(paramANodo);
-
-            for (let i = 0; i < nodos.length; i++) {
-                if (i === 0) {
-                    nodoFun.add("(");
+            const nodos = (() => {
+                if (params.length === 1 && params[0].type === "EIdentificador" && params[0].valorId.valor === "()") {
+                    return [];
                 }
+                const paramANodo = (param: Expresion): SourceNode => {
+                    return inner(param, toplevel, nivel)[0];
+                };
+
+                return params.map(paramANodo);
+            })();
+
+            nodoFun.add("(");
+            for (let i = 0; i < nodos.length; i++) {
                 nodoFun.add(nodos[i]);
-                nodoFun.add((i + 1 === nodos.length)? ")": ", ");
+                if (i + 1 !== nodos.length) {
+                    nodoFun.add(", ");
+                }
             }
+            nodoFun.add(")");
 
             return nodoFun;
         }
