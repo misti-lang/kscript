@@ -422,7 +422,7 @@ export function parseTokens(lexer: Lexer): ResParser {
                                 const [precFunApl, asocFunApl] = [14, Asociatividad.Izq];
                                 if (precFunApl > precedencia) {
                                     let infoOpFunApl = obtInfoFunAppl(false, infoIdInicio, infoIdNumLinea, infoIdPosInicioLinea);
-                                    return sigExprOperador(primeraExprId, infoOpFunApl, nivel, precFunApl, asocFunApl, esExprPrincipal);
+                                    return sigExprOperador(primeraExprId, infoOpFunApl, nivel, precedencia, asocFunApl, esExprPrincipal);
                                 } else if (precFunApl == precedencia && asocFunApl == Asociatividad.Der) {
                                     let infoOpFunApl = obtInfoFunAppl(false, infoIdInicio, infoIdNumLinea, infoIdPosInicioLinea);
                                     return sigExprOperador(primeraExprId, infoOpFunApl, nivel, precFunApl, asocFunApl, esExprPrincipal);
@@ -438,7 +438,7 @@ export function parseTokens(lexer: Lexer): ResParser {
                             fnEnOp();
                             const [precOp, asocOp] = obtInfoOp(infoOp.valor);
                             if (precOp > precedencia) {
-                                return sigExprOperador(primeraExprId, infoOp, nivel, precOp, asocOp, esExprPrincipal);
+                                return sigExprOperador(primeraExprId, infoOp, nivel, precedencia, asocOp, esExprPrincipal);
                             } else if (precOp == precedencia && asocOp == Asociatividad.Der) {
                                 return sigExprOperador(primeraExprId, infoOp, nivel, precOp, asocOp, esExprPrincipal);
                             } else {

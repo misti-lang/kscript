@@ -2,12 +2,19 @@ import { EDeclaracion, EIdentificador, EOperadorApl, Expresion } from "../Analis
 import { SourceNode } from "source-map";
 import { InfoToken } from "../AnalisisLexico/InfoToken";
 
+const opcionesDefecto: {[s: string]: boolean} = {
+    imprimirParensEnOperadores: false
+};
+
 export function crearCodeWithSourceMap(
     expr: Expresion,
     toplevel: boolean,
     nivel: number,
-    nombreArchivo: string | null
+    nombreArchivo: string | null,
+    opciones: {[s: string]: boolean} = opcionesDefecto
 ): [SourceNode, number] {
+
+    const imprParenEnOp = !!(opciones?.imprimirParensEnOperadores) ?? false;
 
     function inner(expr: Expresion, toplevel: boolean, nivel: number): [SourceNode, number] {
         const indentacionNivel = new Array(nivel * 4).fill(" ").join("");
@@ -163,7 +170,7 @@ export function crearCodeWithSourceMap(
                 ? new SourceNode(nodoIzq.line, nodoIzq.column, nombreArchivo, ["(", nodoDer, ")"])
                 : nodoDer;
 
-            let jsOpFinal = (() => {
+            const jsOpFinal = (() => {
                 switch (operador) {
                     case ".":
                     case "?.":
@@ -176,9 +183,10 @@ export function crearCodeWithSourceMap(
                 }
             })();
 
-            let nodoOp = new SourceNode(op.valorOp.numLinea, op.valorOp.inicio - op.valorOp.posInicioLinea, nombreArchivo, jsOpFinal);
+            const nodoOp = new SourceNode(op.valorOp.numLinea, op.valorOp.inicio - op.valorOp.posInicioLinea, nombreArchivo, jsOpFinal);
 
-            let retorno = new SourceNode(nodoIzq.line, nodoIzq.column, nombreArchivo, [nuevoNodoIzq, nodoOp, nuevoNodoDer]);
+            const chunks = imprParenEnOp? ["(", nuevoNodoIzq, nodoOp, nuevoNodoDer, ")"]: [nuevoNodoIzq, nodoOp, nuevoNodoDer];
+            const retorno = new SourceNode(nodoIzq.line, nodoIzq.column, nombreArchivo, chunks);
             return [retorno, precedenciaOp];
         }
 
