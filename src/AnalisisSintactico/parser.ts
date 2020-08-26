@@ -197,7 +197,7 @@ export function parseTokens(lexer: Lexer): ResParser {
         exprIzq: Expresion,
         infoOp: InfoToken<string>,
         nivel: number,
-        _: any,
+        precedencia: any,
         __: any,
         esExprPrincipal: boolean
     ): ExprRes {
@@ -236,8 +236,16 @@ export function parseTokens(lexer: Lexer): ResParser {
                             switch (token.type) {
                                 case "TOperador": {
                                     fnEnOp();
-                                    let [precOp, asocOp] = obtInfoOp(token.token.valor);
-                                    return sigExprOperador(exprOpRes, token.token, nivel, precOp, asocOp, esExprPrincipal);
+                                    const [precOp, asocOp] = obtInfoOp(token.token.valor);
+
+                                    if (precOp > precedencia) {
+                                        return sigExprOperador(exprOpRes, token.token, nivel, precedencia, asocOp, esExprPrincipal);
+                                    } else if (precOp == precedencia && precOp == Asociatividad.Der) {
+                                        return sigExprOperador(exprOpRes, token.token, nivel, precedencia, asocOp, esExprPrincipal);
+                                    } else {
+                                        lexer.retroceder();
+                                        return new PExito(exprOpRes);
+                                    }
                                 }
                                 case "TParenCer": {
                                     if (!aceptarSoloOp) {
@@ -252,15 +260,19 @@ export function parseTokens(lexer: Lexer): ResParser {
                                 case "TTexto":
                                 case "TBool":
                                 case "TParenAb": {
-                                    if (!aceptarSoloOp) {
-                                        let posEI = obtPosExpr(exprIzq);
-                                        let infoOp2 = obtInfoFunAppl(false, posEI.inicioPE, posEI.numLineaPE, posEI.posInicioLineaPE);
+                                    fnEnOp();
+                                    const posEI = obtPosExpr(exprIzq);
+                                    const infoOp2 = obtInfoFunAppl(false, posEI.inicioPE, posEI.numLineaPE, posEI.posInicioLineaPE);
 
-                                        let [precOpFunApl, asocOpFunApl] = obtInfoOp(infoOp2.valor);
-                                        lexer.retroceder();
-                                        return sigExprOperador(exprOpRes, infoOp2, nivel, precOpFunApl, asocOpFunApl, esExprPrincipal);
+                                    const [precOpFunApl, asocOpFunApl] = obtInfoOp(infoOp2.valor);
+                                    lexer.retroceder();
+
+                                    if (precOpFunApl > precedencia) {
+                                        return sigExprOperador(exprOpRes, infoOp2, nivel, precedencia, asocOpFunApl, esExprPrincipal);
+                                    } else if (precOpFunApl == precedencia && asocOpFunApl == Asociatividad.Der) {
+                                        return sigExprOperador(exprOpRes, infoOp2, nivel, precedencia, asocOpFunApl, esExprPrincipal);
                                     } else {
-                                        return funValorDefecto();
+                                        return new PExito(exprOpRes);
                                     }
                                 }
                                 case "TGenerico": {
@@ -417,20 +429,17 @@ export function parseTokens(lexer: Lexer): ResParser {
                         case "TTexto":
                         case "TBool":
                         case "TParenAb": {
-                            if (!aceptarSoloOperador) {
-                                lexer.retroceder();
-                                const [precFunApl, asocFunApl] = [14, Asociatividad.Izq];
-                                if (precFunApl > precedencia) {
-                                    let infoOpFunApl = obtInfoFunAppl(false, infoIdInicio, infoIdNumLinea, infoIdPosInicioLinea);
-                                    return sigExprOperador(primeraExprId, infoOpFunApl, nivel, precedencia, asocFunApl, esExprPrincipal);
-                                } else if (precFunApl == precedencia && asocFunApl == Asociatividad.Der) {
-                                    let infoOpFunApl = obtInfoFunAppl(false, infoIdInicio, infoIdNumLinea, infoIdPosInicioLinea);
-                                    return sigExprOperador(primeraExprId, infoOpFunApl, nivel, precFunApl, asocFunApl, esExprPrincipal);
-                                } else {
-                                    return new PExito(primeraExprId);
-                                }
+                            fnEnOp();
+                            lexer.retroceder();
+                            const [precFunApl, asocFunApl] = [14, Asociatividad.Izq];
+                            if (precFunApl > precedencia) {
+                                let infoOpFunApl = obtInfoFunAppl(false, infoIdInicio, infoIdNumLinea, infoIdPosInicioLinea);
+                                return sigExprOperador(primeraExprId, infoOpFunApl, nivel, precedencia, asocFunApl, esExprPrincipal);
+                            } else if (precFunApl == precedencia && asocFunApl == Asociatividad.Der) {
+                                let infoOpFunApl = obtInfoFunAppl(false, infoIdInicio, infoIdNumLinea, infoIdPosInicioLinea);
+                                return sigExprOperador(primeraExprId, infoOpFunApl, nivel, precedencia, asocFunApl, esExprPrincipal);
                             } else {
-                                return funValorDefecto();
+                                return new PExito(primeraExprId);
                             }
                         }
                         case "TOperador": {
@@ -440,7 +449,7 @@ export function parseTokens(lexer: Lexer): ResParser {
                             if (precOp > precedencia) {
                                 return sigExprOperador(primeraExprId, infoOp, nivel, precedencia, asocOp, esExprPrincipal);
                             } else if (precOp == precedencia && asocOp == Asociatividad.Der) {
-                                return sigExprOperador(primeraExprId, infoOp, nivel, precOp, asocOp, esExprPrincipal);
+                                return sigExprOperador(primeraExprId, infoOp, nivel, precedencia, asocOp, esExprPrincipal);
                             } else {
                                 lexer.retroceder();
                                 return new PExito(primeraExprId);

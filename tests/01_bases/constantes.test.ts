@@ -77,11 +77,20 @@ test("Operadores unarios der", () => {
     expect(salida).toBe(esperado);
 });
 
-test("Precedencia de operadores correctaa", () => {
+test("Precedencia de operadores correcta", () => {
     const entrada = `1 * 1 + 2 * 2 + 3`;
     const salida = flujo2(entrada, "", {
         imprimirParensEnOperadores: true
     }).toString();
     const esperado = `(((1 * 1) + (2 * 2)) + 3)`;
+    expect(salida).toBe(esperado);
+});
+
+test("Precedencia de operadores correcta", () => {
+    const entrada = `1 * 1 + 2 * 2 + 3 / 3`;
+    const salida = flujo2(entrada, "", {
+        imprimirParensEnOperadores: true
+    }).toString();
+    const esperado = `(((1 * 1) + (2 * 2)) + (3 / 3))`;
     expect(salida).toBe(esperado);
 });
