@@ -118,7 +118,7 @@ export function crearCodeWithSourceMap(
         }
 
         function generarJS_EIdentificador(identificador: EIdentificador): [SourceNode, number] {
-            const strRes = identificador.valorId.valor;
+            const strRes = identificador.valorId.valor === "()"? "undefined": identificador.valorId.valor;
             return [new SourceNode(
                 identificador.valorId.numLinea,
                 identificador.valorId.inicio - identificador.valorId.posInicioLinea,
