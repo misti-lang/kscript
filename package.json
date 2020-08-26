@@ -1,6 +1,6 @@
 {
 	"name": "misti",
-	"version": "0.0.20",
+	"version": "0.0.21",
 	"description": "Lenguaje de programación funcional que se compila a JavaScript.",
 	"homepage": "https://misti.araozu.pro/",
 	"bugs": {
@@ -13,11 +13,12 @@
 		"compile": "node ./src/index.js -c",
 		"probar": "node src/prueba.js",
 		"test": "jest",
-		"prepare": "tsc && jest",
+		"prepare": "tsc",
 		"watch": "tsc -w"
 	},
 	"main": "./src/index.js",
 	"bin": "./src/bin.js",
+  "types": "misti.d.ts",
 	"keywords": [
 		"javascript language compiler"
 	],

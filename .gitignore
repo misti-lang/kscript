@@ -3,6 +3,7 @@ npm-debug.log
 /node_modules/
 .idea/
 
+src/**/*.d.ts
+
 *.js
 *.js.map
-*.d.ts
