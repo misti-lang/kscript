@@ -1,23 +1,24 @@
 #!/usr/bin/env node
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const repl_1 = require("../src/Utils/repl");
-const compile_1 = require("../src/Utils/compile");
-let tknToStr = (token2) => token2.toString();
+import {flujoREPL} from "./Utils/repl";
+import {compilar} from "./Utils/compile";
+
 const strAyuda = `Uso:
   --repl               Inicia el REPL.
   -c, --compile FILE   Compila el archivo FILE.
   -cs FILE             Compila el archivo FILE y adicionalmente imprime en stdout.
   -h, --help           Muestra esta información.
   -v, --version        Imprime la versión del compilador.`;
+
 process.on("SIGINT", () => {
     console.log("Recibida señal de detención.");
     process.exit(1);
 });
+
 if (process.argv.length <= 2) {
     console.log(strAyuda);
     process.exit(0);
 }
+
 const comando = process.argv[2];
 let imprimirCompilacion = false;
 switch (comando) {
@@ -32,7 +33,7 @@ switch (comando) {
         process.exit(0);
     }
     case "--repl": {
-        repl_1.flujoREPL();
+        flujoREPL();
         break;
     }
     case "-cs":
@@ -41,7 +42,7 @@ switch (comando) {
     case "--compile": {
         const ruta = process.argv[3];
         if (ruta) {
-            compile_1.compilar(ruta, imprimirCompilacion);
+            compilar(ruta, imprimirCompilacion);
         }
         else {
             console.log("Tienes que introducir una ruta a un archivo " +
@@ -55,4 +56,3 @@ switch (comando) {
         process.exit(0);
     }
 }
-//# sourceMappingURL=index.js.map
