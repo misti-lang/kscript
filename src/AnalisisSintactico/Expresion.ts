@@ -10,6 +10,7 @@ export type Expresion =
     | EBool
     | EOperador
     | EOperadorApl
+    | EOperadorUnarioIzq
     | EDeclaracion
     | EBloque
 
@@ -93,6 +94,17 @@ export class EOperadorApl {
         this.op = op;
         this.izq = izq;
         this.der = der;
+    }
+}
+
+export class EOperadorUnarioIzq {
+    type = "EOperadorUnarioIzq" as const
+    readonly op: eOperador
+    readonly expr: Expresion
+
+    constructor(op: eOperador, expr: Expresion) {
+        this.op = op;
+        this.expr = expr;
     }
 }
 

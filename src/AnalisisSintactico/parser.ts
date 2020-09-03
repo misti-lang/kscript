@@ -9,9 +9,9 @@ import {
     EBool,
     EDeclaracion,
     EIdentificador,
-    ENumero,
+    ENumero, EOperador,
     eOperador,
-    EOperadorApl,
+    EOperadorApl, EOperadorUnarioIzq,
     ETexto,
     Expresion
 } from "./Expresion";
@@ -40,7 +40,7 @@ function obtInfoOp(operador: string): [number, Asociatividad] {
         case "*=":
         case "/=":
         case "%=":
-        case "^=":
+        case "**=":
             return [2, Asociatividad.Izq]
         case "<|":
         case "|>":
@@ -71,7 +71,7 @@ function obtInfoOp(operador: string): [number, Asociatividad] {
         case "/":
         case "%":
             return [11, Asociatividad.Izq]
-        case "^":
+        case "**":
             return [12, Asociatividad.Der]
         case ".":
         case "?.":
@@ -83,6 +83,9 @@ function obtInfoOp(operador: string): [number, Asociatividad] {
             return [13, Asociatividad.Izq]
     }
 }
+
+const operadoresUnariosIzq = ["+", "-", "++", "--"];
+const operadoresUnariosDer = ["++", "--"];
 
 const crearString = (largo: number, c: string): string => {
     return new Array(largo).fill(c).join("");
@@ -404,6 +407,41 @@ export function parseTokens(lexer: Lexer): ResParser {
 
     }
 
+    function sigExprOpUnarioIzq(
+        infoOp: InfoToken<string>,
+        nivel: number,
+        precedencia: any,
+        esExprPrincipal: boolean
+    ): ExprRes {
+        const valorOp = infoOp.valor;
+        const [precOp1, asocOp1] = obtInfoOp(valorOp);
+        const sigExpr = sigExpresion(
+            nivel,
+            nivel,
+            false,
+            precOp1,
+            asocOp1,
+            esExprPrincipal
+        );
+
+        switch (sigExpr.type) {
+            case "PEOF":
+            case "PReturn":
+            case "PErrorLexer":
+            case "PError":
+                return new PError("");
+            case "PExito": {
+                const expr = sigExpr.expr;
+                const eOp = new eOperador(new SignIndefinida(), infoOp, precOp1, asocOp1);
+                return new PExito(new EOperadorUnarioIzq(eOp, expr));
+            }
+            default:
+                let _: never;
+                _ = sigExpr;
+                return _;
+        }
+    }
+
     function sigExprIdentificador(
         exprIdInfo: ExprIdInfo,
         nivel: number,
@@ -419,8 +457,10 @@ export function parseTokens(lexer: Lexer): ResParser {
 
         function funDesicion(lexerRes: ResLexer, aceptarSoloOperador: boolean, fnEnOp: () => void, funValorDefecto: () => ExprRes): ExprRes {
             switch (lexerRes.type) {
-                case "EOFLexer": return new PExito(primeraExprId);
-                case "ErrorLexer": return new PErrorLexer(lexerRes.razon);
+                case "EOFLexer":
+                    return new PExito(primeraExprId);
+                case "ErrorLexer":
+                    return new PErrorLexer(lexerRes.razon);
                 case "TokenLexer": {
                     const token = lexerRes.token;
                     switch (token.type) {
@@ -475,10 +515,13 @@ export function parseTokens(lexer: Lexer): ResParser {
                                             fnEstablecer();
                                             let sigExpresionRaw = sigExpresion(nivel, nivel, false, 0, Asociatividad.Izq, true);
                                             switch (sigExpresionRaw.type) {
-                                                case "PError": return new PError(sigExpresionRaw.err);
-                                                case "PErrorLexer": return sigExpresionRaw;
+                                                case "PError":
+                                                    return new PError(sigExpresionRaw.err);
+                                                case "PErrorLexer":
+                                                    return sigExpresionRaw;
                                                 case "PReturn":
-                                                case "PEOF": return primeraExpresion;
+                                                case "PEOF":
+                                                    return primeraExpresion;
                                                 case "PExito": {
                                                     const nuevaExpr = sigExpresionRaw.expr;
                                                     switch (nuevaExpr.type) {
@@ -501,7 +544,8 @@ export function parseTokens(lexer: Lexer): ResParser {
 
                                     } else {
                                         fnEstablecer();
-                                        return funDesicion(lexer.sigToken(), false, () => {}, () => new PReturn());
+                                        return funDesicion(lexer.sigToken(), false, () => {
+                                        }, () => new PReturn());
                                     }
                                 } else {
                                     return expresionRespuesta;
@@ -561,7 +605,8 @@ export function parseTokens(lexer: Lexer): ResParser {
             }
         }
 
-        return funDesicion(lexer.sigToken(), false, () => {}, () => new PReturn());
+        return funDesicion(lexer.sigToken(), false, () => {
+        }, () => new PReturn());
     }
 
     function sigExprParen(infoParen: InfoToken<string>, _: number, __: number) {
@@ -650,8 +695,12 @@ export function parseTokens(lexer: Lexer): ResParser {
     }
 
     function sigExpresion(
-        nivel: number, nivelPadre: number, iniciarIndentacionEnToken: boolean,
-        precedencia: number, asociatividad: Asociatividad, esExprPrincipal: boolean
+        nivel: number,
+        nivelPadre: number,
+        iniciarIndentacionEnToken: boolean,
+        precedencia: number,
+        asociatividad: Asociatividad,
+        esExprPrincipal: boolean
     ): ExprRes {
 
         const obtNuevoNivel = (infoToken: InfoToken<any>): number => {
@@ -760,9 +809,17 @@ export function parseTokens(lexer: Lexer): ResParser {
                         return new PError(`Los genericos aun no estan soportados.`);
                     case "TOperador": {
                         const infoOp = token.token;
-                        let textoErr = generarTextoError(infoOp);
-                        return new PError(`No se puede usar un operador como expresión. Si esa es tu intención, rodea el operador en paréntesis, por ejemplo: (+)\n\n${textoErr}`);
+                        if (operadoresUnariosIzq.find(s => infoOp.valor === s)) {
+                            return sigExprOpUnarioIzq(infoOp, nivel, precedencia, esExprPrincipal);
+                        } else {
+                            let textoErr = generarTextoError(infoOp);
+                            return new PError(`No se puede usar el operador ${infoOp.valor} como operador unario.\n\n${textoErr}`);
+                        }
                     }
+                    default:
+                        let _: never;
+                        _ = token;
+                        return _;
                 }
             }
             default: {
@@ -785,6 +842,10 @@ export function parseTokens(lexer: Lexer): ResParser {
         case "PEOF":
         case "PReturn":
             return new ExitoParser(new EBloque([]));
+        default:
+            let _: never;
+            _ = exprRe;
+            return _;
     }
 
 }

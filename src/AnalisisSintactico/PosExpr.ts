@@ -64,6 +64,14 @@ export function obtPosExpr(ex: Expresion): PosExpr {
                 };
             }
         }
+        case "EOperadorUnarioIzq": {
+            const op = ex.op.valorOp;
+            return {
+                inicioPE: op.inicio,
+                numLineaPE: op.numLinea,
+                posInicioLineaPE: op.posInicioLinea
+            }
+        }
         default:
             let _: never;
             _ = ex;

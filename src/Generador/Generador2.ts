@@ -1,4 +1,10 @@
-import { EDeclaracion, EIdentificador, EOperadorApl, Expresion } from "../AnalisisSintactico/Expresion";
+import {
+    EDeclaracion,
+    EIdentificador,
+    EOperadorApl,
+    EOperadorUnarioIzq,
+    Expresion
+} from "../AnalisisSintactico/Expresion";
 import { SourceNode } from "source-map";
 import { InfoToken } from "../AnalisisLexico/InfoToken";
 
@@ -190,6 +196,22 @@ export function crearCodeWithSourceMap(
             return [retorno, precedenciaOp];
         }
 
+        function generarJs_EOpUnarioIzq(eOpApl: EOperadorUnarioIzq): [SourceNode, number] {
+            const infoOp = eOpApl.op.valorOp;
+
+            const [nodo] = crearCodeWithSourceMap(eOpApl.expr, false, nivel, nombreArchivo);
+
+            return [
+                new SourceNode(
+                    infoOp.numLinea,
+                    infoOp.inicio - infoOp.posInicioLinea,
+                    nombreArchivo,
+                    [infoOp.valor, nodo]
+                ),
+                eOpApl.op.precedencia
+            ];
+        }
+
         switch (expr.type) {
             case "EBloque": {
                 return generarJS_EBloque(expr.bloque, toplevel)
@@ -212,8 +234,29 @@ export function crearCodeWithSourceMap(
             case "EOperadorApl": {
                 return generarJS_EOperadorApl(expr);
             }
+            case "EUnidad": {
+                const info = expr.info;
+                return [
+                    new SourceNode(
+                        info.numLinea,
+                        info.inicio - info.posInicioLinea,
+                        nombreArchivo,
+                        "undefined"
+                    ),
+                    0
+                ];
+            }
+            case "EOperador": {
+                throw new Error("Usar operadores como expresiones aun no soportado.");
+            }
+            case "EOperadorUnarioIzq": {
+                return generarJs_EOpUnarioIzq(expr);
+            }
             default:
-                return [new SourceNode(0, 0, nombreArchivo, ""), 0];
+                let _: never;
+                _ = expr;
+                return _;
+                // return [new SourceNode(0, 0, nombreArchivo, ""), 0];
         }
     }
 

@@ -70,6 +70,26 @@ test("Operadores unarios izq", () => {
     expect(salida).toBe(esperado);
 });
 
+test("Operadores unarios izq ++", () => {
+    const entrada = `const s = ++1`;
+    const salida = flujo2(entrada, "").toString();
+    const esperado = `const s = ++1`;
+    expect(salida).toBe(esperado);
+});
+
+test("Operadores unarios izq --", () => {
+    const entrada = `const s = --1`;
+    const salida = flujo2(entrada, "").toString();
+    const esperado = `const s = --1`;
+    expect(salida).toBe(esperado);
+});
+
+test("Operador unarios izq incorrecto", () => {
+    const entrada = `const s = **1`;
+    const f = () => flujo2(entrada, "").toString();
+    expect(f).toThrow(Error);
+});
+
 test("Operadores unarios der", () => {
     const entrada = `const s = 1++`;
     const salida = flujo2(entrada, "").toString();
