@@ -115,7 +115,7 @@ export function crearCodeWithSourceMap(
             return [jsRetorno, 0];
         }
 
-        function generarJS_ENumero(info: InfoToken<number>): [SourceNode, number] {
+        function generarJS_ENumero(info: InfoToken<string>): [SourceNode, number] {
             let valor = info.valor.toString();
             return [new SourceNode(info.numLinea, info.inicio - info.posInicioLinea, nombreArchivo, valor), 0];
         }

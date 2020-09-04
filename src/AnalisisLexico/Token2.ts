@@ -66,9 +66,9 @@ export class TComentario {
 
 export class TNumero {
     type = "TNumero" as const
-    token: InfoToken<number>
+    token: InfoToken<string>
 
-    constructor(token: InfoToken<number>) {
+    constructor(token: InfoToken<string>) {
         this.token = token;
     }
     toString() {

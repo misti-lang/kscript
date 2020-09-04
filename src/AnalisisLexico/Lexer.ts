@@ -142,7 +142,7 @@ export class Lexer {
                     case Token.Comentario:
                         return crearToken2(x => new TComentario(x), ex.res);
                     case Token.Numero:
-                        return crearToken2(x => new TNumero(x), parseFloat(ex.res));
+                        return crearToken2(x => new TNumero(x), ex.res);
                     case Token.Texto:
                         return crearToken2(x => new TTexto(x), ex.res);
                     case Token.Operadores:

@@ -84,7 +84,7 @@ function obtInfoOp(operador: string): [number, Asociatividad] {
     }
 }
 
-const operadoresUnariosIzq = ["+", "-", "++", "--"];
+const operadoresUnariosIzq = ["+", "-", "++", "--", "!"];
 const operadoresUnariosDer = ["++", "--"];
 
 const crearString = (largo: number, c: string): string => {

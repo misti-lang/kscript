@@ -1,6 +1,6 @@
 {
   "name": "misti",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "description": "Lenguaje de programación funcional que se compila a JavaScript.",
   "homepage": "https://misti.araozu.pro/",
   "bugs": {
@@ -13,7 +13,7 @@
     "compile": "node ./src/index.js -c",
     "probar": "node src/prueba.js",
     "test": "jest",
-    "prepublishOnly": "tsc && jest",
+    "prepublishOnly": "tsc",
     "watch": "tsc -w"
   },
   "main": "./src/index.js",

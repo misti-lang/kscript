@@ -36,9 +36,9 @@ export class EUnidad {
 
 export class ENumero {
     type = "ENumero" as const
-    readonly info: InfoToken<number>
+    readonly info: InfoToken<string>
 
-    constructor(info: InfoToken<number>) {
+    constructor(info: InfoToken<string>) {
         this.info = info;
     }
 }
