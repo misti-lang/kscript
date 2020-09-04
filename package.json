@@ -16,6 +16,9 @@
     "prepublishOnly": "tsc",
     "watch": "tsc -w"
   },
+  "jest": {
+    "preset": "ts-jest"
+  },
   "main": "./src/index.js",
   "bin": "./src/bin.js",
   "types": "misti.d.ts",
@@ -35,6 +38,7 @@
     "@types/jest": "^26.0.10",
     "@types/node": "^14.6.0",
     "jest": "^26.4.2",
+    "ts-jest": "^26.3.0",
     "typescript": "^3.9.7"
   }
 }
