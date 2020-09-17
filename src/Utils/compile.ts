@@ -16,9 +16,9 @@ export const compilar = (ruta: string, imprimirEnStdout = false) => {
     const fragmentosRuta = ruta.split("/");
     const nombreArchivo = (() => {
         const n = fragmentosRuta.pop();
-        if (n && n.endsWith(".misti")) return n;
+        if (n && n.endsWith(".ks")) return n;
         else {
-            console.error(`El archivo provisto no tiene la extensión .misti`);
+            console.error(`El archivo provisto no tiene la extensión .ks`);
             process.exit(1);
         }
     })();
@@ -29,7 +29,7 @@ export const compilar = (ruta: string, imprimirEnStdout = false) => {
     const data = fs.readFileSync(ruta, "utf-8");
 
     try {
-        const jsResultado = flujo2(data, nombreSinExtension + ".misti");
+        const jsResultado = flujo2(data, nombreSinExtension + ".ks");
         const codigoConSourceMap = jsResultado.toStringWithSourceMap();
         const codigo = codigoConSourceMap.code + `\n\n//# sourceMappingURL=${nombreSinExtension}.js.map`;
         const sourceMap = codigoConSourceMap.map.toString();

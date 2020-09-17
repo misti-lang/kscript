@@ -29,7 +29,7 @@ switch (comando) {
     }
     case "-v":
     case "--version": {
-        console.log("El compilador Misti, versión 0.0.23");
+        console.log("KScript versión 0.0.24");
         process.exit(0);
     }
     case "--repl": {

@@ -21,7 +21,7 @@ const repl = () => {
 };
 
 export const flujoREPL = () => {
-    console.log("Misti v0.0.23");
+    console.log("KScript v0.0.24");
     console.log("Para salir del REPL escribe :s o CTRL+C");
     repl();
 };

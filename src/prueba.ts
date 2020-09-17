@@ -4,8 +4,8 @@ const str = `
 if (a === b) console.log 20
 `;
 
-const resultado = flujo2(str, "test.misti")
-    .toStringWithSourceMap({ file: "test.misti" });
+const resultado = flujo2(str, "test.ks")
+    .toStringWithSourceMap({ file: "test.ks" });
 
 console.log(resultado);
 console.log(resultado.code);
