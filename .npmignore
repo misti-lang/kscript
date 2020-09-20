@@ -5,8 +5,8 @@ npm-debug.log
 tests/
 
 src/**/*.d.ts
+sdc/**/*.ts
 
-*.ts
 *.js.map
 tsconfig.json
 .travis.yml

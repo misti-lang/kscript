@@ -262,7 +262,8 @@ export function parseTokens(lexer: Lexer): ResParser {
                                 case "TTexto":
                                 case "TBool":
                                 case "TParenAb": {
-                                    fnEnOp();
+                                    if (aceptarSoloOp) return funValorDefecto();
+
                                     const posEI = obtPosExpr(exprIzq);
                                     const infoOp2 = obtInfoFunAppl(false, posEI.inicioPE, posEI.numLineaPE, posEI.posInicioLineaPE);
 
@@ -328,15 +329,15 @@ export function parseTokens(lexer: Lexer): ResParser {
                                 case "TNuevaLinea": {
                                     if (!aceptarSoloOp) {
                                         lexer.retroceder();
-                                        let [resLexer, indentacion, _, fnEstablecer] = lexer.lookAheadSignificativo(true);
+                                        const [resLexer, indentacion, _, fnEstablecer] = lexer.lookAheadSignificativo(true);
 
-                                        let expresionRespuesta = new PExito(exprOpRes);
+                                        const expresionRespuesta = new PExito(exprOpRes);
 
                                         if (esExprPrincipal) {
 
                                             if (indentacion < nivel) {
                                                 return expresionRespuesta;
-                                            } else if (indentacion == nivel) {
+                                            } else if (indentacion === nivel) {
                                                 let nuevaFnEst = () => {
                                                     fnEstablecer();
                                                     lexer.sigToken();
