@@ -84,8 +84,7 @@ function obtInfoOp(operador: string): [number, Asociatividad] {
     }
 }
 
-const operadoresUnariosIzq = ["+", "-", "++", "--", "!"];
-const operadoresUnariosDer = ["++", "--"];
+const operadoresUnarios = ["+", "-", "!"];
 
 const crearString = (largo: number, c: string): string => {
     return new Array(largo).fill(c).join("");
@@ -809,7 +808,7 @@ export function parseTokens(lexer: Lexer): ResParser {
                         return new PError(`Los genericos aun no estan soportados.`);
                     case "TOperador": {
                         const infoOp = token.token;
-                        if (operadoresUnariosIzq.find(s => infoOp.valor === s)) {
+                        if (operadoresUnarios.find(s => infoOp.valor === s)) {
                             return sigExprOpUnarioIzq(infoOp, nivel, precedencia, esExprPrincipal);
                         } else {
                             let textoErr = generarTextoError(infoOp);

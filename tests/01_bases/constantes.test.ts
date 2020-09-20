@@ -63,38 +63,36 @@ test("Pasar propiedad de objeto como parametro entre otros", () => {
     expect(salida).toBe(esperado);
 });
 
-test("Operadores unarios izq", () => {
+test("Operadores unario - valido", () => {
     const entrada = `const s = -1`;
     const salida = flujo2(entrada, "").toString();
     const esperado = `const s = -1`;
     expect(salida).toBe(esperado);
 });
 
-test("Operadores unarios izq ++", () => {
-    const entrada = `const s = ++1`;
-    const salida = flujo2(entrada, "").toString();
-    const esperado = `const s = ++1`;
-    expect(salida).toBe(esperado);
-});
-
-test("Operadores unarios izq --", () => {
-    const entrada = `const s = --1`;
+test("Multiples operadores unarios - validos", () => {
+    const entrada = `const s = - -1`;
     const salida = flujo2(entrada, "").toString();
     const esperado = `const s = --1`;
     expect(salida).toBe(esperado);
 });
 
-test("Operador unarios izq incorrecto", () => {
-    const entrada = `const s = **1`;
+test("Operador unario ++ invalido", () => {
+    const entrada = `const s = ++1`;
     const f = () => flujo2(entrada, "").toString();
     expect(f).toThrow(Error);
 });
 
-test("Operadores unarios der", () => {
-    const entrada = `const s = 1++`;
-    const salida = flujo2(entrada, "").toString();
-    const esperado = `const s = 1++`;
-    expect(salida).toBe(esperado);
+test("Operador unario -- invalido", () => {
+    const entrada = `const s = --1`;
+    const f = () => flujo2(entrada, "").toString();
+    expect(f).toThrow(Error);
+});
+
+test("Operador unario ** invalido", () => {
+    const entrada = `const s = **1`;
+    const f = () => flujo2(entrada, "").toString();
+    expect(f).toThrow(Error);
 });
 
 test("Precedencia de operadores correcta", () => {
