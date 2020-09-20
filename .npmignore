@@ -5,7 +5,7 @@ npm-debug.log
 tests/
 
 src/**/*.d.ts
-sdc/**/*.ts
+src/**/*.ts
 
 *.js.map
 tsconfig.json
