@@ -6,12 +6,12 @@ import { ResLexer } from "../../AnalisisLexico/ResLexer";
 import { Asociatividad } from "../Asociatividad";
 import { obtPosExpr } from "../PosExpr";
 import { Lexer } from "../../AnalisisLexico/Lexer";
+import {generarTextoError} from "./utilidades";
 
 export function getParserSigExprOperador(
     lexer: Lexer,
     obtInfoOp: (operador: string) => [number, Asociatividad],
     obtInfoFunAppl: (esCurry: boolean, inicio: number, numLinea: number, posInicioLinea: number) => InfoToken<string>,
-    generarTextoError: <A>(info: InfoToken<A>) => string,
     sigExpresion: (
         nivel: number,
         nivelPadre: number,
@@ -95,7 +95,7 @@ export function getParserSigExprOperador(
                             if (aceptarSoloOp) return funValorDefecto();
 
                             const infoGen = token.token;
-                            let textoError = generarTextoError(infoGen);
+                            let textoError = generarTextoError(lexer.entrada, infoGen);
                             return new PError(`No se esperaba un genérico luego de la aplicación del operador.\n\n${textoError}`);
                         }
                         case "TComentario": {
@@ -105,28 +105,28 @@ export function getParserSigExprOperador(
                             if (aceptarSoloOp) return funValorDefecto();
 
                             const info = token.token;
-                            let textoError = generarTextoError(info);
+                            let textoError = generarTextoError(lexer.entrada, info);
                             return new PError(`No se esperaba la palabra clave 'let' luego de la aplicación del operador.\n\n${textoError}`)
                         }
                         case "PC_CONST": {
                             if (aceptarSoloOp) return funValorDefecto();
 
                             const info = token.token;
-                            let textoError = generarTextoError(info);
+                            let textoError = generarTextoError(lexer.entrada, info);
                             return new PError(`No se esperaba la palabra clave 'const' luego de la aplicación del operador.\n\n${textoError}`)
                         }
                         case "TAgrupAb": {
                             if (aceptarSoloOp) return funValorDefecto();
 
                             const info = token.token;
-                            let textoError = generarTextoError(info);
+                            let textoError = generarTextoError(lexer.entrada, info);
                             return new PError(`Este signo de agrupación aun no está soportado.\n\n${textoError}`);
                         }
                         case "TAgrupCer": {
                             if (aceptarSoloOp) return funValorDefecto();
 
                             const info = token.token;
-                            let textoError = generarTextoError(info);
+                            let textoError = generarTextoError(lexer.entrada, info);
                             return new PError(`Este signo de agrupación aun no está soportado.\n\n${textoError}`);
                         }
                         case "TNuevaLinea": {
@@ -186,7 +186,7 @@ export function getParserSigExprOperador(
                             if (aceptarSoloOp) return funValorDefecto();
 
                             const info = token.token;
-                            let textoError = generarTextoError(info);
+                            let textoError = generarTextoError(lexer.entrada, info);
                             return new PError(`No se esperaba la palabra clave 'if' luego de la aplicación del operador.
                                                 \n\n${textoError}
                                                 Si deseas usar un condicional como parámetro de una función encierra la
