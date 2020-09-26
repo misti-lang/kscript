@@ -1,6 +1,5 @@
 import { InfoToken } from "../../AnalisisLexico/InfoToken";
 import { Asociatividad } from "../Asociatividad";
-import { Lexer } from "../..";
 
 export function obtInfoFunAppl(esCurry: boolean, inicio: number, numLinea: number, posInicioLinea: number): InfoToken<string> {
     return {

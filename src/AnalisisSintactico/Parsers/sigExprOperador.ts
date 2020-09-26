@@ -7,6 +7,7 @@ import { Asociatividad } from "../Asociatividad";
 import { obtPosExpr } from "../PosExpr";
 import { Lexer } from "../../AnalisisLexico/Lexer";
 import {generarTextoError} from "./utilidades";
+import { generarParserContinuo } from "./parserContinuo";
 
 export function getParserSigExprOperador(
     lexer: Lexer,
@@ -41,6 +42,20 @@ export function getParserSigExprOperador(
             asocOp1
         );
         const exprOpRes = new EOperadorApl(eOperadorRes, exprIzq, exprFinal);
+        const posEI = obtPosExpr(exprIzq);
+
+        const funDesicion2 = generarParserContinuo(
+            lexer,
+            exprOpRes,
+            precedencia,
+            sigExprOperador,
+            posEI.inicioPE,
+            esExprPrincipal,
+            posEI.numLineaPE,
+            posEI.posInicioLineaPE,
+            nivel,
+            sigExpresion,
+        );
 
         function funDesicion(lexerRes: ResLexer, aceptarSoloOp: boolean, fnEnOp: () => void, funValorDefecto: () => ExprRes): ExprRes {
             switch (lexerRes.type) {
@@ -223,7 +238,7 @@ export function getParserSigExprOperador(
             }
         }
 
-        return funDesicion(lexer.sigToken(), false, () => {
+        return funDesicion2(lexer.sigToken(), false, () => {
         }, () => new PReturn());
     }
 

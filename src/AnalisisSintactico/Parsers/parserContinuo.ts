@@ -80,54 +80,57 @@ export const generarParserContinuo = (
                         let [tokenSig, indentacion, _, fnEstablecer] = lexer.lookAheadSignificativo(true);
 
                         let expresionRespuesta = new PExito(primeraExprId);
-                        if (esExprPrincipal) {
-                            if (indentacion < nivel) {
-                                return expresionRespuesta;
-                            } else if (indentacion == nivel) {
-                                const nuevaFnEst = () => {
-                                    fnEstablecer();
-                                    lexer.sigToken();
-                                };
 
-                                const funSiNoEsOp = () => {
-                                    let primeraExpresion = expresionRespuesta;
-                                    fnEstablecer();
-                                    let sigExpresionRaw = sigExpresion(nivel, nivel, false, 0, Asociatividad.Izq, true);
-                                    switch (sigExpresionRaw.type) {
-                                        case "PError":
-                                            return new PError(sigExpresionRaw.err);
-                                        case "PErrorLexer":
-                                            return sigExpresionRaw;
-                                        case "PReturn":
-                                        case "PEOF":
-                                            return primeraExpresion;
-                                        case "PExito": {
-                                            const nuevaExpr = sigExpresionRaw.expr;
-                                            switch (nuevaExpr.type) {
-                                                case "EBloque": {
-                                                    const exprs = nuevaExpr.bloque;
-                                                    return new PExito(new EBloque([primeraExprId, ...exprs]));
-                                                }
-                                                default: {
-                                                    return new PExito(new EBloque([primeraExprId, nuevaExpr]));
-                                                }
+                        if (!esExprPrincipal) return expresionRespuesta;
+
+                        if (indentacion < nivel) {
+                            return expresionRespuesta;
+                        } else if (indentacion === nivel) {
+                            const nuevaFnEst = () => {
+                                fnEstablecer();
+                                lexer.sigToken();
+                            };
+
+                            const funSiNoEsOp = () => {
+                                let primeraExpresion = expresionRespuesta;
+                                fnEstablecer();
+                                let sigExpresionRaw = sigExpresion(nivel, nivel, false, 0, Asociatividad.Izq, true);
+                                switch (sigExpresionRaw.type) {
+                                    case "PError":
+                                        return new PError(sigExpresionRaw.err);
+                                    case "PErrorLexer":
+                                        return sigExpresionRaw;
+                                    case "PReturn":
+                                    case "PEOF":
+                                        return primeraExpresion;
+                                    case "PExito": {
+                                        const nuevaExpr = sigExpresionRaw.expr;
+                                        switch (nuevaExpr.type) {
+                                            case "EBloque": {
+                                                const exprs = nuevaExpr.bloque;
+                                                return new PExito(new EBloque([primeraExprId, ...exprs]));
+                                            }
+                                            default: {
+                                                return new PExito(new EBloque([primeraExprId, nuevaExpr]));
                                             }
                                         }
-                                        default:
-                                            let _: never;
-                                            _ = sigExpresionRaw;
-                                            return _;
                                     }
-                                };
-                                return funDesicion(tokenSig, true, nuevaFnEst, funSiNoEsOp);
+                                    default:
+                                        let _: never;
+                                        _ = sigExpresionRaw;
+                                        return _;
+                                }
+                            };
+                            return funDesicion(tokenSig, true, nuevaFnEst, funSiNoEsOp);
 
-                            } else {
-                                fnEstablecer();
-                                return funDesicion(lexer.sigToken(), false, () => {
-                                }, () => new PReturn());
-                            }
                         } else {
-                            return expresionRespuesta;
+                            fnEstablecer();
+                            return funDesicion(
+                                lexer.sigToken(),
+                                false,
+                                () => {},
+                                () => new PReturn()
+                            );
                         }
                     }
                     case "TComentario": {
