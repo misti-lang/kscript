@@ -15,6 +15,10 @@ export type Token2 =
     | TAgrupCer
     | PC_LET
     | PC_CONST
+    | PC_IF
+    | PC_ELIF
+    | PC_DO
+    | PC_ELSE
 
 export class TNuevaLinea {
     type = "TNuevaLinea" as const
@@ -184,3 +188,50 @@ export class PC_CONST {
     }
 }
 
+export class PC_IF {
+    type = "PC_IF" as const
+    token: InfoToken<string>
+
+    constructor(token: InfoToken<string>) {
+        this.token = token;
+    }
+    toString() {
+        return `${this.type}: ${this.token.valor}`;
+    }
+}
+
+export class PC_ELIF {
+    type = "PC_ELIF" as const
+    token: InfoToken<string>
+
+    constructor(token: InfoToken<string>) {
+        this.token = token;
+    }
+    toString() {
+        return `${this.type}: ${this.token.valor}`;
+    }
+}
+
+export class PC_DO {
+    type = "PC_DO" as const
+    token: InfoToken<string>
+
+    constructor(token: InfoToken<string>) {
+        this.token = token;
+    }
+    toString() {
+        return `${this.type}: ${this.token.valor}`;
+    }
+}
+
+export class PC_ELSE {
+    type = "PC_ELSE" as const
+    token: InfoToken<string>
+
+    constructor(token: InfoToken<string>) {
+        this.token = token;
+    }
+    toString() {
+        return `${this.type}: ${this.token.valor}`;
+    }
+}
