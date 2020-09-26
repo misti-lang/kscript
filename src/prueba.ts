@@ -1,8 +1,7 @@
 import {flujo2} from "./Utils/flujos";
 
 const str = `
-console.log "hola"
-console.log "mundo"
+(1 + 2) / 3
 `;
 
 const resultado = flujo2(str, "test.ks")
