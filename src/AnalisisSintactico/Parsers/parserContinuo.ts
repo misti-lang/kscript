@@ -4,7 +4,7 @@ import { InfoToken } from "../../AnalisisLexico/InfoToken";
 import { ExprRes, PError, PErrorLexer, PExito, PReturn } from "../ExprRes";
 import { Asociatividad } from "../Asociatividad";
 import { ResLexer } from "../../AnalisisLexico/ResLexer";
-import {obtInfoFunAppl, obtInfoOp, generarTextoError} from "./utilidades"
+import { obtInfoFunAppl, obtInfoOp, generarTextoError } from "./utilidades"
 
 export const generarParserContinuo = (
     lexer: Lexer,
@@ -33,53 +33,100 @@ export const generarParserContinuo = (
     ) => ExprRes,
 ) => {
     function funDesicion(lexerRes: ResLexer, aceptarSoloOperador: boolean, fnEnOp: () => void, funValorDefecto: () => ExprRes): ExprRes {
+
         switch (lexerRes.type) {
             case "EOFLexer":
-                return new PExito(primeraExprId);
+                return new PExito(primeraExprId)
             case "ErrorLexer":
-                return new PErrorLexer(lexerRes.razon);
+                return new PError(lexerRes.razon)
             case "TokenLexer": {
                 const token = lexerRes.token;
                 switch (token.type) {
-                    case "TIdentificador":
-                    case "TNumero":
-                    case "TTexto":
-                    case "TBool":
-                    case "TParenAb": {
-                        if (aceptarSoloOperador) fnEnOp();
-
-                        lexer.retroceder();
-                        const [precFunApl, asocFunApl] = [14, Asociatividad.Izq];
-                        if (precFunApl > precedencia) {
-                            let infoOpFunApl = obtInfoFunAppl(false, infoIdInicio, infoIdNumLinea, infoIdPosInicioLinea);
-                            return sigExprOperador(primeraExprId, infoOpFunApl, nivel, precedencia, asocFunApl, esExprPrincipal);
-                        } else if (precFunApl == precedencia && asocFunApl == Asociatividad.Der) {
-                            let infoOpFunApl = obtInfoFunAppl(false, infoIdInicio, infoIdNumLinea, infoIdPosInicioLinea);
-                            return sigExprOperador(primeraExprId, infoOpFunApl, nivel, precedencia, asocFunApl, esExprPrincipal);
-                        } else {
-                            return new PExito(primeraExprId);
-                        }
-                    }
                     case "TOperador": {
                         const infoOp = token.token;
                         fnEnOp();
                         const [precOp, asocOp] = obtInfoOp(infoOp.valor);
+
                         if (precOp > precedencia) {
                             return sigExprOperador(primeraExprId, infoOp, nivel, precedencia, asocOp, esExprPrincipal);
-                        } else if (precOp == precedencia && asocOp == Asociatividad.Der) {
+                        } else if (precOp == precedencia && precOp == Asociatividad.Der) {
                             return sigExprOperador(primeraExprId, infoOp, nivel, precedencia, asocOp, esExprPrincipal);
                         } else {
                             lexer.retroceder();
                             return new PExito(primeraExprId);
                         }
                     }
+                    case "TParenCer": {
+                        if (aceptarSoloOperador) return funValorDefecto();
+
+                        lexer.retroceder();
+                        return new PExito(primeraExprId);
+                    }
+                    case "TIdentificador":
+                    case "TNumero":
+                    case "TTexto":
+                    case "TBool":
+                    case "TParenAb": {
+                        if (aceptarSoloOperador) return funValorDefecto();
+
+                        const infoOp2 = obtInfoFunAppl(false, infoIdInicio, infoIdNumLinea, infoIdPosInicioLinea);
+
+                        const [precOpFunApl, asocOpFunApl] = obtInfoOp(infoOp2.valor);
+                        lexer.retroceder();
+
+                        if (precOpFunApl > precedencia) {
+                            return sigExprOperador(primeraExprId, infoOp2, nivel, precedencia, asocOpFunApl, esExprPrincipal);
+                        } else if (precOpFunApl == precedencia && asocOpFunApl == Asociatividad.Der) {
+                            return sigExprOperador(primeraExprId, infoOp2, nivel, precedencia, asocOpFunApl, esExprPrincipal);
+                        } else {
+                            return new PExito(primeraExprId);
+                        }
+                    }
+                    case "TGenerico": {
+                        if (aceptarSoloOperador) return funValorDefecto();
+
+                        const infoGen = token.token;
+                        const textoError = generarTextoError(lexer.entrada, infoGen);
+                        return new PError(`No se esperaba un genérico luego de la aplicación del operador.\n\n${textoError}`);
+                    }
+                    case "TComentario": {
+                        return funDesicion(lexer.sigToken(), aceptarSoloOperador, fnEnOp, funValorDefecto);
+                    }
+                    case "PC_LET": {
+                        if (aceptarSoloOperador) return funValorDefecto();
+
+                        const info = token.token;
+                        const textoError = generarTextoError(lexer.entrada, info);
+                        return new PError(`No se esperaba la palabra clave 'let' luego de la aplicación del operador.\n\n${textoError}`)
+                    }
+                    case "PC_CONST": {
+                        if (aceptarSoloOperador) return funValorDefecto();
+
+                        const info = token.token;
+                        const textoError = generarTextoError(lexer.entrada, info);
+                        return new PError(`No se esperaba la palabra clave 'const' luego de la aplicación del operador.\n\n${textoError}`)
+                    }
+                    case "TAgrupAb": {
+                        if (aceptarSoloOperador) return funValorDefecto();
+
+                        const info = token.token;
+                        const textoError = generarTextoError(lexer.entrada, info);
+                        return new PError(`Este signo de agrupación aun no está soportado.\n\n${textoError}`);
+                    }
+                    case "TAgrupCer": {
+                        if (aceptarSoloOperador) return funValorDefecto();
+
+                        const info = token.token;
+                        const textoError = generarTextoError(lexer.entrada, info);
+                        return new PError(`Este signo de agrupación aun no está soportado.\n\n${textoError}`);
+                    }
                     case "TNuevaLinea": {
                         if (aceptarSoloOperador) return funValorDefecto();
 
                         lexer.retroceder();
-                        let [tokenSig, indentacion, _, fnEstablecer] = lexer.lookAheadSignificativo(true);
+                        const [resLexer, indentacion, _, fnEstablecer] = lexer.lookAheadSignificativo(true);
 
-                        let expresionRespuesta = new PExito(primeraExprId);
+                        const expresionRespuesta = new PExito(primeraExprId);
 
                         if (!esExprPrincipal) return expresionRespuesta;
 
@@ -92,17 +139,18 @@ export const generarParserContinuo = (
                             };
 
                             const funSiNoEsOp = () => {
-                                let primeraExpresion = expresionRespuesta;
+                                const primeraExpresion = expresionRespuesta;
                                 fnEstablecer();
-                                let sigExpresionRaw = sigExpresion(nivel, nivel, false, 0, Asociatividad.Izq, true);
+                                const sigExpresionRaw = sigExpresion(nivel, nivel, false, 0, Asociatividad.Izq, true);
                                 switch (sigExpresionRaw.type) {
                                     case "PError":
-                                        return new PError(sigExpresionRaw.err);
-                                    case "PErrorLexer":
                                         return sigExpresionRaw;
+                                    case "PErrorLexer":
+                                        return sigExpresionRaw
                                     case "PReturn":
-                                    case "PEOF":
-                                        return primeraExpresion;
+                                    case "PEOF": {
+                                        return primeraExpresion
+                                    }
                                     case "PExito": {
                                         const nuevaExpr = sigExpresionRaw.expr;
                                         switch (nuevaExpr.type) {
@@ -115,71 +163,26 @@ export const generarParserContinuo = (
                                             }
                                         }
                                     }
-                                    default:
-                                        let _: never;
-                                        _ = sigExpresionRaw;
-                                        return _;
                                 }
                             };
-                            return funDesicion(tokenSig, true, nuevaFnEst, funSiNoEsOp);
+                            return funDesicion(resLexer, true, nuevaFnEst, funSiNoEsOp);
 
                         } else {
                             fnEstablecer();
                             return funDesicion(
                                 lexer.sigToken(),
                                 false,
-                                () => {},
+                                () => {
+                                },
                                 () => new PReturn()
                             );
-                        }
-                    }
-                    case "TComentario": {
-                        console.log("Atorado en parser?");
-                        return funDesicion(lexer.sigToken(), aceptarSoloOperador, fnEnOp, funValorDefecto);
-                    }
-                    case "TParenCer": {
-                        if (!aceptarSoloOperador) {
-                            lexer.retroceder();
-                            return new PExito(primeraExprId);
-                        } else {
-                            return funValorDefecto();
-                        }
-                    }
-                    case "PC_LET": {
-                        const info = token.token;
-                        const textoError = generarTextoError(lexer.entrada, info);
-                        return new PError(`No se esperaba la palabra clave 'let' luego de la aplicación del operador.\n\n${textoError}`)
-                    }
-                    case "PC_CONST": {
-                        const info = token.token;
-                        const textoError = generarTextoError(lexer.entrada, info);
-                        return new PError(`No se esperaba la palabra clave 'const' luego de la aplicación del operador.\n\n${textoError}`)
-                    }
-                    case "TAgrupAb": {
-                        const info = token.token;
-                        const textoError = generarTextoError(lexer.entrada, info);
-                        return new PError(`Este signo de agrupación aun no está soportado.\n\n${textoError}`);
-                    }
-                    case "TAgrupCer": {
-                        const info = token.token;
-                        const textoError = generarTextoError(lexer.entrada, info);
-                        return new PError(`Este signo de agrupación aun no está soportado.\n\n${textoError}`);
-                    }
-                    case "TGenerico": {
-                        if (!aceptarSoloOperador) {
-                            const infoGen = token.token;
-                            const textoError = generarTextoError(lexer.entrada, infoGen);
-                            console.error(token);
-                            return new PError(`No se esperaba un genérico luego del identificador.\n\n${textoError}`)
-                        } else {
-                            return funValorDefecto();
                         }
                     }
                     case "PC_IF": {
                         if (aceptarSoloOperador) return funValorDefecto();
 
                         const info = token.token;
-                        let textoError = generarTextoError(lexer.entrada, info);
+                        const textoError = generarTextoError(lexer.entrada, info);
                         return new PError(`No se esperaba la palabra clave 'if' luego de la aplicación del operador.
                                                 \n\n${textoError}
                                                 Si deseas usar un condicional como parámetro de una función encierra la
@@ -206,10 +209,11 @@ export const generarParserContinuo = (
                         lexer.retroceder();
                         return new PExito(primeraExprId);
                     }
-                    default:
+                    default: {
                         let _: never;
                         _ = token;
                         return _;
+                    }
                 }
             }
         }
