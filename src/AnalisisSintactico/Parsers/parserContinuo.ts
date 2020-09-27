@@ -6,6 +6,22 @@ import { Asociatividad } from "../Asociatividad";
 import { ResLexer } from "../../AnalisisLexico/ResLexer";
 import { obtInfoFunAppl, obtInfoOp, generarTextoError } from "./utilidades"
 
+/**
+ * Genera una función que continua el parsing.
+ * @param lexer - El lexer con el que se está trabajando
+ * @param primeraExprId - Expresión que se devolverá si los parsers fallan
+ * @param precedencia - La precedencia de primeraExprId
+ * @param sigExprOperador - Una función que permite crear una expresión de Operador
+ * @param infoIdInicio - La posición absoluta en la que acaba la expresión anterior.
+ *                       Se usa para generar un token para la aplicación de funciones.
+ * @param esExprPrincipal - Si actualmente se está tratando con una expresión principal.
+ * @param infoIdNumLinea - El número de linea de la expresión anterior.
+ *                         Se usa para generar un token para la aplicación de funciones.
+ * @param infoIdPosInicioLinea - La posición relativa en la que acaba la expresión anterior.
+ *                               Se usa para generar un token para la aplicación de funciones.
+ * @param nivel - El nivel de la expresión anterior
+ * @param sigExpresion - Una función para extraer una nueva Expresión
+ */
 export const generarParserContinuo = (
     lexer: Lexer,
     primeraExprId: Expresion,

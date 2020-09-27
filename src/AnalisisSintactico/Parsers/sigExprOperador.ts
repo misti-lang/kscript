@@ -52,7 +52,7 @@ export function getParserSigExprOperador(
             posEI.numLineaPE,
             posEI.posInicioLineaPE,
             nivel,
-            sigExpresion,
+            sigExpresion
         );
 
         return funDesicion(lexer.sigToken(), false, () => {
