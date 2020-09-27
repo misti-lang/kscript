@@ -1,12 +1,10 @@
-import { EBloque, eOperador, EOperadorApl, Expresion } from "../Expresion";
+import { eOperador, EOperadorApl, Expresion } from "../Expresion";
 import { InfoToken } from "../../AnalisisLexico/InfoToken";
 import { ExprRes, PError, PExito, PReturn } from "../ExprRes";
 import { SignIndefinida } from "../Signatura";
-import { ResLexer } from "../../AnalisisLexico/ResLexer";
 import { Asociatividad } from "../Asociatividad";
 import { obtPosExpr } from "../PosExpr";
 import { Lexer } from "../../AnalisisLexico/Lexer";
-import {generarTextoError} from "./utilidades";
 import { generarParserContinuo } from "./parserContinuo";
 
 export function getParserSigExprOperador(
