@@ -84,7 +84,8 @@ export const generarTextoError = <A>(entrada: string, info: InfoToken<A>): strin
 };
 
 const globalState = {
-    parensAbiertos: 0
+    parensAbiertos: 0,
+    ifAbiertos: 0
 };
 
 export const getGlobalState = () => globalState;

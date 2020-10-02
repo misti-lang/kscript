@@ -9,7 +9,7 @@ import {
     TIdentificador,
     TNuevaLinea,
     TNumero,
-    Token2, TOperador, TParenAb, TParenCer
+    Token2, TOperador, TParenAb, TParenCer, PC_IF, PC_DO, PC_ELIF, PC_ELSE
 } from "./Token2";
 import { Token } from "./Token";
 import { run } from "./parsers";
@@ -121,7 +121,7 @@ export class Lexer {
                         return resultado;
                     }
                     case Token.Identificador: {
-                        switch (ex.res) {
+                        switch (ex.res as string) {
                             case "true":
                             case "false": {
                                 return crearToken2(x => new TBool(x), ex.res === "true");
@@ -131,6 +131,18 @@ export class Lexer {
                             }
                             case "const": {
                                 return crearToken2(x => new PC_CONST(x), "const");
+                            }
+                            case "if": {
+                                return crearToken2(x => new PC_IF(x), "if");
+                            }
+                            case "do": {
+                                return crearToken2(x => new PC_DO(x), "do");
+                            }
+                            case "elif": {
+                                return crearToken2(x => new PC_ELIF(x), "elif");
+                            }
+                            case "else": {
+                                return crearToken2(x => new PC_ELSE(x), "else");
                             }
                             default: {
                                 return crearToken2(x => new TIdentificador(x), ex.res)

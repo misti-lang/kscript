@@ -20,6 +20,7 @@ import { getParserSigExprOperador } from "./Parsers/sigExprOperador";
 import { generarParserContinuo } from "./Parsers/parserContinuo";
 import { obtInfoFunAppl, obtInfoOp, operadoresUnarios, generarTextoError, getGlobalState } from "./Parsers/utilidades"
 import { getSigExprParen } from "./Parsers/sigExprParen";
+import { getSigExprCondicional } from "./Parsers/sigExprCondicional";
 
 
 export function parseTokens(lexer: Lexer): ResParser {
@@ -188,6 +189,7 @@ export function parseTokens(lexer: Lexer): ResParser {
     }
 
     const sigExprParen = getSigExprParen(lexer, sigExpresion);
+    const sigExprCondicional = getSigExprCondicional(lexer, sigExpresion);
 
     function sigExpresion(
         nivel: number,
@@ -311,7 +313,9 @@ export function parseTokens(lexer: Lexer): ResParser {
                             return new PError(`No se puede usar el operador ${infoOp.valor} como operador unario.\n\n${textoErr}`);
                         }
                     }
-                    case "PC_IF":
+                    case "PC_IF": {
+                        return sigExprCondicional(token.token, obtNuevoNivel(token.token));
+                    }
                     case "PC_ELSE":
                     case "PC_ELIF":
                     case "PC_DO": {

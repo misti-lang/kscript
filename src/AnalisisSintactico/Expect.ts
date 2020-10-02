@@ -123,6 +123,17 @@ export const Expect = Object.freeze({
             }
         }
     },
+    PC_DO: (resLexer: ResLexer, msgError: string): InfoToken<string> => {
+        const preToken = extraerToken(resLexer, msgError);
+        switch (preToken.type) {
+            case "PC_DO": {
+                return preToken.token
+            }
+            default: {
+                throw new ErrorComun(msgError);
+            }
+        }
+    },
     TOperador: (fnObtToken: () => ResLexer, valorOpc: string | undefined, msgError: string): InfoToken<string> => {
         const preToken = extraerToken(fnObtToken(), msgError);
         switch (preToken.type) {

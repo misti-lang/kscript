@@ -1,7 +1,7 @@
 import {flujo2} from "./Utils/flujos";
 
 const str = `
-(1 + 2) / 3
+if a == b do c
 `;
 
 const resultado = flujo2(str, "test.ks")

@@ -1,4 +1,5 @@
 import {
+    ECondicional,
     EDeclaracion,
     EIdentificador,
     EOperadorApl,
@@ -143,7 +144,7 @@ export function crearCodeWithSourceMap(
         function generarJS_EDeclaracion(dec: EDeclaracion): [SourceNode, number] {
             const inicio = dec.mut ? "let" : "const";
             const snId = generarJS_EIdentificador(dec.id)[0];
-            const snResto = inner(dec.valorDec, false, (nivel + 1))[0];
+            const [snResto] = inner(dec.valorDec, false, (nivel + 1));
             switch (dec.valorDec.type) {
                 case "EDeclaracion": {
                     let codigoRes = [inicio, " ", snId, " = ", "(() => {\n", indentacionNivelSig, snResto, "\n", indentacionNivelSig,
@@ -212,6 +213,30 @@ export function crearCodeWithSourceMap(
             ];
         }
 
+        function generarJs_ECondicional(eCond: ECondicional): [SourceNode, number] {
+            const [exprCondicionIf, exprBloqueIf] = eCond.exprCondicion;
+
+            const [snCondicion] = inner(exprCondicionIf, toplevel, nivel);
+            const [snBloqueIf] = inner(exprBloqueIf, toplevel, nivel + 1);
+
+            return [
+                new SourceNode(
+                    eCond.numLinea,
+                    eCond.inicio - eCond.posInicioLinea,
+                    nombreArchivo,
+                    [
+                        "if (",
+                        snCondicion,
+                        ") {\n",
+                        indentacionNivelSig,
+                        snBloqueIf,
+                        "\n}"
+                    ]
+                ),
+                0
+            ];
+        }
+
         switch (expr.type) {
             case "EBloque": {
                 return generarJS_EBloque(expr.bloque, toplevel)
@@ -251,6 +276,9 @@ export function crearCodeWithSourceMap(
             }
             case "EOperadorUnarioIzq": {
                 return generarJs_EOpUnarioIzq(expr);
+            }
+            case "ECondicional": {
+                return generarJs_ECondicional(expr);
             }
             default:
                 let _: never;

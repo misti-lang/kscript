@@ -6,6 +6,10 @@ export interface PosExpr {
     readonly posInicioLineaPE: number
 }
 
+/**
+ * Devuelve la posicion de inicio absoluta, número de linea y pos. de inicio relativa de una expresión.
+ * @param ex - Expresión de la que extraer los datos
+ */
 export function obtPosExpr(ex: Expresion): PosExpr {
     switch (ex.type) {
         case "EIdentificador":
@@ -70,6 +74,13 @@ export function obtPosExpr(ex: Expresion): PosExpr {
                 inicioPE: op.inicio,
                 numLineaPE: op.numLinea,
                 posInicioLineaPE: op.posInicioLinea
+            }
+        }
+        case "ECondicional": {
+            return {
+                inicioPE: ex.inicio,
+                numLineaPE: ex.numLinea,
+                posInicioLineaPE: ex.posInicioLinea,
             }
         }
         default:
