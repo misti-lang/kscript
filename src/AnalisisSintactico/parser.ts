@@ -18,13 +18,13 @@ import { SignIndefinida } from "./Signatura";
 import { ExprIdInfo } from "./ExprIdInfo";
 import { getParserSigExprOperador } from "./Parsers/sigExprOperador";
 import { generarParserContinuo } from "./Parsers/parserContinuo";
-import { obtInfoFunAppl, obtInfoOp, operadoresUnarios, generarTextoError } from "./Parsers/utilidades"
+import { obtInfoFunAppl, obtInfoOp, operadoresUnarios, generarTextoError, getGlobalState } from "./Parsers/utilidades"
 import { getSigExprParen } from "./Parsers/sigExprParen";
 
 
 export function parseTokens(lexer: Lexer): ResParser {
 
-    const parensAbiertos = {v: 0};
+    const globalState = getGlobalState();
 
     function sigExprDeclaracion(nivel: number, esMut: boolean): ExprRes {
         try {
@@ -274,11 +274,11 @@ export function parseTokens(lexer: Lexer): ResParser {
                     }
                     case "TParenAb": {
                         const infoParen = token.token;
-                        return sigExprParen(infoParen, parensAbiertos);
+                        return sigExprParen(infoParen, nivel);
                     }
                     case "TParenCer": {
                         const infoParen = token.token;
-                        if (parensAbiertos.v > 0) {
+                        if (globalState.parensAbiertos > 0) {
                             lexer.retroceder();
                             return new PReturn();
                         } else {

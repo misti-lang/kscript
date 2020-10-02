@@ -82,3 +82,9 @@ export const generarTextoError = <A>(entrada: string, info: InfoToken<A>): strin
     let strIndicador = `${espBlanco}${indicador}`;
     return `${strIndicadorNumLinea}${substr}\n${espacioBlancoIndicador}${strIndicador}\n`;
 };
+
+const globalState = {
+    parensAbiertos: 0
+};
+
+export const getGlobalState = () => globalState;

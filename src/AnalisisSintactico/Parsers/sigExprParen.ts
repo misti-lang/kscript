@@ -1,11 +1,12 @@
 import { InfoToken } from "../../AnalisisLexico/InfoToken";
-import { ExprRes, PError, PExito } from "../ExprRes";
+import { ExprRes, PError, PExito, PReturn } from "../ExprRes";
 import { EIdentificador } from "../Expresion";
 import { SignIndefinida } from "../Signatura";
 import { Asociatividad } from "../Asociatividad";
-import { generarTextoError } from "./utilidades";
+import { generarTextoError, getGlobalState, obtInfoFunAppl, obtInfoOp } from "./utilidades";
 import { Lexer } from "../..";
 import { generarParserContinuo } from "./parserContinuo";
+import { getParserSigExprOperador } from "./sigExprOperador";
 
 export const getSigExprParen = (
     lexer: Lexer,
@@ -18,8 +19,9 @@ export const getSigExprParen = (
         esExprPrincipal: boolean
     ) => ExprRes
 ) => {
-    function sigExprParen(infoParen: InfoToken<string>, parensAbiertos: { v: number }) {
-        parensAbiertos.v++;
+    function sigExprParen(infoParen: InfoToken<string>, nivel: number) {
+        const globalState = getGlobalState();
+        globalState.parensAbiertos++;
         const sigToken = lexer.sigToken();
 
         if (sigToken.type == "EOFLexer") {
@@ -88,25 +90,28 @@ export const getSigExprParen = (
                                      Pedir una sig. expresión y hacer lo de funDesicion.
                             */
                             case "TParenCer": {
-                                parensAbiertos.v--;
+                                globalState.parensAbiertos--;
 
-                                /*
-                                TODO:
                                 const funDesicion = generarParserContinuo(
                                     lexer,
                                     sigExpr2,
-                                    precedencia,
-                                    sigExprOperador,
-                                    posEI.inicioPE,
-                                    esExprPrincipal,
-                                    posEI.numLineaPE,
-                                    posEI.posInicioLineaPE,
+                                    0,
+                                    getParserSigExprOperador(
+                                        lexer,
+                                        obtInfoOp,
+                                        obtInfoFunAppl,
+                                        sigExpresion
+                                    ),
+                                    ultimoToken3.token.final,
+                                    false,
+                                    ultimoToken3.token.numLinea,
+                                    ultimoToken3.token.posInicioLinea,
                                     nivel,
                                     sigExpresion
                                 );
-                                */
 
-                                return new PExito(sigExpr2);
+                                return funDesicion(lexer.sigToken(), false, () => {
+                                }, () => new PReturn());
                             }
                             default:
                                 return new PError("Se esperaba un cierre de parentesis.")

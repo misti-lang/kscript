@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.0.28
+
+- Arreglado error al agrupar expresiones en parentesis que evitaba que el codigo continuara compilandose,
+  y que malograba la precedencia de operadores.
+
 # 0.0.27
 
 - Arreglado error que trataba identificadores en una nueva linea como parametros de una función.
