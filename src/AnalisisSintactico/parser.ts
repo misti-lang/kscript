@@ -23,7 +23,6 @@ import { generarTextoError, getGlobalState, obtInfoFunAppl, obtInfoOp, operadore
 import { getSigExprParen } from "./Parsers/sigExprParen";
 import { getSigExprCondicional } from "./Parsers/sigExprCondicional";
 
-
 export function parseTokens(lexer: Lexer): ResParser {
 
     const globalState = getGlobalState();
@@ -63,71 +62,72 @@ export function parseTokens(lexer: Lexer): ResParser {
             }
 
             // Obtener expresion que representa el valor de la declaracion
-            const sigExpr = sigExpresion(
-                nuevoNivel,
-                hayNuevaLinea? nuevoNivel: indentacionMinima,
+            const sigExpr = hayNuevaLinea ?
+                sigExpresionBloque(nuevoNivel, true) :
+                sigExpresion(
+                    nuevoNivel,
+                    hayNuevaLinea ? nuevoNivel : indentacionMinima,
+                    0,
+                    Asociatividad.Izq,
+                    true
+                );
+
+            // Casos de error de la expresión inicializadora :D
+            if (sigExpr.type === "PEOF" || sigExpr.type === "PReturn") {
+                return new PError("Se esperaba una expresión luego de la asignación");
+            } else if (sigExpr.type === "PErrorLexer") {
+                return sigExpr;
+            } else if (sigExpr.type === "PError") {
+                return new PError(`Se esperaba una expresión luego de la asignación: ${sigExpr.err}`);
+            }
+
+            const exprFinal = sigExpr.expr;
+
+            const exprDeclaracion = new EDeclaracion(
+                esMut,
+                new EIdentificador(new SignIndefinida(), infoTokenId),
+                exprFinal,
+                infoTokenId.inicio,
+                infoTokenId.numLinea,
+                infoTokenId.posInicioLinea
+            );
+            return new PExito(exprDeclaracion);
+
+            /*/
+            const sigExpresionRaw = sigExpresion(
+                indentacionNuevaLinea,
+                indentacionNuevaLinea,
                 0,
                 Asociatividad.Izq,
                 true
             );
-            switch (sigExpr.type) {
-                case "PEOF":
-                case "PReturn": {
-                    return new PError("Se esperaba una expresión luego de la asignación");
-                }
+
+            switch (sigExpresionRaw.type) {
+                case "PError":
+                    return sigExpresionRaw
                 case "PErrorLexer":
-                    return sigExpr;
-                case "PError": {
-                    return new PError(`Se esperaba una expresión luego de la asignación: ${sigExpr.err}`);
-                }
+                    return sigExpresionRaw
+                case "PReturn":
+                case "PEOF":
+                    return exprRespuesta
                 case "PExito": {
-                    const exprFinal = sigExpr.expr;
-
-                    const exprDeclaracion = new EDeclaracion(
-                        esMut,
-                        new EIdentificador(new SignIndefinida(), infoTokenId),
-                        exprFinal,
-                        infoTokenId.inicio,
-                        infoTokenId.numLinea,
-                        infoTokenId.posInicioLinea
-                    );
-                    const exprRespuesta = new PExito(exprDeclaracion);
-                    const sigExpresionRaw = sigExpresion(
-                        indentacionNuevaLinea,
-                        indentacionNuevaLinea,
-                        0,
-                        Asociatividad.Izq,
-                        true
-                    );
-
-                    switch (sigExpresionRaw.type) {
-                        case "PError":
-                            return sigExpresionRaw
-                        case "PErrorLexer":
-                            return sigExpresionRaw
-                        case "PReturn":
-                        case "PEOF":
-                            return exprRespuesta
-                        case "PExito": {
-                            const nuevaExpr = sigExpresionRaw.expr;
-                            switch (nuevaExpr.type) {
-                                case "EBloque": {
-                                    return new PExito(new EBloque([exprDeclaracion, ...nuevaExpr.bloque]));
-                                }
-                                default: {
-                                    return new PExito(new EBloque([exprDeclaracion, nuevaExpr]));
-                                }
-                            }
+                    const nuevaExpr = sigExpresionRaw.expr;
+                    switch (nuevaExpr.type) {
+                        case "EBloque": {
+                            return new PExito(new EBloque([exprDeclaracion, ...nuevaExpr.bloque]));
                         }
                         default: {
-                            let _: never;
-                            _ = sigExpresionRaw;
-                            return _;
+                            return new PExito(new EBloque([exprDeclaracion, nuevaExpr]));
                         }
                     }
                 }
+                default: {
+                    let _: never;
+                    _ = sigExpresionRaw;
+                    return _;
+                }
             }
-
+            // */
         } catch (e) {
             if (e instanceof ErrorComun) {
                 return new PError(e.message);
@@ -224,9 +224,11 @@ export function parseTokens(lexer: Lexer): ResParser {
             const sigExpr = sigExpresion(nivel, nivel, 0, Asociatividad.Izq, false);
             switch (sigExpr.type) {
                 case "PErrorLexer":
-                case "PError": return sigExpr
+                case "PError":
+                    return sigExpr
                 case "PEOF":
-                case "PReturn": return new PExito(new EBloque(exprs, esExpresion))
+                case "PReturn":
+                    return new PExito(new EBloque(exprs, esExpresion))
                 case "PExito": {
                     exprs.push(sigExpr.expr)
                 }
