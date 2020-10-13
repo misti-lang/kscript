@@ -92,42 +92,6 @@ export function parseTokens(lexer: Lexer): ResParser {
                 infoTokenId.posInicioLinea
             );
             return new PExito(exprDeclaracion);
-
-            /*/
-            const sigExpresionRaw = sigExpresion(
-                indentacionNuevaLinea,
-                indentacionNuevaLinea,
-                0,
-                Asociatividad.Izq,
-                true
-            );
-
-            switch (sigExpresionRaw.type) {
-                case "PError":
-                    return sigExpresionRaw
-                case "PErrorLexer":
-                    return sigExpresionRaw
-                case "PReturn":
-                case "PEOF":
-                    return exprRespuesta
-                case "PExito": {
-                    const nuevaExpr = sigExpresionRaw.expr;
-                    switch (nuevaExpr.type) {
-                        case "EBloque": {
-                            return new PExito(new EBloque([exprDeclaracion, ...nuevaExpr.bloque]));
-                        }
-                        default: {
-                            return new PExito(new EBloque([exprDeclaracion, nuevaExpr]));
-                        }
-                    }
-                }
-                default: {
-                    let _: never;
-                    _ = sigExpresionRaw;
-                    return _;
-                }
-            }
-            // */
         } catch (e) {
             if (e instanceof ErrorComun) {
                 return new PError(e.message);
