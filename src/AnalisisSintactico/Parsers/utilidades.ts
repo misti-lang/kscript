@@ -1,13 +1,20 @@
 import { InfoToken } from "../../AnalisisLexico/InfoToken";
 import { Asociatividad } from "../Asociatividad";
 
-export function obtInfoFunAppl(esCurry: boolean, inicio: number, numLinea: number, posInicioLinea: number): InfoToken<string> {
+export function obtInfoFunAppl(
+    esCurry: boolean,
+    inicio: number,
+    numLinea: number,
+    posInicioLinea: number,
+    indentacion: number
+): InfoToken<string> {
     return {
         valor: (esCurry) ? "Ñ" : "ñ",
         inicio,
         final: inicio + 1,
         numLinea,
-        posInicioLinea
+        posInicioLinea,
+        indentacion
     }
 }
 

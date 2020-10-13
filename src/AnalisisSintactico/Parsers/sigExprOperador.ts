@@ -10,14 +10,12 @@ import { generarParserContinuo } from "./parserContinuo";
 export function getParserSigExprOperador(
     lexer: Lexer,
     obtInfoOp: (operador: string) => [number, Asociatividad],
-    obtInfoFunAppl: (esCurry: boolean, inicio: number, numLinea: number, posInicioLinea: number) => InfoToken<string>,
+    obtInfoFunAppl: (esCurry: boolean, inicio: number, numLinea: number, posInicioLinea: number, indentacion: number) => InfoToken<string>,
     sigExpresion: (
         nivel: number,
         nivelPadre: number,
-        iniciarIndentacionEnToken: boolean,
         precedencia: number,
-        asociatividad: Asociatividad,
-        esExprPrincipal: boolean
+        asociatividad: Asociatividad
     ) => ExprRes
 ) {
 
@@ -28,8 +26,7 @@ export function getParserSigExprOperador(
         precOp1: number,
         asocOp1: Asociatividad,
         precedencia: any,
-        nivel: number,
-        esExprPrincipal: boolean
+        nivel: number
     ) {
         const exprFinal = sigExpr.expr;
 
@@ -48,29 +45,24 @@ export function getParserSigExprOperador(
             precedencia,
             sigExprOperador,
             posEI.inicioPE,
-            esExprPrincipal,
             posEI.numLineaPE,
             posEI.posInicioLineaPE,
-            nivel,
-            sigExpresion
+            nivel
         );
 
-        return funDesicion(lexer.sigToken(), false, () => {
-        }, () => new PReturn());
+        return funDesicion(lexer.sigToken());
     }
 
     function sigExprOperador(
         exprIzq: Expresion,
         infoOp: InfoToken<string>,
         nivel: number,
-        precedencia: any,
-        __: any,
-        esExprPrincipal: boolean
+        precedencia: any
     ): ExprRes {
 
         const valorOp = infoOp.valor;
         const [precOp1, asocOp1] = obtInfoOp(valorOp);
-        const sigExpr = sigExpresion(nivel, nivel, false, precOp1, asocOp1, false);
+        const sigExpr = sigExpresion(nivel, nivel, precOp1, asocOp1);
 
         switch (sigExpr.type) {
             case "PEOF":
@@ -88,8 +80,7 @@ export function getParserSigExprOperador(
                     precOp1,
                     asocOp1,
                     precedencia,
-                    nivel,
-                    esExprPrincipal,
+                    nivel
                 );
             }
             default: {

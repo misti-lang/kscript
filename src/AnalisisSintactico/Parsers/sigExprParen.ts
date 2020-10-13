@@ -13,10 +13,8 @@ export const getSigExprParen = (
     sigExpresion: (
         nivel: number,
         nivelPadre: number,
-        iniciarIndentacionEnToken: boolean,
         precedencia: number,
-        asociatividad: Asociatividad,
-        esExprPrincipal: boolean
+        asociatividad: Asociatividad
     ) => ExprRes
 ) => {
     function sigExprParen(infoParen: InfoToken<string>, nivel: number) {
@@ -46,10 +44,8 @@ export const getSigExprParen = (
         const sigToken2 = sigExpresion(
             0,
             0,
-            false,
             0,
-            Asociatividad.Izq,
-            true
+            Asociatividad.Izq
         );
         switch (sigToken2.type) {
             case "PReturn":
@@ -103,15 +99,12 @@ export const getSigExprParen = (
                                         sigExpresion
                                     ),
                                     ultimoToken3.token.final,
-                                    false,
                                     ultimoToken3.token.numLinea,
                                     ultimoToken3.token.posInicioLinea,
-                                    nivel,
-                                    sigExpresion
+                                    nivel
                                 );
 
-                                return funDesicion(lexer.sigToken(), false, () => {
-                                }, () => new PReturn());
+                                return funDesicion(lexer.sigToken());
                             }
                             default:
                                 return new PError("Se esperaba un cierre de parentesis.")

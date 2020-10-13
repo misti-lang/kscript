@@ -11,7 +11,6 @@ export function getSigExprCondicional(
     sigExpresion: (
         nivel: number,
         nivelPadre: number,
-        iniciarIndentacionEnToken: boolean,
         precedencia: number,
         asociatividad: Asociatividad,
         esExprPrincipal: boolean
@@ -22,9 +21,8 @@ export function getSigExprCondicional(
 
     function sigExprCondicional(tokenIf: InfoToken<string> ,nivel: number): ExprRes {
         try {
-            globlalState.ifAbiertos += 1;
 
-            const sigExpr = sigExpresion(nivel, nivel, true, 0, Asociatividad.Izq, true);
+            const sigExpr = sigExpresion(nivel, nivel, 0, Asociatividad.Izq, true);
             if (sigExpr.type === "PReturn" || sigExpr.type === "PEOF") {
                 return new PError("Se esperaba una expresión luego de 'if'.");
             } else if (sigExpr.type === "PError") {
@@ -47,10 +45,11 @@ export function getSigExprCondicional(
                 fnEstablecer();
             }
 
+            globlalState.ifAbiertos += 1;
+
             const sigExprCuerpo = sigExpresion(
                 nuevoNivel,
                 nivel,
-                true,
                 0,
                 Asociatividad.Izq,
                 true
@@ -75,9 +74,15 @@ export function getSigExprCondicional(
             const exprRespuestaRes = new PExito(exprCondicional);
 
             const sigExpresionRaw = sigExpresion(
-                nivel, nivel, true,
-                0, Asociatividad.Izq, true
+                nivel,
+                nivel,
+                0,
+                Asociatividad.Izq,
+                true
             );
+
+            // Cerrar el if
+            globlalState.ifAbiertos -= 1;
 
             // Continuar parseando expresiones luego de terminar el condicional
             switch (sigExpresionRaw.type) {

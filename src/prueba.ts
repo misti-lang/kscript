@@ -1,7 +1,16 @@
 import {flujo2} from "./Utils/flujos";
 
 const str = `
-if a == b do c
+const nombreCompleto =
+    const nombre = "Juan"
+    const apellido = "Perez"
+    
+    nombre + " " + apellido
+
+const edad = 40
+const sexo = "M"
+
+console.log nombreCompleto edad sexo
 `;
 
 const resultado = flujo2(str, "test.ks")
