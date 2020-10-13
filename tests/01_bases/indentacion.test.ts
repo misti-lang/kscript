@@ -3,7 +3,7 @@ var flujo2 = require("../../src/Utils/flujos").flujo2;
 test("2 constantes", () => {
     const entrada = `const a = 20\nconst b = 30`;
     const salida = flujo2(entrada, "").toString();
-    const esperado = `const a = 20;\nconst b = 30`;
+    const esperado = `const a = 20;\nconst b = 30;`;
     expect(salida).toBe(esperado);
 });
 
@@ -32,6 +32,6 @@ test("Constante con único valor en nueva linea", () => {
 test("Constante anidada", () => {
     const entrada = `const a =\n    const b = 20\n    b`;
     const salida = flujo2(entrada, "").toString();
-    const esperado = `const a = (() => {\n    const b = 0;\n    return b;})();`;
+    const esperado = `const a = (() => {\n    const b = 20;\n    return b;\n})();`;
     expect(salida).toBe(esperado);
 });

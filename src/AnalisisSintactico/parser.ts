@@ -159,8 +159,7 @@ export function parseTokens(lexer: Lexer): ResParser {
             esExprPrincipal,
             infoIdNumLinea,
             infoIdPosInicioLinea,
-            indentacionNuevaLinea,
-            sigExpresion,
+            indentacionNuevaLinea
         );
 
         return funDesicion(

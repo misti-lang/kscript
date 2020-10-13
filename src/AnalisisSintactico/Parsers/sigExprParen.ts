@@ -104,8 +104,7 @@ export const getSigExprParen = (
                                     false,
                                     ultimoToken3.token.numLinea,
                                     ultimoToken3.token.posInicioLinea,
-                                    nivel,
-                                    sigExpresion
+                                    nivel
                                 );
 
                                 return funDesicion(lexer.sigToken(), false, () => {

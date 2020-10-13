@@ -50,8 +50,7 @@ export function getParserSigExprOperador(
             esExprPrincipal,
             posEI.numLineaPE,
             posEI.posInicioLineaPE,
-            nivel,
-            sigExpresion
+            nivel
         );
 
         return funDesicion(lexer.sigToken(), false, () => {
