@@ -10,7 +10,7 @@ import { generarParserContinuo } from "./parserContinuo";
 export function getParserSigExprOperador(
     lexer: Lexer,
     obtInfoOp: (operador: string) => [number, Asociatividad],
-    obtInfoFunAppl: (esCurry: boolean, inicio: number, numLinea: number, posInicioLinea: number) => InfoToken<string>,
+    obtInfoFunAppl: (esCurry: boolean, inicio: number, numLinea: number, posInicioLinea: number, indentacion: number) => InfoToken<string>,
     sigExpresion: (
         nivel: number,
         nivelPadre: number,

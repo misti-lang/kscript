@@ -15,6 +15,7 @@ import { obtInfoFunAppl, obtInfoOp, generarTextoError } from "./utilidades"
  * @param infoIdInicio - La posición absoluta en la que acaba la expresión anterior.
  *                       Se usa para generar un token para la aplicación de funciones.
  * @param esExprPrincipal - Si actualmente se está tratando con una expresión principal.
+ *                          Se usa para agrupar expresiones separadas por una linea nueva.
  * @param infoIdNumLinea - El número de linea de la expresión anterior.
  *                         Se usa para generar un token para la aplicación de funciones.
  * @param infoIdPosInicioLinea - La posición relativa en la que acaba la expresión anterior.
@@ -40,8 +41,8 @@ export const generarParserContinuo = (
     infoIdPosInicioLinea: number,
     nivel: number,
     sigExpresion: (
-        nivel: number,
-        nivelPadre: number,
+        indentacionNuevaLinea: number,
+        indentacionMinima: number,
         iniciarIndentacionEnToken: boolean,
         precedencia: number,
         asociatividad: Asociatividad,
@@ -85,7 +86,7 @@ export const generarParserContinuo = (
                     case "TParenAb": {
                         if (aceptarSoloOperador) return funValorDefecto();
 
-                        const infoOp2 = obtInfoFunAppl(false, infoIdInicio, infoIdNumLinea, infoIdPosInicioLinea);
+                        const infoOp2 = obtInfoFunAppl(false, infoIdInicio, infoIdNumLinea, infoIdPosInicioLinea, nivel);
 
                         const [precOpFunApl, asocOpFunApl] = obtInfoOp(infoOp2.valor);
                         lexer.retroceder();

@@ -74,7 +74,8 @@ export class Lexer {
                         inicio: ex.posInicio,
                         final: ex.posFinal,
                         numLinea: this.numLineaActual,
-                        posInicioLinea: this.posAbsInicioLinea
+                        posInicioLinea: this.posAbsInicioLinea,
+                        indentacion: this.indentacionActual
                     }), this.indentacionActual);
                 };
 
@@ -111,7 +112,8 @@ export class Lexer {
                             inicio: ex.posInicio,
                             final: ex.posFinal,
                             numLinea: this.numLineaActual,
-                            posInicioLinea: this.posAbsInicioLinea
+                            posInicioLinea: this.posAbsInicioLinea,
+                            indentacion: this.indentacionActual
                         }), this.indentacionActual);
                         this.posActual = ex.posFinal;
                         this.esInicioDeLinea = true;

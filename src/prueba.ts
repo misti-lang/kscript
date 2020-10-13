@@ -1,7 +1,12 @@
 import {flujo2} from "./Utils/flujos";
 
 const str = `
-if a == b do c
+if true do
+    const s = 20
+    console.log "hola mundo" s
+
+console.log 20
+
 `;
 
 const resultado = flujo2(str, "test.ks")

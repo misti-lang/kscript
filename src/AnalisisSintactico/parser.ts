@@ -12,13 +12,14 @@ import {
     ENumero,
     eOperador,
     EOperadorUnarioIzq,
-    ETexto
+    ETexto,
+    Expresion
 } from "./Expresion";
 import { SignIndefinida } from "./Signatura";
 import { ExprIdInfo } from "./ExprIdInfo";
 import { getParserSigExprOperador } from "./Parsers/sigExprOperador";
 import { generarParserContinuo } from "./Parsers/parserContinuo";
-import { obtInfoFunAppl, obtInfoOp, operadoresUnarios, generarTextoError, getGlobalState } from "./Parsers/utilidades"
+import { generarTextoError, getGlobalState, obtInfoFunAppl, obtInfoOp, operadoresUnarios } from "./Parsers/utilidades"
 import { getSigExprParen } from "./Parsers/sigExprParen";
 import { getSigExprCondicional } from "./Parsers/sigExprCondicional";
 
@@ -51,7 +52,15 @@ export function parseTokens(lexer: Lexer): ResParser {
                 fnEstablecer();
             }
 
-            const sigExpr = sigExpresion(nuevoNivel, nivel, true, 0, Asociatividad.Izq, true);
+            // Obtener expresion que representa el valor de la declaracion
+            const sigExpr = sigExpresion(
+                nuevoNivel,
+                hayNuevaLinea? nuevoNivel: nivel,
+                true,
+                0,
+                Asociatividad.Izq,
+                true
+            );
             switch (sigExpr.type) {
                 case "PEOF":
                 case "PReturn": {
@@ -155,7 +164,7 @@ export function parseTokens(lexer: Lexer): ResParser {
 
     function sigExprIdentificador(
         exprIdInfo: ExprIdInfo,
-        nivel: number,
+        indentacionNuevaLinea: number,
         precedencia: number,
         _: any,
         esExprPrincipal: boolean
@@ -175,7 +184,7 @@ export function parseTokens(lexer: Lexer): ResParser {
             esExprPrincipal,
             infoIdNumLinea,
             infoIdPosInicioLinea,
-            nivel,
+            indentacionNuevaLinea,
             sigExpresion,
         );
 
@@ -191,9 +200,43 @@ export function parseTokens(lexer: Lexer): ResParser {
     const sigExprParen = getSigExprParen(lexer, sigExpresion);
     const sigExprCondicional = getSigExprCondicional(lexer, sigExpresion);
 
-    function sigExpresion(
+    /**
+     * Obtiene el siguiente bloque de expresiones.
+     */
+    function sigExpresionBloque(
         nivel: number,
-        nivelPadre: number,
+        esExpresion: boolean = false
+    ): ExprRes {
+
+        const exprs: Array<Expresion> = [];
+        while (true) {
+            const sigExpr = sigExpresion(nivel, nivel, false, 0, Asociatividad.Izq, false);
+            switch (sigExpr.type) {
+                case "PErrorLexer":
+                case "PError": return sigExpr
+                case "PEOF":
+                case "PReturn": return new PExito(new EBloque(exprs, esExpresion))
+                case "PExito": {
+                    exprs.push(sigExpr.expr)
+                }
+            }
+        }
+    }
+
+    // TODO: Encontrar la forma de ajustar la indentacion
+    /**
+     *
+     * @param indentacionNuevaLinea El nivel de indentacion que deben tener los tokens en nuevas lineas para que se consideren
+     *              parte de la expresion
+     * @param indentacionMinima El nivel de indentacion minima para que el token se considere parte de la expresion
+     * @param iniciarIndentacionEnToken
+     * @param precedencia
+     * @param asociatividad
+     * @param esExprPrincipal
+     */
+    function sigExpresion(
+        indentacionNuevaLinea: number,
+        indentacionMinima: number,
         iniciarIndentacionEnToken: boolean,
         precedencia: number,
         asociatividad: Asociatividad,
@@ -204,7 +247,7 @@ export function parseTokens(lexer: Lexer): ResParser {
             if (iniciarIndentacionEnToken) {
                 return infoToken.inicio - infoToken.posInicioLinea;
             } else {
-                return nivel;
+                return indentacionNuevaLinea;
             }
         };
 
@@ -219,6 +262,12 @@ export function parseTokens(lexer: Lexer): ResParser {
             }
             case "TokenLexer": {
                 const token = resultado.token;
+                if (token.token.indentacion < indentacionMinima) {
+                    console.log("Error de indentacion?");
+                    console.log("Esperado ", indentacionMinima, ", obtenido", token.token.indentacion);
+                    lexer.retroceder();
+                    return new PReturn();
+                }
                 switch (token.type) {
                     case "PC_LET": {
                         return sigExprDeclaracion(obtNuevoNivel(token.token), true);
@@ -227,7 +276,7 @@ export function parseTokens(lexer: Lexer): ResParser {
                         return sigExprDeclaracion(obtNuevoNivel(token.token), false);
                     }
                     case "TComentario":
-                        return sigExpresion(nivel, nivel, iniciarIndentacionEnToken, precedencia, asociatividad, esExprPrincipal);
+                        return sigExpresion(indentacionNuevaLinea, indentacionMinima, iniciarIndentacionEnToken, precedencia, asociatividad, esExprPrincipal);
                     case "TNumero": {
                         const infoNumero = token.token;
                         let exprIdInfo: ExprIdInfo = {
@@ -276,7 +325,7 @@ export function parseTokens(lexer: Lexer): ResParser {
                     }
                     case "TParenAb": {
                         const infoParen = token.token;
-                        return sigExprParen(infoParen, nivel);
+                        return sigExprParen(infoParen, indentacionNuevaLinea);
                     }
                     case "TParenCer": {
                         const infoParen = token.token;
@@ -291,9 +340,9 @@ export function parseTokens(lexer: Lexer): ResParser {
                     case "TNuevaLinea": {
                         lexer.retroceder();
                         const [_, sigNivel, __, fnEstablecer] = lexer.lookAheadSignificativo(true);
-                        if (sigNivel >= nivel) {
+                        if (sigNivel >= indentacionNuevaLinea) {
                             fnEstablecer();
-                            return sigExpresion(nivel, nivel, iniciarIndentacionEnToken, precedencia, asociatividad, esExprPrincipal);
+                            return sigExpresion(indentacionNuevaLinea, indentacionMinima, iniciarIndentacionEnToken, precedencia, asociatividad, esExprPrincipal);
                         } else {
                             return new PReturn();
                         }
@@ -307,7 +356,7 @@ export function parseTokens(lexer: Lexer): ResParser {
                     case "TOperador": {
                         const infoOp = token.token;
                         if (operadoresUnarios.find(s => infoOp.valor === s)) {
-                            return sigExprOpUnarioIzq(infoOp, nivel, precedencia, esExprPrincipal);
+                            return sigExprOpUnarioIzq(infoOp, indentacionNuevaLinea, precedencia, esExprPrincipal);
                         } else {
                             let textoErr = generarTextoError(lexer.entrada, infoOp);
                             return new PError(`No se puede usar el operador ${infoOp.valor} como operador unario.\n\n${textoErr}`);
@@ -317,7 +366,16 @@ export function parseTokens(lexer: Lexer): ResParser {
                         return sigExprCondicional(token.token, obtNuevoNivel(token.token));
                     }
                     case "PC_ELSE":
-                    case "PC_ELIF":
+                    case "PC_ELIF": {
+                        // TODO: Verificar si hay algun condicional abierto, asi saber si retroceder o lanzar error.
+                        if (globalState.ifAbiertos > 0) {
+                            lexer.retroceder();
+                            return new PReturn();
+                        } else {
+                            let textoErr = generarTextoError(lexer.entrada, token.token);
+                            return new PError(`No se esperaba la palabra clave 'elif'. No hay ningún condicional abierto.\n\n${textoErr}`);
+                        }
+                    }
                     case "PC_DO": {
                         return new PError("Condicionales no implementados")
                     }
@@ -336,7 +394,8 @@ export function parseTokens(lexer: Lexer): ResParser {
 
     }
 
-    let exprRe = sigExpresion(0, 0, true, 0, Asociatividad.Izq, true);
+    // const exprRe = sigExpresion(0, true, 0, Asociatividad.Izq, true);
+    const exprRe = sigExpresionBloque(0, false);
     switch (exprRe.type) {
         case "PExito":
             return new ExitoParser(exprRe.expr);

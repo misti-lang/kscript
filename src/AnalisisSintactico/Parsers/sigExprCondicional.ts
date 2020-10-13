@@ -22,7 +22,6 @@ export function getSigExprCondicional(
 
     function sigExprCondicional(tokenIf: InfoToken<string> ,nivel: number): ExprRes {
         try {
-            globlalState.ifAbiertos += 1;
 
             const sigExpr = sigExpresion(nivel, nivel, true, 0, Asociatividad.Izq, true);
             if (sigExpr.type === "PReturn" || sigExpr.type === "PEOF") {
@@ -46,6 +45,8 @@ export function getSigExprCondicional(
             if (hayNuevaLinea) {
                 fnEstablecer();
             }
+
+            globlalState.ifAbiertos += 1;
 
             const sigExprCuerpo = sigExpresion(
                 nuevoNivel,
@@ -78,6 +79,9 @@ export function getSigExprCondicional(
                 nivel, nivel, true,
                 0, Asociatividad.Izq, true
             );
+
+            // Cerrar el if
+            globlalState.ifAbiertos -= 1;
 
             // Continuar parseando expresiones luego de terminar el condicional
             switch (sigExpresionRaw.type) {
