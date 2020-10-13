@@ -15,8 +15,7 @@ export function getParserSigExprOperador(
         nivel: number,
         nivelPadre: number,
         precedencia: number,
-        asociatividad: Asociatividad,
-        esExprPrincipal: boolean
+        asociatividad: Asociatividad
     ) => ExprRes
 ) {
 
@@ -27,8 +26,7 @@ export function getParserSigExprOperador(
         precOp1: number,
         asocOp1: Asociatividad,
         precedencia: any,
-        nivel: number,
-        esExprPrincipal: boolean
+        nivel: number
     ) {
         const exprFinal = sigExpr.expr;
 
@@ -47,7 +45,6 @@ export function getParserSigExprOperador(
             precedencia,
             sigExprOperador,
             posEI.inicioPE,
-            esExprPrincipal,
             posEI.numLineaPE,
             posEI.posInicioLineaPE,
             nivel
@@ -60,14 +57,12 @@ export function getParserSigExprOperador(
         exprIzq: Expresion,
         infoOp: InfoToken<string>,
         nivel: number,
-        precedencia: any,
-        __: any,
-        esExprPrincipal: boolean
+        precedencia: any
     ): ExprRes {
 
         const valorOp = infoOp.valor;
         const [precOp1, asocOp1] = obtInfoOp(valorOp);
-        const sigExpr = sigExpresion(nivel, nivel, precOp1, asocOp1, false);
+        const sigExpr = sigExpresion(nivel, nivel, precOp1, asocOp1);
 
         switch (sigExpr.type) {
             case "PEOF":
@@ -85,8 +80,7 @@ export function getParserSigExprOperador(
                     precOp1,
                     asocOp1,
                     precedencia,
-                    nivel,
-                    esExprPrincipal,
+                    nivel
                 );
             }
             default: {

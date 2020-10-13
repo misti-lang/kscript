@@ -14,8 +14,7 @@ export const getSigExprParen = (
         nivel: number,
         nivelPadre: number,
         precedencia: number,
-        asociatividad: Asociatividad,
-        esExprPrincipal: boolean
+        asociatividad: Asociatividad
     ) => ExprRes
 ) => {
     function sigExprParen(infoParen: InfoToken<string>, nivel: number) {
@@ -46,8 +45,7 @@ export const getSigExprParen = (
             0,
             0,
             0,
-            Asociatividad.Izq,
-            true
+            Asociatividad.Izq
         );
         switch (sigToken2.type) {
             case "PReturn":
@@ -101,7 +99,6 @@ export const getSigExprParen = (
                                         sigExpresion
                                     ),
                                     ultimoToken3.token.final,
-                                    false,
                                     ultimoToken3.token.numLinea,
                                     ultimoToken3.token.posInicioLinea,
                                     nivel

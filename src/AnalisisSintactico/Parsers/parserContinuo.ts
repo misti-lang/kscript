@@ -18,14 +18,12 @@ import { obtInfoFunAppl, obtInfoOp, generarTextoError } from "./utilidades"
  * @param sigExprOperador - Una función que permite crear una expresión de Operador
  * @param infoIdInicio - La posición absoluta en la que acaba la expresión anterior.
  *                       Se usa para generar un token para la aplicación de funciones.
- * @param esExprPrincipal - Si actualmente se está tratando con una expresión principal.
  *                          Se usa para agrupar expresiones separadas por una linea nueva.
  * @param infoIdNumLinea - El número de linea de la expresión anterior.
  *                         Se usa para generar un token para la aplicación de funciones.
  * @param infoIdPosInicioLinea - La posición relativa en la que acaba la expresión anterior.
  *                               Se usa para generar un token para la aplicación de funciones.
  * @param nivel - El nivel de la expresión anterior
- * @param sigExpresion - Una función para extraer una nueva Expresión
  */
 export const generarParserContinuo = (
     lexer: Lexer,
@@ -35,12 +33,9 @@ export const generarParserContinuo = (
         exprIzq: Expresion,
         infoOp: InfoToken<string>,
         nivel: number,
-        precedencia: any,
-        __: any,
-        esExprPrincipal: boolean
+        precedencia: any
     ) => ExprRes,
     infoIdInicio: number,
-    esExprPrincipal: boolean,
     infoIdNumLinea: number,
     infoIdPosInicioLinea: number,
     nivel: number
@@ -61,9 +56,9 @@ export const generarParserContinuo = (
                 const [precOp, asocOp] = obtInfoOp(infoOp.valor);
 
                 if (precOp > precedencia) {
-                    return sigExprOperador(primeraExprId, infoOp, nivel, precedencia, asocOp, esExprPrincipal);
+                    return sigExprOperador(primeraExprId, infoOp, nivel, precedencia);
                 } else if (precOp == precedencia && precOp == Asociatividad.Der) {
-                    return sigExprOperador(primeraExprId, infoOp, nivel, precedencia, asocOp, esExprPrincipal);
+                    return sigExprOperador(primeraExprId, infoOp, nivel, precedencia);
                 } else {
                     lexer.retroceder();
                     return new PExito(primeraExprId);
@@ -84,15 +79,14 @@ export const generarParserContinuo = (
                 lexer.retroceder();
 
                 if (precOpFunApl > precedencia) {
-                    return sigExprOperador(primeraExprId, infoOp2, nivel, precedencia, asocOpFunApl, esExprPrincipal);
+                    return sigExprOperador(primeraExprId, infoOp2, nivel, precedencia);
                 } else if (precOpFunApl == precedencia && asocOpFunApl == Asociatividad.Der) {
-                    return sigExprOperador(primeraExprId, infoOp2, nivel, precedencia, asocOpFunApl, esExprPrincipal);
+                    return sigExprOperador(primeraExprId, infoOp2, nivel, precedencia);
                 } else {
                     return new PExito(primeraExprId);
                 }
             }
             case "TGenerico": {
-
                 const infoGen = token.token;
                 const textoError = generarTextoError(lexer.entrada, infoGen);
                 return new PError(`No se esperaba un genérico luego de la aplicación del operador.\n\n${textoError}`);
@@ -126,9 +120,6 @@ export const generarParserContinuo = (
 
                 const expresionRespuesta = new PExito(primeraExprId);
 
-                if (!esExprPrincipal) return expresionRespuesta;
-
-                console.log("Indentacion en nueva linea :D", indentacion, nivel);
                 if (indentacion <= nivel) {
                     return expresionRespuesta;
                 } else {
