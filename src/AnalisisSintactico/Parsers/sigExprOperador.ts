@@ -53,8 +53,7 @@ export function getParserSigExprOperador(
             nivel
         );
 
-        return funDesicion(lexer.sigToken(), false, () => {
-        }, () => new PReturn());
+        return funDesicion(lexer.sigToken());
     }
 
     function sigExprOperador(

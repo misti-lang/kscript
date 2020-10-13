@@ -45,7 +45,7 @@ export const generarParserContinuo = (
     infoIdPosInicioLinea: number,
     nivel: number
 ) => {
-    function funDesicion(lexerRes: ResLexer, aceptarSoloOperador: boolean, fnEnOp: () => void, funValorDefecto: () => ExprRes): ExprRes {
+    function funDesicion(lexerRes: ResLexer): ExprRes {
 
         // Retorno en casos excepcionales
         if (lexerRes.type === "EOFLexer") {
@@ -58,7 +58,6 @@ export const generarParserContinuo = (
         switch (token.type) {
             case "TOperador": {
                 const infoOp = token.token;
-                fnEnOp();
                 const [precOp, asocOp] = obtInfoOp(infoOp.valor);
 
                 if (precOp > precedencia) {
@@ -71,8 +70,6 @@ export const generarParserContinuo = (
                 }
             }
             case "TParenCer": {
-                if (aceptarSoloOperador) return funValorDefecto();
-
                 lexer.retroceder();
                 return new PExito(primeraExprId);
             }
@@ -81,8 +78,6 @@ export const generarParserContinuo = (
             case "TTexto":
             case "TBool":
             case "TParenAb": {
-                if (aceptarSoloOperador) return funValorDefecto();
-
                 const infoOp2 = obtInfoFunAppl(false, infoIdInicio, infoIdNumLinea, infoIdPosInicioLinea, nivel);
 
                 const [precOpFunApl, asocOpFunApl] = obtInfoOp(infoOp2.valor);
@@ -97,46 +92,35 @@ export const generarParserContinuo = (
                 }
             }
             case "TGenerico": {
-                if (aceptarSoloOperador) return funValorDefecto();
 
                 const infoGen = token.token;
                 const textoError = generarTextoError(lexer.entrada, infoGen);
                 return new PError(`No se esperaba un genérico luego de la aplicación del operador.\n\n${textoError}`);
             }
             case "TComentario": {
-                return funDesicion(lexer.sigToken(), aceptarSoloOperador, fnEnOp, funValorDefecto);
+                return funDesicion(lexer.sigToken());
             }
             case "PC_LET": {
-                if (aceptarSoloOperador) return funValorDefecto();
-
                 const info = token.token;
                 const textoError = generarTextoError(lexer.entrada, info);
                 return new PError(`No se esperaba la palabra clave 'let' luego de la aplicación del operador.\n\n${textoError}`)
             }
             case "PC_CONST": {
-                if (aceptarSoloOperador) return funValorDefecto();
-
                 const info = token.token;
                 const textoError = generarTextoError(lexer.entrada, info);
                 return new PError(`No se esperaba la palabra clave 'const' luego de la aplicación del operador.\n\n${textoError}`)
             }
             case "TAgrupAb": {
-                if (aceptarSoloOperador) return funValorDefecto();
-
                 const info = token.token;
                 const textoError = generarTextoError(lexer.entrada, info);
                 return new PError(`Este signo de agrupación aun no está soportado.\n\n${textoError}`);
             }
             case "TAgrupCer": {
-                if (aceptarSoloOperador) return funValorDefecto();
-
                 const info = token.token;
                 const textoError = generarTextoError(lexer.entrada, info);
                 return new PError(`Este signo de agrupación aun no está soportado.\n\n${textoError}`);
             }
             case "TNuevaLinea": {
-                if (aceptarSoloOperador) return funValorDefecto();
-
                 lexer.retroceder();
                 const [_, indentacion, __, fnEstablecer] = lexer.lookAheadSignificativo(true);
 
@@ -144,22 +128,15 @@ export const generarParserContinuo = (
 
                 if (!esExprPrincipal) return expresionRespuesta;
 
+                console.log("Indentacion en nueva linea :D", indentacion, nivel);
                 if (indentacion <= nivel) {
                     return expresionRespuesta;
                 } else {
                     fnEstablecer();
-                    return funDesicion(
-                        lexer.sigToken(),
-                        false,
-                        () => {
-                        },
-                        () => new PReturn()
-                    );
+                    return funDesicion(lexer.sigToken());
                 }
             }
             case "PC_IF": {
-                if (aceptarSoloOperador) return funValorDefecto();
-
                 const info = token.token;
                 const textoError = generarTextoError(lexer.entrada, info);
                 return new PError(`No se esperaba la palabra clave 'if' luego de la aplicación del operador.
@@ -168,22 +145,16 @@ export const generarParserContinuo = (
                                         condición en paréntesis.`);
             }
             case "PC_DO": {
-                if (aceptarSoloOperador) return funValorDefecto();
-
                 // Asumir que estamos dentro de una condicion y que esta termino.
                 lexer.retroceder();
                 return new PExito(primeraExprId);
             }
             case "PC_ELIF": {
-                if (aceptarSoloOperador) return funValorDefecto();
-
                 // Asumir que estamos dentro de una condicion y que esta termino.
                 lexer.retroceder();
                 return new PExito(primeraExprId);
             }
             case "PC_ELSE": {
-                if (aceptarSoloOperador) return funValorDefecto();
-
                 // Asumir que estamos dentro de una condicion y que esta termino.
                 lexer.retroceder();
                 return new PExito(primeraExprId);

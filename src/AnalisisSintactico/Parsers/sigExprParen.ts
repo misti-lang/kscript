@@ -107,8 +107,7 @@ export const getSigExprParen = (
                                     nivel
                                 );
 
-                                return funDesicion(lexer.sigToken(), false, () => {
-                                }, () => new PReturn());
+                                return funDesicion(lexer.sigToken());
                             }
                             default:
                                 return new PError("Se esperaba un cierre de parentesis.")

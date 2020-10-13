@@ -162,13 +162,7 @@ export function parseTokens(lexer: Lexer): ResParser {
             indentacionNuevaLinea
         );
 
-        return funDesicion(
-            lexer.sigToken(),
-            false,
-            () => {
-            },
-            () => new PReturn()
-        );
+        return funDesicion(lexer.sigToken());
     }
 
     const sigExprParen = getSigExprParen(lexer, sigExpresion);
@@ -251,7 +245,6 @@ export function parseTokens(lexer: Lexer): ResParser {
                             infoPosInicioLinea: infoNumero.posInicioLinea
                         };
                         return sigExprIdentificador(exprIdInfo, indentacionNuevaLinea, precedencia, asociatividad, esExprPrincipal);
-                        // sigExprLiteral(ENumero(infoNumero), obtNuevoNivel(infoNumero), precedencia, esExprPrincipal);
                     }
                     case "TTexto": {
                         const infoTexto = token.token;
@@ -262,7 +255,6 @@ export function parseTokens(lexer: Lexer): ResParser {
                             infoPosInicioLinea: infoTexto.posInicioLinea
                         };
                         return sigExprIdentificador(exprIdInfo, indentacionNuevaLinea, precedencia, asociatividad, esExprPrincipal);
-                        // sigExprLiteral(ETexto(infoTexto), obtNuevoNivel(infoTexto), precedencia, esExprPrincipal);
                     }
                     case "TBool": {
                         const infoBool = token.token;
@@ -273,7 +265,6 @@ export function parseTokens(lexer: Lexer): ResParser {
                             infoPosInicioLinea: infoBool.posInicioLinea
                         };
                         return sigExprIdentificador(exprIdInfo, indentacionNuevaLinea, precedencia, asociatividad, esExprPrincipal);
-                        // sigExprLiteral(EBool(infoBool), obtNuevoNivel(infoBool), precedencia, esExprPrincipal);
                     }
                     case "TIdentificador": {
                         const infoId = token.token;

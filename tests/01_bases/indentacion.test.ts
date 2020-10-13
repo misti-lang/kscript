@@ -35,3 +35,20 @@ test("Constante anidada", () => {
     const esperado = `const a = (() => {\n    const b = 20;\n    return b;\n})();`;
     expect(salida).toBe(esperado);
 });
+
+test("Juan Perez", () => {
+    const entrada = `
+    const nombreCompleto =
+        const nombre = "Juan"
+        const apellido = "Apellido"
+        
+        nombre + " " + apellido
+    `;
+    const salida = flujo2(entrada, "").toString();
+    const esperado = `const nombreCompleto = (() => {
+    const nombre = "Juan";
+    const apellido = "Apellido";
+    return nombre + " " + apellido;
+})();`;
+    expect(salida).toBe(esperado);
+});
