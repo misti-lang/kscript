@@ -28,7 +28,17 @@ export function parseTokens(lexer: Lexer): ResParser {
 
     const globalState = getGlobalState();
 
-    function sigExprDeclaracion(nivel: number, esMut: boolean): ExprRes {
+    /* TODO: Hacer que en lugar de seguir parseando expresiones, use la funcion sigExprBloque:
+    *        - Si la expresión que inicializa el bloque está en la misma linea, solo parsear 1 expresión
+    *        - Sino, parsear un bloque de codigo
+    */
+    /**
+     * Parsea una expresión de declaracion (let x = ..., const x = ...)
+     * @param indentacionNuevaLinea La indentación de tokens en nuevas lineas.
+     * @param indentacionMinima La indentación de la expresion actual.
+     * @param esMut Si es una declaración tipo 'let' o 'const'
+     */
+    function sigExprDeclaracion(indentacionNuevaLinea: number, indentacionMinima: number, esMut: boolean): ExprRes {
         try {
 
             const infoTokenId = Expect.TIdentificador(
@@ -44,7 +54,7 @@ export function parseTokens(lexer: Lexer): ResParser {
 
             const [_, nuevoNivel, hayNuevaLinea, fnEstablecer] = lexer.lookAheadSignificativo(false);
 
-            if (hayNuevaLinea && nuevoNivel <= nivel) {
+            if (hayNuevaLinea && nuevoNivel <= indentacionNuevaLinea) {
                 throw new ErrorComun(`La expresión actual está incompleta. Se esperaba una expresión indentada.`);
             }
 
@@ -55,7 +65,7 @@ export function parseTokens(lexer: Lexer): ResParser {
             // Obtener expresion que representa el valor de la declaracion
             const sigExpr = sigExpresion(
                 nuevoNivel,
-                hayNuevaLinea? nuevoNivel: nivel,
+                hayNuevaLinea? nuevoNivel: indentacionMinima,
                 0,
                 Asociatividad.Izq,
                 true
@@ -83,8 +93,8 @@ export function parseTokens(lexer: Lexer): ResParser {
                     );
                     const exprRespuesta = new PExito(exprDeclaracion);
                     const sigExpresionRaw = sigExpresion(
-                        nivel,
-                        nivel,
+                        indentacionNuevaLinea,
+                        indentacionNuevaLinea,
                         0,
                         Asociatividad.Izq,
                         true
@@ -260,10 +270,10 @@ export function parseTokens(lexer: Lexer): ResParser {
                 }
                 switch (token.type) {
                     case "PC_LET": {
-                        return sigExprDeclaracion(indentacionNuevaLinea, true);
+                        return sigExprDeclaracion(indentacionNuevaLinea, indentacionMinima, true);
                     }
                     case "PC_CONST": {
-                        return sigExprDeclaracion(indentacionNuevaLinea, false);
+                        return sigExprDeclaracion(indentacionNuevaLinea, indentacionMinima, false);
                     }
                     case "TComentario":
                         return sigExpresion(indentacionNuevaLinea, indentacionMinima, precedencia, asociatividad, esExprPrincipal);
