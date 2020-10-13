@@ -43,7 +43,6 @@ export const generarParserContinuo = (
     sigExpresion: (
         indentacionNuevaLinea: number,
         indentacionMinima: number,
-        iniciarIndentacionEnToken: boolean,
         precedencia: number,
         asociatividad: Asociatividad,
         esExprPrincipal: boolean
@@ -158,7 +157,7 @@ export const generarParserContinuo = (
                             const funSiNoEsOp = () => {
                                 const primeraExpresion = expresionRespuesta;
                                 fnEstablecer();
-                                const sigExpresionRaw = sigExpresion(nivel, nivel, false, 0, Asociatividad.Izq, true);
+                                const sigExpresionRaw = sigExpresion(nivel, nivel, 0, Asociatividad.Izq, true);
                                 switch (sigExpresionRaw.type) {
                                     case "PError":
                                         return sigExpresionRaw;

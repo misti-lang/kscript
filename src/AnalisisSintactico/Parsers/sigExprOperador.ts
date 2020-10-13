@@ -14,7 +14,6 @@ export function getParserSigExprOperador(
     sigExpresion: (
         nivel: number,
         nivelPadre: number,
-        iniciarIndentacionEnToken: boolean,
         precedencia: number,
         asociatividad: Asociatividad,
         esExprPrincipal: boolean
@@ -70,7 +69,7 @@ export function getParserSigExprOperador(
 
         const valorOp = infoOp.valor;
         const [precOp1, asocOp1] = obtInfoOp(valorOp);
-        const sigExpr = sigExpresion(nivel, nivel, false, precOp1, asocOp1, false);
+        const sigExpr = sigExpresion(nivel, nivel, precOp1, asocOp1, false);
 
         switch (sigExpr.type) {
             case "PEOF":
