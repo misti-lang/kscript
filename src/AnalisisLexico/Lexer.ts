@@ -39,7 +39,8 @@ export class Lexer {
     private sigTokenLuegoDeIdentacion(posActual: number): [Token, number] {
         const sigToken = run(parserGeneral, this.entrada, posActual);
         switch (sigToken.type) {
-            case "ErrorRes": return [Token.Nada, -1]
+            case "ErrorRes":
+                return [Token.Nada, -1]
             case "ExitoRes": {
                 const ex = sigToken.exito;
                 if (ex.tipo === Token.Indentacion) return this.sigTokenLuegoDeIdentacion(ex.posFinal);
@@ -57,7 +58,8 @@ export class Lexer {
 
         const resultado = run(parserGeneral, this.entrada, this.posActual);
         switch (resultado.type) {
-            case "ErrorRes": return new ErrorLexer(resultado.error);
+            case "ErrorRes":
+                return new ErrorLexer(resultado.error);
             case "ExitoRes": {
                 const ex = resultado.exito;
 

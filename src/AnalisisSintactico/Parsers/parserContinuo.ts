@@ -53,7 +53,7 @@ export const generarParserContinuo = (
         switch (token.type) {
             case "TOperador": {
                 const infoOp = token.token;
-                const [precOp, asocOp] = obtInfoOp(infoOp.valor);
+                const [precOp] = obtInfoOp(infoOp.valor);
 
                 if (precOp > precedencia) {
                     return sigExprOperador(primeraExprId, infoOp, nivel, precedencia);

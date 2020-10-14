@@ -47,15 +47,18 @@ export function parseTokens(lexer: Lexer): ResParser {
                 "Se esperaba el operador de asignación '=' luego del indentificador."
             );
 
-            const [_, nuevoNivel, hayNuevaLinea, fnEstablecer] = lexer.lookAheadSignificativo(false);
+            const [_, nuevoNivel1, hayNuevaLinea, fnEstablecer] = lexer.lookAheadSignificativo(false);
 
-            if (hayNuevaLinea && nuevoNivel <= indentacionNuevaLinea) {
+            if (hayNuevaLinea && nuevoNivel1 <= indentacionNuevaLinea) {
                 throw new ErrorComun(`La expresión actual está incompleta. Se esperaba una expresión indentada.`);
             }
 
             if (hayNuevaLinea) {
                 fnEstablecer();
             }
+
+            // Enviar el mayor entre el nivel del token y el nivel heredado
+            const nuevoNivel = Math.max(nuevoNivel1, indentacionNuevaLinea);
 
             // Obtener expresion que representa el valor de la declaracion
             const sigExpr = hayNuevaLinea ?
@@ -283,6 +286,7 @@ export function parseTokens(lexer: Lexer): ResParser {
                     case "TNuevaLinea": {
                         lexer.retroceder();
                         const [_, sigNivel, __, fnEstablecer] = lexer.lookAheadSignificativo(true);
+                        // TODO: Verificar si es una linea en blanco?
                         if (sigNivel >= indentacionNuevaLinea) {
                             fnEstablecer();
                             return sigExpresion(indentacionNuevaLinea, indentacionMinima, precedencia, asociatividad);

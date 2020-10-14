@@ -78,9 +78,16 @@ export const crearString = (largo: number, c: string): string => {
     return new Array(largo).fill(c).join("");
 };
 
+/**
+ * Devuelve un string con un token resaltado.
+ * @param entrada El código fuente
+ * @param info El token que generó el error, y que se resaltará
+ */
 export const generarTextoError = <A>(entrada: string, info: InfoToken<A>): string => {
     let largo = info.final - info.posInicioLinea;
     let substr = entrada.substring(info.posInicioLinea, info.posInicioLinea + largo);
+    if (substr.charAt(substr.length - 1) === "\n") substr = substr.substr(0, substr.length - 1);
+
     let espBlanco = crearString(info.inicio - info.posInicioLinea, ' ');
     let indicador = crearString(info.final - info.inicio, '~');
     let numLinea = info.numLinea;

@@ -1,16 +1,9 @@
 import {flujo2} from "./Utils/flujos";
 
 const str = `
-const nombreCompleto =
-    const nombre = "Juan"
-    const apellido = "Perez"
-    
-    nombre + " " + apellido
-
-const edad = 40
-const sexo = "M"
-
-console.log nombreCompleto edad sexo
+if const a = 20
+   a do
+   console.log a
 `;
 
 const resultado = flujo2(str, "test.ks")

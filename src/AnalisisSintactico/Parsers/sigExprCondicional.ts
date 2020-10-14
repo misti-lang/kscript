@@ -19,10 +19,17 @@ export function getSigExprCondicional(
 
     const globlalState = getGlobalState();
 
-    function sigExprCondicional(tokenIf: InfoToken<string> ,nivel: number): ExprRes {
+    function sigExprCondicional(tokenIf: InfoToken<string>, indentacionNuevaLinea: number): ExprRes {
         try {
 
-            const sigExpr = sigExpresion(nivel, nivel, 0, Asociatividad.Izq, true);
+            // Obtener la posicion del siguiente token para ajustar la indentacion
+            const tokenSig = lexer.lookAhead();
+            if (tokenSig.type !== "TokenLexer") {
+                return new PError("Se esperaba una expresión luego de 'if'.");
+            }
+            const posInicio = tokenSig.token.token.inicio - tokenSig.token.token.posInicioLinea;
+
+            const sigExpr = sigExpresion(posInicio, indentacionNuevaLinea, 0, Asociatividad.Izq, true);
             if (sigExpr.type === "PReturn" || sigExpr.type === "PEOF") {
                 return new PError("Se esperaba una expresión luego de 'if'.");
             } else if (sigExpr.type === "PError") {
@@ -33,11 +40,11 @@ export function getSigExprCondicional(
 
             const exprCondicionIf = sigExpr.expr;
 
-            Expect.PC_DO(lexer.sigToken(), "Se esperaba el token 'do'.");
+            Expect.PC_DO(lexer.sigToken(), "Se esperaba el token 'do'.", lexer);
 
             const [_, nuevoNivel, hayNuevaLinea, fnEstablecer] = lexer.lookAheadSignificativo(false);
 
-            if (hayNuevaLinea && nuevoNivel <= nivel) {
+            if (hayNuevaLinea && nuevoNivel <= indentacionNuevaLinea) {
                 throw new ErrorComun(`La expresión condicional está incompleta. Se esperaba una expresión indentada.`);
             }
 
@@ -49,7 +56,7 @@ export function getSigExprCondicional(
 
             const sigExprCuerpo = sigExpresion(
                 nuevoNivel,
-                nivel,
+                indentacionNuevaLinea,
                 0,
                 Asociatividad.Izq,
                 true
@@ -74,8 +81,8 @@ export function getSigExprCondicional(
             const exprRespuestaRes = new PExito(exprCondicional);
 
             const sigExpresionRaw = sigExpresion(
-                nivel,
-                nivel,
+                indentacionNuevaLinea,
+                indentacionNuevaLinea,
                 0,
                 Asociatividad.Izq,
                 true

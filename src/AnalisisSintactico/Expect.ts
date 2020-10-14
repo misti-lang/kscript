@@ -1,6 +1,8 @@
 import { ResLexer } from "../AnalisisLexico/ResLexer";
 import { Token2 } from "../AnalisisLexico/Token2";
 import { InfoToken } from "../AnalisisLexico/InfoToken";
+import { generarTextoError } from "./Parsers/utilidades";
+import { Lexer } from "..";
 
 export class ErrorComun extends Error {
     constructor(message: string) {
@@ -123,14 +125,20 @@ export const Expect = Object.freeze({
             }
         }
     },
-    PC_DO: (resLexer: ResLexer, msgError: string): InfoToken<string> => {
+    PC_DO: (resLexer: ResLexer, msgError: string, lexer: Lexer): InfoToken<string> => {
         const preToken = extraerToken(resLexer, msgError);
         switch (preToken.type) {
             case "PC_DO": {
                 return preToken.token
             }
+            case "TNuevaLinea": {
+                const msgErrorF = generarTextoError<any>(lexer.entrada, preToken.token);
+                throw new ErrorComun(msgError + " No se esperaba una nueva linea." + "\n" + msgErrorF);
+            }
             default: {
-                throw new ErrorComun(msgError);
+                console.log(preToken);
+                const msgErrorF = generarTextoError<any>(lexer.entrada, preToken.token);
+                throw new ErrorComun(msgError + "\n" + msgErrorF);
             }
         }
     },
