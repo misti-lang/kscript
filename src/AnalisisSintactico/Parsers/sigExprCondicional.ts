@@ -33,6 +33,7 @@ export function getSigExprCondicional(
             }
             const posInicio = tokenSig.token.token.inicio - tokenSig.token.token.posInicioLinea;
 
+            // Obtener la expresion que se usara como condicional
             const sigExpr = sigExpresion(posInicio, indentacionNuevaLinea, 0, Asociatividad.Izq, true);
             if (sigExpr.type === "PReturn" || sigExpr.type === "PEOF") {
                 return new PError("Se esperaba una expresión luego de 'if'.");
@@ -44,8 +45,10 @@ export function getSigExprCondicional(
 
             const exprCondicionIf = sigExpr.expr;
 
+            // Esperar el token 'do', o lanzar un error
             Expect.PC_DO(lexer.sigToken(), "Se esperaba el token 'do'.", lexer);
 
+            // Revisar si el siguiente token está en la misma linea o en una linea diferente
             const [_, nuevoNivel1, hayNuevaLinea, fnEstablecer] = lexer.lookAheadSignificativo(false);
 
             if (hayNuevaLinea && nuevoNivel1 <= indentacionNuevaLinea) {
@@ -56,10 +59,13 @@ export function getSigExprCondicional(
                 fnEstablecer();
             }
 
+            // Indicar que hay un if abierto, para que sigExpresion devuelva PReturn al encontrarse con 'elif' o 'else'
             globlalState.ifAbiertos += 1;
 
             const nuevoNivel = Math.max(nuevoNivel1, indentacionNuevaLinea);
 
+            // Obtener la expresion que ira dentro del if. Si esta en la misma linea, solo 1 expresion.
+            //   Sino, un bloque de expresiones
             const sigExprCuerpo = hayNuevaLinea ?
                 sigExpresionBloque(nuevoNivel, true) :
                 sigExpresion(
@@ -80,6 +86,7 @@ export function getSigExprCondicional(
 
             const exprBloque = sigExprCuerpo.expr;
 
+            // Crear AST
             const exprCondicional = new ECondicional(
                 tokenIf.inicio,
                 tokenIf.numLinea,

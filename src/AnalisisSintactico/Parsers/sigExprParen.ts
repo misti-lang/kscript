@@ -80,11 +80,6 @@ export const getSigExprParen = (
                     case "TokenLexer": {
                         const ultimoToken3 = ultimoToken.token;
                         switch (ultimoToken3.type) {
-                            /* TODO: Aqui debe cerrar la expresion y continuar buscando una nueva expresion.
-                                     Básicamente hacer lo mismo que hace funDesicion en el parser de operador e
-                                     identificador.
-                                     Pedir una sig. expresión y hacer lo de funDesicion.
-                            */
                             case "TParenCer": {
                                 globalState.parensAbiertos--;
 

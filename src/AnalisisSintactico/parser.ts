@@ -288,7 +288,6 @@ export function parseTokens(lexer: Lexer): ResParser {
                     case "TNuevaLinea": {
                         lexer.retroceder();
                         const [_, sigNivel, __, fnEstablecer] = lexer.lookAheadSignificativo(true);
-                        // TODO: Verificar si es una linea en blanco?
                         if (sigNivel >= indentacionNuevaLinea) {
                             fnEstablecer();
                             return sigExpresion(indentacionNuevaLinea, indentacionMinima, precedencia, asociatividad);
@@ -316,7 +315,6 @@ export function parseTokens(lexer: Lexer): ResParser {
                     }
                     case "PC_ELSE":
                     case "PC_ELIF": {
-                        // TODO: Verificar si hay algun condicional abierto, asi saber si retroceder o lanzar error.
                         if (globalState.ifAbiertos > 0) {
                             lexer.retroceder();
                             return new PReturn();
@@ -326,7 +324,7 @@ export function parseTokens(lexer: Lexer): ResParser {
                         }
                     }
                     case "PC_DO": {
-                        return new PError("Condicionales no implementados")
+                        return new PError("No se esperada la palabra clave 'do' aqui.")
                     }
                     default:
                         let _: never;
