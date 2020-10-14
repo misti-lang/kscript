@@ -1,9 +1,9 @@
 import {flujo2} from "./Utils/flujos";
 
 const str = `
-if const a = 20
-   a do
+if 10 == 20 do
    console.log a
+   console.log b
 `;
 
 const resultado = flujo2(str, "test.ks")

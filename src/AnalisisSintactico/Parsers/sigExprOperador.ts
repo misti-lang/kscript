@@ -26,7 +26,8 @@ export function getParserSigExprOperador(
         precOp1: number,
         asocOp1: Asociatividad,
         precedencia: any,
-        nivel: number
+        indentacionNuevaLinea: number,
+        indentacionMinima: number
     ) {
         const exprFinal = sigExpr.expr;
 
@@ -47,7 +48,8 @@ export function getParserSigExprOperador(
             posEI.inicioPE,
             posEI.numLineaPE,
             posEI.posInicioLineaPE,
-            nivel
+            indentacionNuevaLinea,
+            indentacionMinima
         );
 
         return funDesicion(lexer.sigToken());
@@ -56,13 +58,14 @@ export function getParserSigExprOperador(
     function sigExprOperador(
         exprIzq: Expresion,
         infoOp: InfoToken<string>,
-        nivel: number,
+        indentacionNuevaLinea: number,
+        indentacionMinima: number,
         precedencia: any
     ): ExprRes {
 
         const valorOp = infoOp.valor;
         const [precOp1, asocOp1] = obtInfoOp(valorOp);
-        const sigExpr = sigExpresion(nivel, nivel, precOp1, asocOp1);
+        const sigExpr = sigExpresion(indentacionNuevaLinea, indentacionMinima, precOp1, asocOp1);
 
         switch (sigExpr.type) {
             case "PEOF":
@@ -80,7 +83,8 @@ export function getParserSigExprOperador(
                     precOp1,
                     asocOp1,
                     precedencia,
-                    nivel
+                    indentacionNuevaLinea,
+                    indentacionMinima
                 );
             }
             default: {

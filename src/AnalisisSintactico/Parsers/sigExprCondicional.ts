@@ -14,6 +14,10 @@ export function getSigExprCondicional(
         precedencia: number,
         asociatividad: Asociatividad,
         esExprPrincipal: boolean
+    ) => ExprRes,
+    sigExpresionBloque: (
+        nivel: number,
+        esExpresion: boolean
     ) => ExprRes
 ) {
 
@@ -42,9 +46,9 @@ export function getSigExprCondicional(
 
             Expect.PC_DO(lexer.sigToken(), "Se esperaba el token 'do'.", lexer);
 
-            const [_, nuevoNivel, hayNuevaLinea, fnEstablecer] = lexer.lookAheadSignificativo(false);
+            const [_, nuevoNivel1, hayNuevaLinea, fnEstablecer] = lexer.lookAheadSignificativo(false);
 
-            if (hayNuevaLinea && nuevoNivel <= indentacionNuevaLinea) {
+            if (hayNuevaLinea && nuevoNivel1 <= indentacionNuevaLinea) {
                 throw new ErrorComun(`La expresión condicional está incompleta. Se esperaba una expresión indentada.`);
             }
 
@@ -54,13 +58,17 @@ export function getSigExprCondicional(
 
             globlalState.ifAbiertos += 1;
 
-            const sigExprCuerpo = sigExpresion(
-                nuevoNivel,
-                indentacionNuevaLinea,
-                0,
-                Asociatividad.Izq,
-                true
-            );
+            const nuevoNivel = Math.max(nuevoNivel1, indentacionNuevaLinea);
+
+            const sigExprCuerpo = hayNuevaLinea ?
+                sigExpresionBloque(nuevoNivel, true) :
+                sigExpresion(
+                    nuevoNivel,
+                    indentacionNuevaLinea,
+                    0,
+                    Asociatividad.Izq,
+                    true
+                );
 
             if (sigExprCuerpo.type === "PReturn" || sigExprCuerpo.type === "PEOF") {
                 return new PError("Se esperaba una expresión luego de 'do'.");

@@ -23,7 +23,7 @@ import { obtInfoFunAppl, obtInfoOp, generarTextoError } from "./utilidades"
  *                         Se usa para generar un token para la aplicación de funciones.
  * @param infoIdPosInicioLinea - La posición relativa en la que acaba la expresión anterior.
  *                               Se usa para generar un token para la aplicación de funciones.
- * @param nivel - El nivel de la expresión anterior
+ * @param indentacionNuevaLinea - El nivel de la expresión anterior
  */
 export const generarParserContinuo = (
     lexer: Lexer,
@@ -32,13 +32,15 @@ export const generarParserContinuo = (
     sigExprOperador: (
         exprIzq: Expresion,
         infoOp: InfoToken<string>,
-        nivel: number,
+        indentacionNuevaLinea: number,
+        indentacionMinima: number,
         precedencia: any
     ) => ExprRes,
     infoIdInicio: number,
     infoIdNumLinea: number,
     infoIdPosInicioLinea: number,
-    nivel: number
+    indentacionNuevaLinea: number,
+    indentacionMinima: number,
 ) => {
     function funDesicion(lexerRes: ResLexer): ExprRes {
 
@@ -56,9 +58,9 @@ export const generarParserContinuo = (
                 const [precOp] = obtInfoOp(infoOp.valor);
 
                 if (precOp > precedencia) {
-                    return sigExprOperador(primeraExprId, infoOp, nivel, precedencia);
+                    return sigExprOperador(primeraExprId, infoOp, indentacionNuevaLinea, indentacionMinima, precedencia);
                 } else if (precOp == precedencia && precOp == Asociatividad.Der) {
-                    return sigExprOperador(primeraExprId, infoOp, nivel, precedencia);
+                    return sigExprOperador(primeraExprId, infoOp, indentacionNuevaLinea, indentacionMinima, precedencia);
                 } else {
                     lexer.retroceder();
                     return new PExito(primeraExprId);
@@ -73,15 +75,15 @@ export const generarParserContinuo = (
             case "TTexto":
             case "TBool":
             case "TParenAb": {
-                const infoOp2 = obtInfoFunAppl(false, infoIdInicio, infoIdNumLinea, infoIdPosInicioLinea, nivel);
+                const infoOp2 = obtInfoFunAppl(false, infoIdInicio, infoIdNumLinea, infoIdPosInicioLinea, indentacionNuevaLinea);
 
                 const [precOpFunApl, asocOpFunApl] = obtInfoOp(infoOp2.valor);
                 lexer.retroceder();
 
                 if (precOpFunApl > precedencia) {
-                    return sigExprOperador(primeraExprId, infoOp2, nivel, precedencia);
+                    return sigExprOperador(primeraExprId, infoOp2, indentacionNuevaLinea, indentacionMinima, precedencia);
                 } else if (precOpFunApl == precedencia && asocOpFunApl == Asociatividad.Der) {
-                    return sigExprOperador(primeraExprId, infoOp2, nivel, precedencia);
+                    return sigExprOperador(primeraExprId, infoOp2, indentacionNuevaLinea, indentacionMinima, precedencia);
                 } else {
                     return new PExito(primeraExprId);
                 }
@@ -120,7 +122,7 @@ export const generarParserContinuo = (
 
                 const expresionRespuesta = new PExito(primeraExprId);
 
-                if (indentacion <= nivel) {
+                if (indentacion <= indentacionNuevaLinea) {
                     return expresionRespuesta;
                 } else {
                     fnEstablecer();

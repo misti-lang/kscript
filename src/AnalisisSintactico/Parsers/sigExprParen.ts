@@ -17,7 +17,7 @@ export const getSigExprParen = (
         asociatividad: Asociatividad
     ) => ExprRes
 ) => {
-    function sigExprParen(infoParen: InfoToken<string>, nivel: number) {
+    function sigExprParen(infoParen: InfoToken<string>, indentacionNuevaLinea: number, indentacionMinima: number) {
         const globalState = getGlobalState();
         globalState.parensAbiertos++;
         const sigToken = lexer.sigToken();
@@ -101,7 +101,8 @@ export const getSigExprParen = (
                                     ultimoToken3.token.final,
                                     ultimoToken3.token.numLinea,
                                     ultimoToken3.token.posInicioLinea,
-                                    nivel
+                                    indentacionNuevaLinea,
+                                    indentacionMinima
                                 );
 
                                 return funDesicion(lexer.sigToken());

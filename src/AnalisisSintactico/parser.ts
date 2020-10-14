@@ -135,6 +135,7 @@ export function parseTokens(lexer: Lexer): ResParser {
     function sigExprIdentificador(
         exprIdInfo: ExprIdInfo,
         indentacionNuevaLinea: number,
+        indentacionMinima: number,
         precedencia: number
     ): ExprRes {
 
@@ -151,14 +152,15 @@ export function parseTokens(lexer: Lexer): ResParser {
             infoIdInicio,
             infoIdNumLinea,
             infoIdPosInicioLinea,
-            indentacionNuevaLinea
+            indentacionNuevaLinea,
+            indentacionMinima
         );
 
         return funDesicion(lexer.sigToken());
     }
 
     const sigExprParen = getSigExprParen(lexer, sigExpresion);
-    const sigExprCondicional = getSigExprCondicional(lexer, sigExpresion);
+    const sigExprCondicional = getSigExprCondicional(lexer, sigExpresion, sigExpresionBloque);
 
     /**
      * Obtiene el siguiente bloque de expresiones.
@@ -234,7 +236,7 @@ export function parseTokens(lexer: Lexer): ResParser {
                             infoNumLinea: infoNumero.numLinea,
                             infoPosInicioLinea: infoNumero.posInicioLinea
                         };
-                        return sigExprIdentificador(exprIdInfo, indentacionNuevaLinea, precedencia);
+                        return sigExprIdentificador(exprIdInfo, indentacionNuevaLinea, indentacionMinima, precedencia);
                     }
                     case "TTexto": {
                         const infoTexto = token.token;
@@ -244,7 +246,7 @@ export function parseTokens(lexer: Lexer): ResParser {
                             infoNumLinea: infoTexto.numLinea,
                             infoPosInicioLinea: infoTexto.posInicioLinea
                         };
-                        return sigExprIdentificador(exprIdInfo, indentacionNuevaLinea, precedencia);
+                        return sigExprIdentificador(exprIdInfo, indentacionNuevaLinea, indentacionMinima, precedencia);
                     }
                     case "TBool": {
                         const infoBool = token.token;
@@ -254,7 +256,7 @@ export function parseTokens(lexer: Lexer): ResParser {
                             infoNumLinea: infoBool.numLinea,
                             infoPosInicioLinea: infoBool.posInicioLinea
                         };
-                        return sigExprIdentificador(exprIdInfo, indentacionNuevaLinea, precedencia);
+                        return sigExprIdentificador(exprIdInfo, indentacionNuevaLinea, indentacionMinima, precedencia);
                     }
                     case "TIdentificador": {
                         const infoId = token.token;
@@ -267,11 +269,11 @@ export function parseTokens(lexer: Lexer): ResParser {
                             infoNumLinea: infoId.numLinea,
                             infoPosInicioLinea: infoId.posInicioLinea
                         }
-                        return sigExprIdentificador(exprIdInfo, indentacionNuevaLinea, precedencia);
+                        return sigExprIdentificador(exprIdInfo, indentacionNuevaLinea, indentacionMinima, precedencia);
                     }
                     case "TParenAb": {
                         const infoParen = token.token;
-                        return sigExprParen(infoParen, indentacionNuevaLinea);
+                        return sigExprParen(infoParen, indentacionNuevaLinea, indentacionMinima);
                     }
                     case "TParenCer": {
                         const infoParen = token.token;
