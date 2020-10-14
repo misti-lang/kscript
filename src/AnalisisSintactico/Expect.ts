@@ -136,7 +136,30 @@ export const Expect = Object.freeze({
                 throw new ErrorComun(msgError + " No se esperaba una nueva linea." + "\n" + msgErrorF);
             }
             default: {
-                console.log(preToken);
+                const msgErrorF = generarTextoError<any>(lexer.entrada, preToken.token);
+                throw new ErrorComun(msgError + "\n" + msgErrorF);
+            }
+        }
+    },
+    PC_ELIF: (resLexer: ResLexer, msgError: string, lexer: Lexer): InfoToken<string> => {
+        const preToken = extraerToken(resLexer, msgError);
+        switch (preToken.type) {
+            case "PC_ELIF": {
+                return preToken.token
+            }
+            default: {
+                const msgErrorF = generarTextoError<any>(lexer.entrada, preToken.token);
+                throw new ErrorComun(msgError + "\n" + msgErrorF);
+            }
+        }
+    },
+    PC_ELSE: (resLexer: ResLexer, msgError: string, lexer: Lexer): InfoToken<string> => {
+        const preToken = extraerToken(resLexer, msgError);
+        switch (preToken.type) {
+            case "PC_ELSE": {
+                return preToken.token
+            }
+            default: {
                 const msgErrorF = generarTextoError<any>(lexer.entrada, preToken.token);
                 throw new ErrorComun(msgError + "\n" + msgErrorF);
             }

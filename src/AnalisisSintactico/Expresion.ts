@@ -138,7 +138,14 @@ export class ECondicional {
     readonly numLinea: number
     readonly posInicioLinea: number
 
-    constructor(inicioDec: number, numLineaDec: number, posInicioLineaDec: number, exprCondicion: [Expresion, Expresion], exprElif?: [Expresion, Expresion][], exprElse?: Expresion) {
+    constructor(
+        inicioDec: number,
+        numLineaDec: number,
+        posInicioLineaDec: number,
+        exprCondicion: [Expresion, Expresion],
+        exprElif?: [Expresion, Expresion][],
+        exprElse?: Expresion
+    ) {
         this.exprCondicion = exprCondicion;
         this.exprElif = exprElif;
         this.exprElse = exprElse;
