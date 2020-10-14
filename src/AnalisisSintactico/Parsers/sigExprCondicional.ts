@@ -86,45 +86,11 @@ export function getSigExprCondicional(
                 tokenIf.posInicioLinea,
                 [exprCondicionIf, exprBloque]
             );
-            const exprRespuestaRes = new PExito(exprCondicional);
-
-            const sigExpresionRaw = sigExpresion(
-                indentacionNuevaLinea,
-                indentacionNuevaLinea,
-                0,
-                Asociatividad.Izq,
-                true
-            );
 
             // Cerrar el if
             globlalState.ifAbiertos -= 1;
 
-            // Continuar parseando expresiones luego de terminar el condicional
-            switch (sigExpresionRaw.type) {
-                case "PError":
-                    return sigExpresionRaw
-                case "PErrorLexer":
-                    return sigExpresionRaw
-                case "PReturn":
-                case "PEOF":
-                    return exprRespuestaRes
-                case "PExito": {
-                    const nuevaExpr = sigExpresionRaw.expr;
-                    switch (nuevaExpr.type) {
-                        case "EBloque": {
-                            return new PExito(new EBloque([exprCondicional, ...nuevaExpr.bloque]));
-                        }
-                        default: {
-                            return new PExito(new EBloque([exprCondicional, nuevaExpr]));
-                        }
-                    }
-                }
-                default: {
-                    let _: never;
-                    _ = sigExpresionRaw;
-                    return _;
-                }
-            }
+            return new PExito(exprCondicional);
         } catch (e) {
             if (e instanceof ErrorComun) {
                 return new PError(e.message);
