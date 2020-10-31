@@ -9,7 +9,7 @@ import {
 import { SourceNode } from "source-map";
 import { InfoToken } from "../AnalisisLexico/InfoToken";
 
-const opcionesDefecto: {[s: string]: boolean} = {
+const opcionesDefecto: { [s: string]: boolean } = {
     imprimirParensEnOperadores: false
 };
 
@@ -18,7 +18,7 @@ export function crearCodeWithSourceMap(
     toplevel: boolean,
     nivel: number,
     nombreArchivo: string | null,
-    opciones: {[s: string]: boolean} = opcionesDefecto
+    opciones: { [s: string]: boolean } = opcionesDefecto
 ): [SourceNode, number] {
 
     const imprParenEnOp = !!(opciones?.imprimirParensEnOperadores) ?? false;
@@ -132,7 +132,7 @@ export function crearCodeWithSourceMap(
         }
 
         function generarJS_EIdentificador(identificador: EIdentificador): [SourceNode, number] {
-            const strRes = identificador.valorId.valor === "()"? "undefined": identificador.valorId.valor;
+            const strRes = identificador.valorId.valor === "()" ? "undefined" : identificador.valorId.valor;
             return [new SourceNode(
                 identificador.valorId.numLinea,
                 identificador.valorId.inicio - identificador.valorId.posInicioLinea,
@@ -192,7 +192,7 @@ export function crearCodeWithSourceMap(
 
             const nodoOp = new SourceNode(op.valorOp.numLinea, op.valorOp.inicio - op.valorOp.posInicioLinea, nombreArchivo, jsOpFinal);
 
-            const chunks = imprParenEnOp? ["(", nuevoNodoIzq, nodoOp, nuevoNodoDer, ")"]: [nuevoNodoIzq, nodoOp, nuevoNodoDer];
+            const chunks = imprParenEnOp ? ["(", nuevoNodoIzq, nodoOp, nuevoNodoDer, ")"] : [nuevoNodoIzq, nodoOp, nuevoNodoDer];
             const retorno = new SourceNode(nodoIzq.line, nodoIzq.column, nombreArchivo, chunks);
             return [retorno, precedenciaOp];
         }
@@ -219,22 +219,62 @@ export function crearCodeWithSourceMap(
             const [snCondicion] = inner(exprCondicionIf, toplevel, nivel);
             const [snBloqueIf] = inner(exprBloqueIf, toplevel, nivel + 1);
 
-            return [
-                new SourceNode(
-                    eCond.numLinea,
-                    eCond.inicio - eCond.posInicioLinea,
+            const nodoIf = new SourceNode(
+                eCond.numLinea,
+                eCond.inicio - eCond.posInicioLinea,
+                nombreArchivo,
+                [
+                    "if (",
+                    snCondicion,
+                    ") {\n",
+                    indentacionNivelSig,
+                    snBloqueIf,
+                    "\n}"
+                ]
+            );
+
+            // Agregar nodos elif si existen
+            eCond.exprElif?.map((g) => {
+                const [exprCondicionElif, exprBloqueElif] = g;
+                const [snCondicionELif] = inner(exprCondicionElif, toplevel, nivel);
+                const [snBloqueElif] = inner(exprBloqueElif, toplevel, nivel + 1);
+
+                return new SourceNode(
+                    null,
+                    null,
                     nombreArchivo,
                     [
-                        "if (",
-                        snCondicion,
-                        ") {\n",
+                        " else if (",
+                        snCondicionELif,
+                        ") {",
                         indentacionNivelSig,
-                        snBloqueIf,
+                        snBloqueElif,
                         "\n}"
                     ]
-                ),
-                0
-            ];
+                );
+            })
+                ?.forEach((nodo) => {
+                    nodoIf.add(nodo);
+                });
+
+            // Agregar nodo else si existe
+            if (eCond.exprElse !== undefined) {
+                const [snBloqueElse] = inner(eCond.exprElse, toplevel, nivel + 1);
+
+                nodoIf.add(new SourceNode(
+                    null,
+                    null,
+                    nombreArchivo,
+                    [
+                        " else {",
+                        indentacionNivelSig,
+                        snBloqueElse,
+                        "\n}"
+                    ]
+                ));
+            }
+
+            return [nodoIf, 0];
         }
 
         switch (expr.type) {
@@ -284,7 +324,7 @@ export function crearCodeWithSourceMap(
                 let _: never;
                 _ = expr;
                 return _;
-                // return [new SourceNode(0, 0, nombreArchivo, ""), 0];
+            // return [new SourceNode(0, 0, nombreArchivo, ""), 0];
         }
     }
 

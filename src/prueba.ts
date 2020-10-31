@@ -6,6 +6,8 @@ if 10 == 20 do
     console.log b
 elif 20 == 30 do
     console.log c
+else
+    console.log h
 `;
 
 const resultado = flujo2(str, "test.ks")
