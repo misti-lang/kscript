@@ -8,12 +8,22 @@ export type Expresion =
     | ENumero
     | ETexto
     | EBool
+    | EUndefined
     | EOperador
     | EOperadorApl
     | EOperadorUnarioIzq
     | EDeclaracion
     | ECondicional
     | EBloque
+
+export class EUndefined {
+    type = "EUndefined" as const
+    readonly infoId: InfoToken<string>
+
+    constructor(infoId: InfoToken<string>) {
+        this.infoId = infoId;
+    }
+}
 
 export class EIdentificador {
     type = "EIdentificador" as const

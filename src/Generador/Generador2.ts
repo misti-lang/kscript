@@ -3,7 +3,7 @@ import {
     EDeclaracion,
     EIdentificador,
     EOperadorApl,
-    EOperadorUnarioIzq,
+    EOperadorUnarioIzq, EUndefined,
     Expresion
 } from "../AnalisisSintactico/Expresion";
 import { SourceNode } from "source-map";
@@ -51,7 +51,8 @@ export function crearCodeWithSourceMap(
 
             const [nodoFun, params] = extraerParams(exprOp, []);
             const nodos = (() => {
-                if (params.length === 1 && params[0].type === "EIdentificador" && params[0].valorId.valor === "()") {
+                // Si no hay parametros
+                if (params.length === 1 && params[0].type === "EUndefined") {
                     return [];
                 }
                 const paramANodo = (param: Expresion): SourceNode => {
@@ -136,6 +137,16 @@ export function crearCodeWithSourceMap(
             return [new SourceNode(
                 identificador.valorId.numLinea,
                 identificador.valorId.inicio - identificador.valorId.posInicioLinea,
+                nombreArchivo,
+                strRes
+            ), 0];
+        }
+
+        function generarJs_EUndefined(identificador: EUndefined): [SourceNode, number] {
+            const strRes = "undefined";
+            return [new SourceNode(
+                identificador.infoId.numLinea,
+                identificador.infoId.inicio - identificador.infoId.posInicioLinea,
                 nombreArchivo,
                 strRes
             ), 0];
@@ -319,6 +330,9 @@ export function crearCodeWithSourceMap(
             }
             case "ECondicional": {
                 return generarJs_ECondicional(expr);
+            }
+            case "EUndefined": {
+                return generarJs_EUndefined(expr);
             }
             default:
                 let _: never;

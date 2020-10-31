@@ -1,6 +1,6 @@
 import { InfoToken } from "../../AnalisisLexico/InfoToken";
 import { ExprRes, PError, PExito, PReturn } from "../ExprRes";
-import { EIdentificador } from "../Expresion";
+import { EIdentificador, EUndefined } from "../Expresion";
 import { SignIndefinida } from "../Signatura";
 import { Asociatividad } from "../Asociatividad";
 import { generarTextoError, getGlobalState, obtInfoFunAppl, obtInfoOp } from "./utilidades";
@@ -32,7 +32,7 @@ export const getSigExprParen = (
 
         if (t.type === "TParenCer") {
             const infoParenCer = t.token;
-            return new PExito(new EIdentificador(new SignIndefinida(), {
+            return new PExito(new EUndefined({
                 ...infoParen,
                 valor: "()",
                 final: infoParenCer.final
