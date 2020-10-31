@@ -1,4 +1,23 @@
 import { InfoToken } from "./InfoToken";
+import { TNuevaLinea } from "./Token2/TNuevaLinea"
+import { TIdentificador } from "./Token2/TIdentificador";
+import { TGenerico } from "./Token2/TGenerico";
+import { TComentario } from "./Token2/TComentario";
+import { TNumero } from "./Token2/TNumero"
+import { TTexto } from "./Token2/TTexto"
+import { TBool } from "./Token2/TBool"
+import { TOperador } from "./Token2/TOperador"
+import { TParenAb } from "./Token2/TParenAb"
+import { TParenCer } from "./Token2/TParenCer"
+import { TAgrupAb } from "./Token2/TAgrupAb"
+import { TAgrupCer } from "./Token2/TAgrupCer"
+import { PC_LET } from "./Token2/PC_LET"
+import { PC_CONST } from "./Token2/PC_CONST"
+import { PC_IF } from "./Token2/PC_IF"
+import { PC_ELIF } from "./Token2/PC_ELIF"
+import { PC_DO } from "./Token2/PC_DO"
+import { PC_ELSE } from "./Token2/PC_ELSE"
+import { PC_FUN } from "./Token2/PC_FUN";
 
 export type Token2 =
     | TNuevaLinea
@@ -19,219 +38,4 @@ export type Token2 =
     | PC_ELIF
     | PC_DO
     | PC_ELSE
-
-export class TNuevaLinea {
-    type = "TNuevaLinea" as const
-    token: InfoToken<undefined>
-
-    constructor(token: InfoToken<undefined>) {
-        this.token = token;
-    }
-    toString() {
-        return `${this.type}: ${this.token.valor}`;
-    }
-}
-
-export class TIdentificador {
-    type = "TIdentificador" as const
-    token: InfoToken<string>
-
-    constructor(token: InfoToken<string>) {
-        this.token = token;
-    }
-    toString() {
-        return `${this.type}: ${this.token.valor}`;
-    }
-}
-
-export class TGenerico {
-    type = "TGenerico" as const
-    token: InfoToken<string>
-
-    constructor(token: InfoToken<string>) {
-        this.token = token;
-    }
-    toString() {
-        return `${this.type}: ${this.token.valor}`;
-    }
-}
-
-export class TComentario {
-    type = "TComentario" as const
-    token: InfoToken<string>
-
-    constructor(token: InfoToken<string>) {
-        this.token = token;
-    }
-    toString() {
-        return `${this.type}: ${this.token.valor}`;
-    }
-}
-
-export class TNumero {
-    type = "TNumero" as const
-    token: InfoToken<string>
-
-    constructor(token: InfoToken<string>) {
-        this.token = token;
-    }
-    toString() {
-        return `${this.type}: ${this.token.valor}`;
-    }
-}
-
-export class TTexto {
-    type = "TTexto" as const
-    token: InfoToken<string>
-
-    constructor(token: InfoToken<string>) {
-        this.token = token;
-    }
-    toString() {
-        return `${this.type}: ${this.token.valor}`;
-    }
-}
-
-export class TBool {
-    type = "TBool" as const
-    token: InfoToken<boolean>
-
-    constructor(token: InfoToken<boolean>) {
-        this.token = token;
-    }
-    toString() {
-        return `${this.type}: ${this.token.valor}`;
-    }
-}
-
-export class TOperador {
-    type = "TOperador" as const
-    token: InfoToken<string>
-
-    constructor(token: InfoToken<string>) {
-        this.token = token;
-    }
-    toString() {
-        return `${this.type}: ${this.token.valor}`;
-    }
-}
-
-export class TParenAb {
-    type = "TParenAb" as const
-    token: InfoToken<string>
-
-    constructor(token: InfoToken<string>) {
-        this.token = token;
-    }
-    toString() {
-        return `${this.type}: ${this.token.valor}`;
-    }
-}
-
-export class TParenCer {
-    type = "TParenCer" as const
-    token: InfoToken<string>
-
-    constructor(token: InfoToken<string>) {
-        this.token = token;
-    }
-    toString() {
-        return `${this.type}: ${this.token.valor}`;
-    }
-}
-
-export class TAgrupAb {
-    type = "TAgrupAb" as const
-    token: InfoToken<string>
-
-    constructor(token: InfoToken<string>) {
-        this.token = token;
-    }
-    toString() {
-        return `${this.type}: ${this.token.valor}`;
-    }
-}
-
-export class TAgrupCer {
-    type = "TAgrupCer" as const
-    token: InfoToken<string>
-
-    constructor(token: InfoToken<string>) {
-        this.token = token;
-    }
-    toString() {
-        return `${this.type}: ${this.token.valor}`;
-    }
-}
-
-export class PC_LET {
-    type = "PC_LET" as const
-    token: InfoToken<string>
-
-    constructor(token: InfoToken<string>) {
-        this.token = token;
-    }
-    toString() {
-        return `${this.type}: ${this.token.valor}`;
-    }
-}
-
-export class PC_CONST {
-    type = "PC_CONST" as const
-    token: InfoToken<string>
-
-    constructor(token: InfoToken<string>) {
-        this.token = token;
-    }
-    toString() {
-        return `${this.type}: ${this.token.valor}`;
-    }
-}
-
-export class PC_IF {
-    type = "PC_IF" as const
-    token: InfoToken<string>
-
-    constructor(token: InfoToken<string>) {
-        this.token = token;
-    }
-    toString() {
-        return `${this.type}: ${this.token.valor}`;
-    }
-}
-
-export class PC_ELIF {
-    type = "PC_ELIF" as const
-    token: InfoToken<string>
-
-    constructor(token: InfoToken<string>) {
-        this.token = token;
-    }
-    toString() {
-        return `${this.type}: ${this.token.valor}`;
-    }
-}
-
-export class PC_DO {
-    type = "PC_DO" as const
-    token: InfoToken<string>
-
-    constructor(token: InfoToken<string>) {
-        this.token = token;
-    }
-    toString() {
-        return `${this.type}: ${this.token.valor}`;
-    }
-}
-
-export class PC_ELSE {
-    type = "PC_ELSE" as const
-    token: InfoToken<string>
-
-    constructor(token: InfoToken<string>) {
-        this.token = token;
-    }
-    toString() {
-        return `${this.type}: ${this.token.valor}`;
-    }
-}
+    | PC_FUN
