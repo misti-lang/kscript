@@ -22,6 +22,7 @@ import { generarParserContinuo } from "./Parsers/parserContinuo";
 import { generarTextoError, getGlobalState, obtInfoFunAppl, obtInfoOp, operadoresUnarios } from "./Parsers/utilidades"
 import { getSigExprParen } from "./Parsers/sigExprParen";
 import { getSigExprCondicional } from "./Parsers/sigExprCondicional";
+import { getSigExprFuncion } from "./Parsers/sigExprFuncion";
 
 export function parseTokens(lexer: Lexer): ResParser {
 
@@ -161,6 +162,7 @@ export function parseTokens(lexer: Lexer): ResParser {
 
     const sigExprParen = getSigExprParen(lexer, sigExpresion);
     const sigExprCondicional = getSigExprCondicional(lexer, sigExpresion, sigExpresionBloque);
+    const sigExprFuncion = getSigExprFuncion(lexer, sigExpresion, sigExpresionBloque);
 
     /**
      * Obtiene el siguiente bloque de expresiones.
@@ -325,6 +327,9 @@ export function parseTokens(lexer: Lexer): ResParser {
                     }
                     case "PC_DO": {
                         return new PError("No se esperada la palabra clave 'do' aqui.")
+                    }
+                    case "PC_FUN": {
+                        return sigExprFuncion(token.token, indentacionNuevaLinea);
                     }
                     default:
                         let _: never;

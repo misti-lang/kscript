@@ -152,6 +152,13 @@ export const generarParserContinuo = (
                 lexer.retroceder();
                 return new PExito(primeraExprId);
             }
+            case "PC_FUN": {
+                const info = token.token;
+                const textoError = generarTextoError(lexer.entrada, info);
+                return new PError(`No se esperaba la palabra clave 'fun' luego de la aplicación del operador.
+                                        \n\n${textoError}
+                                        Si deseas usar una función como expresión, usa una función anónima.`);
+            }
             default: {
                 let _: never;
                 _ = token;

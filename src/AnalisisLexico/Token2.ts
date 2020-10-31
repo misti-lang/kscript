@@ -1,4 +1,3 @@
-import { InfoToken } from "./InfoToken";
 import { TNuevaLinea } from "./Token2/TNuevaLinea"
 import { TIdentificador } from "./Token2/TIdentificador";
 import { TGenerico } from "./Token2/TGenerico";

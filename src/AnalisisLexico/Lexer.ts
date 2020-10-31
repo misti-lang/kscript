@@ -1,16 +1,24 @@
 import { EOFLexer, ErrorLexer, ResLexer, TokenLexer } from "./ResLexer";
-import {
-    PC_CONST,
-    PC_LET, TAgrupAb, TAgrupCer,
-    TBool,
-    TComentario,
-    TGenerico,
-    TTexto,
-    TIdentificador,
-    TNuevaLinea,
-    TNumero,
-    Token2, TOperador, TParenAb, TParenCer, PC_IF, PC_DO, PC_ELIF, PC_ELSE
-} from "./Token2";
+import { TNuevaLinea } from "./Token2/TNuevaLinea"
+import { TIdentificador } from "./Token2/TIdentificador";
+import { TGenerico } from "./Token2/TGenerico";
+import { TComentario } from "./Token2/TComentario";
+import { TNumero } from "./Token2/TNumero"
+import { TTexto } from "./Token2/TTexto"
+import { TBool } from "./Token2/TBool"
+import { TOperador } from "./Token2/TOperador"
+import { TParenAb } from "./Token2/TParenAb"
+import { TParenCer } from "./Token2/TParenCer"
+import { TAgrupAb } from "./Token2/TAgrupAb"
+import { TAgrupCer } from "./Token2/TAgrupCer"
+import { PC_LET } from "./Token2/PC_LET"
+import { PC_CONST } from "./Token2/PC_CONST"
+import { PC_IF } from "./Token2/PC_IF"
+import { PC_ELIF } from "./Token2/PC_ELIF"
+import { PC_DO } from "./Token2/PC_DO"
+import { PC_ELSE } from "./Token2/PC_ELSE"
+import { PC_FUN } from "./Token2/PC_FUN";
+import {Token2} from "./Token2";
 import { Token } from "./Token";
 import { run } from "./parsers";
 import { parserGeneral } from "./gramatica";
@@ -147,6 +155,9 @@ export class Lexer {
                             }
                             case "else": {
                                 return crearToken2(x => new PC_ELSE(x), "else");
+                            }
+                            case "fun": {
+                                return crearToken2(x => new PC_FUN(x), "fun");
                             }
                             default: {
                                 return crearToken2(x => new TIdentificador(x), ex.res)
