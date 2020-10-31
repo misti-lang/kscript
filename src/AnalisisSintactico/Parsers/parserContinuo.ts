@@ -74,7 +74,8 @@ export const generarParserContinuo = (
             case "TNumero":
             case "TTexto":
             case "TBool":
-            case "TParenAb": {
+            case "TParenAb":
+            case "TUndefined": {
                 const infoOp2 = obtInfoFunAppl(false, infoIdInicio, infoIdNumLinea, infoIdPosInicioLinea, indentacionNuevaLinea);
 
                 const [precOpFunApl, asocOpFunApl] = obtInfoOp(infoOp2.valor);

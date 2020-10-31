@@ -12,7 +12,7 @@ import {
     ENumero,
     eOperador,
     EOperadorUnarioIzq,
-    ETexto,
+    ETexto, EUndefined,
     Expresion
 } from "./Expresion";
 import { SignIndefinida } from "./Signatura";
@@ -330,6 +330,9 @@ export function parseTokens(lexer: Lexer): ResParser {
                     }
                     case "PC_FUN": {
                         return sigExprFuncion(token.token, indentacionNuevaLinea);
+                    }
+                    case "TUndefined": {
+                        return new PExito(new EUndefined(token.token));
                     }
                     default:
                         let _: never;

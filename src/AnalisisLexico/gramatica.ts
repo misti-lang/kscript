@@ -5,7 +5,7 @@ import {
     parseCaracter,
     parseCualquierMenos, parseCualquierMenosP,
     parseLuego, parseOtro,
-    parseSegundoOpcional, parseVariasOpciones, parseVarios,
+    parseSegundoOpcional, parseString, parseVariasOpciones, parseVarios,
     parseVarios1
 } from "./parsers";
 import { Token } from "./Token";
@@ -16,13 +16,24 @@ const digitos = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 const mayusculas = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "Ñ"];
 const minusculas = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "ñ"];
 
-let parseDigito = cualquier(digitos);
-let parseMayuscula = cualquier(mayusculas);
-let parseMinuscula = cualquier(minusculas);
-let parseMinusculaOMayuscula = cualquier(mayusculas.concat(minusculas));
-let parseGuionBajo = parseCaracter("_");
-let parseComillaSimple = parseCaracter("'");
-let parseDolar = parseCaracter("$");
+const parseDigito = cualquier(digitos);
+const parseMayuscula = cualquier(mayusculas);
+const parseMinuscula = cualquier(minusculas);
+const parseMinusculaOMayuscula = cualquier(mayusculas.concat(minusculas));
+const parseGuionBajo = parseCaracter("_");
+const parseComillaSimple = parseCaracter("'");
+const parseDolar = parseCaracter("$");
+
+const parseParenAb = parseCaracter("(");
+const parseParenCer = parseCaracter(")");
+
+const parseLlaveAb = parseCaracter("{");
+const parseLlaveCer = parseCaracter("}");
+
+const parseCorcheteAb = parseCaracter("[");
+const parseCorcheteCer = parseCaracter("]");
+
+const parseComilla = parseCaracter("\"");
 
 const charListToStr = (caracteres: Array<string>) => {
     if (caracteres.length === 0) return "";
@@ -36,14 +47,14 @@ const tupla3AStr = ([[s1, s2], s3]: [[string, string], string]) => {
     return s1 + s2 + s3;
 };
 
-let parseOperador = cualquier(operadores);
-let parseOperadores = mapP(charListToStr, parseVarios1(parseOperador));
+const parseOperador = cualquier(operadores);
+const parseOperadores = mapP(charListToStr, parseVarios1(parseOperador));
 
 const parseNumero = (() => {
-    let parseNumeros = mapP(charListToStr, parseVarios1(parseDigito));
-    let parsePunto = parseCaracter(".");
+    const parseNumeros = mapP(charListToStr, parseVarios1(parseDigito));
+    const parsePunto = parseCaracter(".");
 
-    let parseParteDecimal = mapP(tupla2AStr, parseLuego(parsePunto, parseNumeros));
+    const parseParteDecimal = mapP(tupla2AStr, parseLuego(parsePunto, parseNumeros));
 
     const funPass = ([num, decimal]: [string, string | undefined]): string => {
         return num + (decimal ? decimal : "");
@@ -53,40 +64,53 @@ const parseNumero = (() => {
 })();
 
 const parseTexto = (() => {
-    let parseComilla = parseCaracter("\"");
-    let parseResto = mapP(charListToStr, (parseVarios(parseCualquierMenos("\""))));
+    const parseResto = mapP(charListToStr, (parseVarios(parseCualquierMenos("\""))));
 
     return between(parseComilla, parseResto, parseComilla);
 })();
 
 const parseNuevaLinea = (() => {
-    let parseNuevaLCarac = parseCaracter("\n");
-    let parseNuevoWin = parseCaracter("\r");
+    const parseNuevaLCarac = parseCaracter("\n");
+    const parseNuevoWin = parseCaracter("\r");
 
-    let parseNuevaLineaWin = mapP(tupla2AStr, parseLuego(parseNuevoWin, parseNuevaLCarac));
+    const parseNuevaLineaWin = mapP(tupla2AStr, parseLuego(parseNuevoWin, parseNuevaLCarac));
 
     return parseOtro(parseNuevaLCarac, parseNuevaLineaWin);
 })();
 
 const parseComentario = (() => {
-    let parseBarra = parseCaracter("/");
-    let parseInicio = mapP(_ => "//", parseLuego(parseBarra, parseBarra));
+    const parseBarra = parseCaracter("/");
+    const parseInicio = mapP(_ => "//", parseLuego(parseBarra, parseBarra));
 
-    let parseResto = mapP(charListToStr, parseVarios(parseCualquierMenosP(parseNuevaLinea)));
+    const parseResto = mapP(charListToStr, parseVarios(parseCualquierMenosP(parseNuevaLinea)));
 
     return mapP(tupla2AStr, parseLuego(parseInicio, parseResto));
 })();
 
 const parseComentarioMulti = (() => {
-    let parseBarra = parseCaracter("/");
-    let parseAst = parseCaracter("*");
+    const parseBarra = parseCaracter("/");
+    const parseAst = parseCaracter("*");
 
-    let parseInicio = mapP((_) => "/*", parseLuego(parseBarra, parseAst));
-    let parseFinal = mapP((_) => "*/", parseLuego(parseAst, parseBarra));
+    const parseInicio = mapP((_) => "/*", parseLuego(parseBarra, parseAst));
+    const parseFinal = mapP((_) => "*/", parseLuego(parseAst, parseBarra));
 
-    let parseResto = mapP(charListToStr, parseVarios(parseCualquierMenosP(parseFinal)));
+    const parseResto = mapP(charListToStr, parseVarios(parseCualquierMenosP(parseFinal)));
 
     return mapP(tupla3AStr, parseLuego(parseLuego(parseInicio, parseResto), parseFinal));
+})();
+
+const parseUndefined = (() => {
+    const pEB = parseCaracter(" ");
+    const parseIdEspBlanco = mapP(charListToStr, parseVarios1(pEB));
+
+    const parseParenAbiertoYCerrado =
+        mapP(
+            () => "()",
+            parseLuego(parseSegundoOpcional(parseParenAb, parseIdEspBlanco), parseParenCer)
+        );
+    const parseUndefined = parseString("undefined");
+
+    return parseOtro(parseParenAbiertoYCerrado, parseUndefined);
 })();
 
 const parseRestoIdentificador = (() => {
@@ -108,32 +132,22 @@ const parseIdentificador = mapP(
 
 // Asume que se encuentra al inicio de la linea
 const parseIndentacion = (() => {
-    let pEB = parseCaracter(" ");
-    let parseIdEspBlanco = mapP(charListToStr, parseVarios1(pEB));
+    const pEB = parseCaracter(" ");
+    const parseIdEspBlanco = mapP(charListToStr, parseVarios1(pEB));
 
-    let pTab = parseCaracter("\t");
+    const pTab = parseCaracter("\t");
     return parseOtro(parseIdEspBlanco, pTab);
 })();
 
+const parseSignoAgrupacionAb = escoger([parseParenAb, parseLlaveAb, parseCorcheteAb]);
+const parseSignoAgrupacionCer = escoger([parseParenCer, parseLlaveCer, parseCorcheteCer]);
 
-let parseParenAb = parseCaracter("(");
-let parseParenCer = parseCaracter(")");
-
-let parseLlaveAb = parseCaracter("{");
-let parseLlaveCer = parseCaracter("}");
-
-let parseCorcheteAb = parseCaracter("[");
-let parseCorcheteCer = parseCaracter("]");
-
-let parseSignoAgrupacionAb = escoger([parseParenAb, parseLlaveAb, parseCorcheteAb]);
-let parseSignoAgrupacionCer = escoger([parseParenCer, parseLlaveCer, parseCorcheteCer]);
-
-
-export let parserGeneral = parseVariasOpciones([
+export const parserGeneral = parseVariasOpciones([
     mapTipo(parseIndentacion, Token.Indentacion),
     mapTipo(parseNuevaLinea, Token.NuevaLinea),
     mapTipo(parseComentarioMulti, Token.Comentario),
     mapTipo(parseComentario, Token.Comentario),
+    mapTipo(parseUndefined, Token.Undefined),
     mapTipo(parseIdentificador, Token.Identificador),
     mapTipo(parseGenerico, Token.Generico),
     mapTipo(parseNumero, Token.Numero),

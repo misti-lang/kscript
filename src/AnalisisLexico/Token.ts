@@ -1,6 +1,7 @@
 export enum Token {
     Indentacion,
     NuevaLinea,
+    Undefined,
     Identificador,
     Generico,
     Comentario,

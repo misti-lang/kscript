@@ -71,6 +71,32 @@ export function parseCaracter(caracter: string): Parser<string> {
     }
 }
 
+/**
+ * Intenta parsear un string. No añade comillas.
+ * @param str El string a parsear
+ */
+export function parseString(str: string): Parser<string> {
+    return function (entrada, inicio): Resultado<string> {
+        if (entrada === "" || inicio >= entrada.length) {
+            return new ErrorRes("Entrada terminada");
+        }
+
+        const largoStr = str.length;
+        const substr = entrada.substring(inicio, inicio + largoStr);
+
+        if (substr === str) {
+            return new ExitoRes({
+                res: substr,
+                posInicio: inicio,
+                posFinal: inicio + largoStr,
+                tipo: Token.Nada
+            });
+        } else {
+            return new ErrorRes("No se encontró el string solicitado.");
+        }
+    }
+}
+
 export function parseLuego<A, B>(p1: Parser<A>, p2: Parser<B>): Parser<[A, B]> {
     return function (entrada, inicio): Resultado<[A, B]> {
         const res1 = run(p1, entrada, inicio);
@@ -99,6 +125,11 @@ export function parseLuego<A, B>(p1: Parser<A>, p2: Parser<B>): Parser<[A, B]> {
     }
 }
 
+/**
+ * Intentar parsear p1, y si falla parsea p2.
+ * @param p1 El primer parser
+ * @param p2 El segundo parser
+ */
 export function parseOtro<A>(p1: Parser<A>, p2: Parser<A>): Parser<A> {
     return function (entrada, inicio) {
         const res1 = run(p1, entrada, inicio);

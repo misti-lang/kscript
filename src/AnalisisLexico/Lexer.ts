@@ -24,6 +24,7 @@ import { run } from "./parsers";
 import { parserGeneral } from "./gramatica";
 import { ErrorRes, ExitoRes } from "./Resultado";
 import { InfoToken } from "./InfoToken";
+import { TUndefined } from "./Token2/TUndefined";
 
 export class Lexer {
 
@@ -92,6 +93,9 @@ export class Lexer {
                 switch (ex.tipo) {
                     case Token.Nada: {
                         return new ErrorLexer("Se encontró un token Huerfano");
+                    }
+                    case Token.Undefined: {
+                        return crearToken2(x => new TUndefined(x), ex.res);
                     }
                     case Token.Indentacion: {
                         if (!this.esInicioDeLinea) {
