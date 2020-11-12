@@ -4,7 +4,8 @@ import { InfoToken } from "../../AnalisisLexico/InfoToken";
 import { ExprRes, PError, PExito } from "../ExprRes";
 import { getGlobalState } from "./utilidades";
 import { ErrorComun, Expect } from "../Expect";
-import { ECondicional, Expresion } from "../Expresion";
+import { Expresion } from "../Expresion";
+import { ECondicional } from "../Expresion/ECondicional";
 
 interface Retorno<A> {
     error?: ExprRes

@@ -150,7 +150,7 @@ export function cualquier(parsers: Array<string>): Parser<string> {
     return escoger(parsers.map(parseCaracter));
 }
 
-export function parseVariosHelper<A>(parser: Parser<A>, entrada: string, inicio: number): [Array<A>, number] {
+function parseVariosHelper<A>(parser: Parser<A>, entrada: string, inicio: number): [Array<A>, number] {
     const resultado = run(parser, entrada, inicio);
 
     if (resultado instanceof ErrorRes) return [[], inicio];
@@ -164,6 +164,10 @@ export function parseVariosHelper<A>(parser: Parser<A>, entrada: string, inicio:
     }
 }
 
+/**
+ * Parsea 0 o mas ocurrencias del parser
+ * @param parser El parser a ejecutar
+ */
 export function parseVarios<A>(parser: Parser<A>): Parser<Array<A>> {
     return function (entrada, inicio) {
         const [datos, posFinal] = parseVariosHelper(parser, entrada, inicio);
@@ -176,6 +180,10 @@ export function parseVarios<A>(parser: Parser<A>): Parser<Array<A>> {
     }
 }
 
+/**
+ * Parsea 1 o mas ocurrencias del parser.
+ * @param parser El parser a ejecutar
+ */
 export function parseVarios1<A>(parser: Parser<A>): Parser<Array<A>> {
     return function (entrada, inicio) {
         const [datos, posFinal] = parseVariosHelper(parser, entrada, inicio);

@@ -1,4 +1,5 @@
-import { EIdentificador, Expresion } from "./Expresion";
+import { Expresion } from "./Expresion";
+import { EIdentificador } from "./Expresion/EIdentificador";
 
 export interface PosExpr {
     readonly inicioPE: number,

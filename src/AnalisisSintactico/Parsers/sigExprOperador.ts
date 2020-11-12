@@ -1,4 +1,4 @@
-import { eOperador, EOperadorApl, Expresion } from "../Expresion";
+import { Expresion } from "../Expresion";
 import { InfoToken } from "../../AnalisisLexico/InfoToken";
 import { ExprRes, PError, PExito, PReturn } from "../ExprRes";
 import { SignIndefinida } from "../Signatura";
@@ -6,6 +6,8 @@ import { Asociatividad } from "../Asociatividad";
 import { obtPosExpr } from "../PosExpr";
 import { Lexer } from "../../AnalisisLexico/Lexer";
 import { generarParserContinuo } from "./parserContinuo";
+import { eOperador } from "../Expresion/EOperador";
+import { EOperadorApl } from "../Expresion/EOperadorApl";
 
 export function getParserSigExprOperador(
     lexer: Lexer,

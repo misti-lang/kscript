@@ -1,12 +1,13 @@
 import { InfoToken } from "../../AnalisisLexico/InfoToken";
 import { ExprRes, PError, PExito, PReturn } from "../ExprRes";
-import { EIdentificador, EUndefined } from "../Expresion";
 import { SignIndefinida } from "../Signatura";
 import { Asociatividad } from "../Asociatividad";
 import { generarTextoError, getGlobalState, obtInfoFunAppl, obtInfoOp } from "./utilidades";
 import { Lexer } from "../..";
 import { generarParserContinuo } from "./parserContinuo";
 import { getParserSigExprOperador } from "./sigExprOperador";
+import { EUndefined } from "../Expresion/EUndefined";
+import { EIdentificador } from "../Expresion/EIdentificador";
 
 export const getSigExprParen = (
     lexer: Lexer,

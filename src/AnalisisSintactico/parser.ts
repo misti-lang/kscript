@@ -5,14 +5,6 @@ import { ErrorLexerP, ErrorParser, ExitoParser, ResParser } from "./ResParser";
 import { ExprRes, PEOF, PError, PErrorLexer, PExito, PReturn } from "./ExprRes";
 import { ErrorComun, Expect } from "./Expect";
 import {
-    EBloque,
-    EBool,
-    EDeclaracion,
-    EIdentificador,
-    ENumero,
-    eOperador,
-    EOperadorUnarioIzq,
-    ETexto, EUndefined,
     Expresion
 } from "./Expresion";
 import { SignIndefinida } from "./Signatura";
@@ -23,6 +15,15 @@ import { generarTextoError, getGlobalState, obtInfoFunAppl, obtInfoOp, operadore
 import { getSigExprParen } from "./Parsers/sigExprParen";
 import { getSigExprCondicional } from "./Parsers/sigExprCondicional";
 import { getSigExprFuncion } from "./Parsers/sigExprFuncion";
+import { EUndefined } from "./Expresion/EUndefined";
+import { EIdentificador } from "./Expresion/EIdentificador";
+import { ENumero } from "./Expresion/ENumero";
+import { ETexto } from "./Expresion/ETexto";
+import { EBool } from "./Expresion/EBool";
+import { eOperador } from "./Expresion/EOperador";
+import { EOperadorUnarioIzq } from "./Expresion/EOperadorUnarioIzq";
+import { EDeclaracion } from "./Expresion/EDeclaracion";
+import { EBloque } from "./Expresion/EBloque";
 
 export function parseTokens(lexer: Lexer): ResParser {
 

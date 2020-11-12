@@ -1,10 +1,11 @@
 import { Lexer } from "../..";
-import { EBloque, Expresion } from "../Expresion";
+import { Expresion } from "../Expresion";
 import { InfoToken } from "../../AnalisisLexico/InfoToken";
 import { ExprRes, PError, PErrorLexer, PExito, PReturn } from "../ExprRes";
 import { Asociatividad } from "../Asociatividad";
 import { ResLexer } from "../../AnalisisLexico/ResLexer";
 import { obtInfoFunAppl, obtInfoOp, generarTextoError } from "./utilidades"
+import { EBloque } from "../Expresion/EBloque";
 
 /* Si un operador esta en una nueva linea pero al mismo nivel de indentacion
 *  ya no se considera dentro de la misma expresion

@@ -1,13 +1,14 @@
 import {
-    ECondicional,
-    EDeclaracion,
-    EIdentificador,
-    EOperadorApl,
-    EOperadorUnarioIzq, EUndefined,
     Expresion
 } from "../AnalisisSintactico/Expresion";
 import { SourceNode } from "source-map";
 import { InfoToken } from "../AnalisisLexico/InfoToken";
+import { EUndefined } from "../AnalisisSintactico/Expresion/EUndefined";
+import { EIdentificador } from "../AnalisisSintactico/Expresion/EIdentificador";
+import { EOperadorApl } from "../AnalisisSintactico/Expresion/EOperadorApl";
+import { EOperadorUnarioIzq } from "../AnalisisSintactico/Expresion/EOperadorUnarioIzq";
+import { EDeclaracion } from "../AnalisisSintactico/Expresion/EDeclaracion";
+import { ECondicional } from "../AnalisisSintactico/Expresion/ECondicional";
 
 const opcionesDefecto: { [s: string]: boolean } = {
     imprimirParensEnOperadores: false
