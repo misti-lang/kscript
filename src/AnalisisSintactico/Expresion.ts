@@ -10,6 +10,7 @@ import { EOperadorUnarioIzq } from "./Expresion/EOperadorUnarioIzq";
 import { EDeclaracion } from "./Expresion/EDeclaracion";
 import { ECondicional } from "./Expresion/ECondicional";
 import { EBloque } from "./Expresion/EBloque";
+import { EDeclaracionFuncion } from "./Expresion/EDeclaracionFuncion";
 
 export type Expresion =
     | EIdentificador
@@ -24,4 +25,5 @@ export type Expresion =
     | EDeclaracion
     | ECondicional
     | EBloque
+    | EDeclaracionFuncion
 

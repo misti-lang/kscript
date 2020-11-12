@@ -1,13 +1,7 @@
 import {flujo2} from "./Utils/flujos";
 
 const str = `
-if 10 == 20 do
-    console.log a
-    console.log b
-elif 20 == 30 do
-    console.log c
-else
-    console.log h
+fun f x = 20
 `;
 
 const resultado = flujo2(str, "test.ks")

@@ -91,6 +91,13 @@ export function obtPosExpr(ex: Expresion): PosExpr {
                 posInicioLineaPE: ex.infoId.posInicioLinea,
             }
         }
+        case "EDeclaracionFuncion": {
+            return {
+                inicioPE: ex.inicio,
+                numLineaPE: ex.numLinea,
+                posInicioLineaPE: ex.posInicioLinea,
+            }
+        }
         default:
             let _: never;
             _ = ex;

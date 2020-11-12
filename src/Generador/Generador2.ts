@@ -335,6 +335,9 @@ export function crearCodeWithSourceMap(
             case "EUndefined": {
                 return generarJs_EUndefined(expr);
             }
+            case "EDeclaracionFuncion": {
+                throw Error(`Declaracion de funciones no soportadas (aun) :c`);
+            }
             default:
                 let _: never;
                 _ = expr;
