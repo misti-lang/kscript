@@ -1,7 +1,8 @@
 import {flujo2} from "./Utils/flujos";
 
 const str = `
-fun f x = 20
+fun f x y z =
+    console.log x y z
 `;
 
 const resultado = flujo2(str, "test.ks")

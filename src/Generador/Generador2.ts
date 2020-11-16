@@ -9,6 +9,7 @@ import { EOperadorApl } from "../AnalisisSintactico/Expresion/EOperadorApl";
 import { EOperadorUnarioIzq } from "../AnalisisSintactico/Expresion/EOperadorUnarioIzq";
 import { EDeclaracion } from "../AnalisisSintactico/Expresion/EDeclaracion";
 import { ECondicional } from "../AnalisisSintactico/Expresion/ECondicional";
+import { getGeneradorJs_EDeclaracionFuncion } from "./GeneradorEDeclaracionFuncion";
 
 const opcionesDefecto: { [s: string]: boolean } = {
     imprimirParensEnOperadores: false
@@ -35,11 +36,11 @@ export function crearCodeWithSourceMap(
                 const ultimoParam = exprFn.der;
                 switch (exprOpCurry.type) {
                     case "EOperadorApl": {
-                        let valorOp = exprOpCurry.op.valorOp.valor;
+                        const valorOp = exprOpCurry.op.valorOp.valor;
                         if (valorOp === "ñ" || valorOp === "Ñ") {
                             return extraerParams(exprOpCurry, [ultimoParam, ...acc]);
                         } else {
-                            let nodo = inner(exprOpCurry, toplevel, nivel)[0];
+                            const nodo = inner(exprOpCurry, toplevel, nivel)[0];
                             return [nodo, [ultimoParam, ...acc]];
                         }
                     }
@@ -119,7 +120,7 @@ export function crearCodeWithSourceMap(
         }
 
         function generarJS_ENumero(info: InfoToken<string>): [SourceNode, number] {
-            let valor = info.valor.toString();
+            const valor = info.valor.toString();
             return [new SourceNode(info.numLinea, info.inicio - info.posInicioLinea, nombreArchivo, valor), 0];
         }
 
@@ -129,7 +130,7 @@ export function crearCodeWithSourceMap(
         }
 
         function generarJS_EBool(info: InfoToken<boolean>): [SourceNode, number] {
-            let strRes = info.valor.toString();
+            const strRes = info.valor.toString();
             return [new SourceNode(info.numLinea, info.inicio - info.posInicioLinea, nombreArchivo, strRes), 0];
         }
 
@@ -159,14 +160,14 @@ export function crearCodeWithSourceMap(
             const [snResto] = inner(dec.valorDec, false, (nivel + 1));
             switch (dec.valorDec.type) {
                 case "EDeclaracion": {
-                    let codigoRes = [inicio, " ", snId, " = ", "(() => {\n", indentacionNivelSig, snResto, "\n", indentacionNivelSig,
+                    const codigoRes = [inicio, " ", snId, " = ", "(() => {\n", indentacionNivelSig, snResto, "\n", indentacionNivelSig,
                         "return undefined;\n", indentacionNivel, "})()"];
-                    let res = new SourceNode(dec.id.valorId.numLinea, dec.id.valorId.inicio - dec.id.valorId.posInicioLinea, nombreArchivo, codigoRes);
+                    const res = new SourceNode(dec.id.valorId.numLinea, dec.id.valorId.inicio - dec.id.valorId.posInicioLinea, nombreArchivo, codigoRes);
                     return [res, 0];
                 }
                 default: {
-                    let codigoRes = [inicio, " ", snId, " = ", snResto];
-                    let res = new SourceNode(dec.id.valorId.numLinea, dec.id.valorId.inicio - dec.id.valorId.posInicioLinea, nombreArchivo, codigoRes);
+                    const codigoRes = [inicio, " ", snId, " = ", snResto];
+                    const res = new SourceNode(dec.id.valorId.numLinea, dec.id.valorId.inicio - dec.id.valorId.posInicioLinea, nombreArchivo, codigoRes);
                     return [res, 0];
                 }
             }
@@ -289,6 +290,15 @@ export function crearCodeWithSourceMap(
             return [nodoIf, 0];
         }
 
+        const generarJs_EDeclaracionFuncion = getGeneradorJs_EDeclaracionFuncion(
+            inner,
+            generarJS_EIdentificador,
+            nivel,
+            nombreArchivo,
+            indentacionNivelSig,
+            indentacionNivel
+        );
+
         switch (expr.type) {
             case "EBloque": {
                 return generarJS_EBloque(expr.bloque, toplevel)
@@ -336,7 +346,7 @@ export function crearCodeWithSourceMap(
                 return generarJs_EUndefined(expr);
             }
             case "EDeclaracionFuncion": {
-                throw Error(`Declaracion de funciones no soportadas (aun) :c`);
+                return generarJs_EDeclaracionFuncion(expr);
             }
             default:
                 let _: never;

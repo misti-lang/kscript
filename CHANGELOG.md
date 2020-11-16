@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.31
+
+- Agregado soporte basico para funciones con `fun`.
+
 ## 0.0.30
 
 - Agregado soporte para generar codigo a partir de `elif` y `else`.
