@@ -4,7 +4,7 @@ import { EIdentificador } from "../AnalisisSintactico/Expresion/EIdentificador";
 import { Expresion } from "../AnalisisSintactico/Expresion";
 
 export function getGeneradorJs_EDeclaracionFuncion(
-    inner: (expr: Expresion, toplevel: boolean, nivel: number) => [SourceNode, number],
+    inner: (expr: Expresion, toplevel: boolean, nivel: number, IIFE?: boolean) => [SourceNode, number],
     generarJS_EIdentificador: (_: EIdentificador) => [SourceNode, number],
     nivel: number,
     nombreArchivo: string | null,
@@ -24,7 +24,7 @@ export function getGeneradorJs_EDeclaracionFuncion(
             })
             .reduce((acc, val) => acc.concat(val), []);
 
-        const [snResto] = inner(valor, false, nivel + 1);
+        const [snResto] = inner(valor, false, nivel + 1, false);
 
         const codigoRes = [
             "function ",
@@ -34,7 +34,6 @@ export function getGeneradorJs_EDeclaracionFuncion(
             ") {\n",
             indentacionNivelSig,
             snResto,
-            "\n",
             indentacionNivel,
             "}"
         ];

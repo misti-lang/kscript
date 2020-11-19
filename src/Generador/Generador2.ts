@@ -25,7 +25,7 @@ export function crearCodeWithSourceMap(
 
     const imprParenEnOp = !!(opciones?.imprimirParensEnOperadores) ?? false;
 
-    function inner(expr: Expresion, toplevel: boolean, nivel: number): [SourceNode, number] {
+    function inner(expr: Expresion, toplevel: boolean, nivel: number, IIFE = true): [SourceNode, number] {
         const indentacionNivel = new Array(nivel * 4).fill(" ").join("");
         const indentacionNivelSig = new Array((nivel + 1) * 4).fill(" ").join("");
         const indentacionNivelAnt = (nivel == 0) ? "" : new Array((nivel - 1) * 4).fill(" ").join("");
@@ -76,7 +76,7 @@ export function crearCodeWithSourceMap(
             return nodoFun;
         }
 
-        function generarJS_EBloque(exprs: Array<Expresion>, toplevel: boolean): [SourceNode, number] {
+        function generarJS_EBloque(exprs: Array<Expresion>, toplevel: boolean, IIFE = true): [SourceNode, number] {
             function generarInner(exprs: Array<Expresion>): SourceNode {
                 if (exprs.length === 1) {
                     const e = exprs[0];
@@ -110,9 +110,13 @@ export function crearCodeWithSourceMap(
             const jsRetorno = (() => {
                 if (toplevel) {
                     return generarInner(exprs);
-                } else {
+                } else if (IIFE) {
                     const jsGen = generarInner(exprs);
                     const codigoRes = ["(() => {\n", jsGen, "\n", indentacionNivelAnt, "})()"];
+                    return new SourceNode(jsGen.line, jsGen.column, nombreArchivo, codigoRes);
+                } else {
+                    const jsGen = generarInner(exprs);
+                    const codigoRes = [jsGen, "\n"];
                     return new SourceNode(jsGen.line, jsGen.column, nombreArchivo, codigoRes);
                 }
             })();
@@ -230,7 +234,7 @@ export function crearCodeWithSourceMap(
             const [exprCondicionIf, exprBloqueIf] = eCond.exprCondicion;
 
             const [snCondicion] = inner(exprCondicionIf, toplevel, nivel);
-            const [snBloqueIf] = inner(exprBloqueIf, toplevel, nivel + 1);
+            const [snBloqueIf] = inner(exprBloqueIf, toplevel, nivel + 1, false);
 
             const nodoIf = new SourceNode(
                 eCond.numLinea,
@@ -250,7 +254,7 @@ export function crearCodeWithSourceMap(
             eCond.exprElif?.map((g) => {
                 const [exprCondicionElif, exprBloqueElif] = g;
                 const [snCondicionELif] = inner(exprCondicionElif, toplevel, nivel);
-                const [snBloqueElif] = inner(exprBloqueElif, toplevel, nivel + 1);
+                const [snBloqueElif] = inner(exprBloqueElif, toplevel, nivel + 1, false);
 
                 return new SourceNode(
                     null,
@@ -272,7 +276,7 @@ export function crearCodeWithSourceMap(
 
             // Agregar nodo else si existe
             if (eCond.exprElse !== undefined) {
-                const [snBloqueElse] = inner(eCond.exprElse, toplevel, nivel + 1);
+                const [snBloqueElse] = inner(eCond.exprElse, toplevel, nivel + 1, false);
 
                 nodoIf.add(new SourceNode(
                     null,
@@ -301,7 +305,7 @@ export function crearCodeWithSourceMap(
 
         switch (expr.type) {
             case "EBloque": {
-                return generarJS_EBloque(expr.bloque, toplevel)
+                return generarJS_EBloque(expr.bloque, toplevel, IIFE);
             }
             case "ENumero": {
                 return generarJS_ENumero(expr.info);
