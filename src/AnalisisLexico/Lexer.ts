@@ -25,6 +25,9 @@ import { parserGeneral } from "./gramatica";
 import { ErrorRes, ExitoRes } from "./Resultado";
 import { InfoToken } from "./InfoToken";
 import { TUndefined } from "./Token2/TUndefined";
+import { TCorcheteAb } from "./Token2/TCorcheteAb";
+import { TCorcheteCer } from "./Token2/TCorcheteCer";
+import { TComa } from "./Token2/TComa";
 
 export class Lexer {
 
@@ -176,12 +179,22 @@ export class Lexer {
                         return crearToken2(x => new TNumero(x), ex.res);
                     case Token.Texto:
                         return crearToken2(x => new TTexto(x), ex.res);
-                    case Token.Operadores:
-                        return crearToken2(x => new TOperador(x), ex.res);
+                    case Token.Operadores: {
+                        switch (ex.res) {
+                            case ",": {
+                                return crearToken2(x => new TComa(x), ex.res);
+                            }
+                            default: {
+                                return crearToken2(x => new TOperador(x), ex.res);
+                            }
+                        }
+                    }
                     case Token.AgrupacionAb: {
                         switch (ex.res) {
                             case "(":
                                 return crearToken2(x => new TParenAb(x), ex.res)
+                            case "[":
+                                return crearToken2(x => new TCorcheteAb(x), ex.res)
                             default:
                                 return crearToken2(x => new TAgrupAb(x), ex.res)
                         }
@@ -190,6 +203,8 @@ export class Lexer {
                         switch (ex.res) {
                             case ")":
                                 return crearToken2(x => new TParenCer(x), ex.res)
+                            case "]":
+                                return crearToken2(x => new TCorcheteCer(x), ex.res)
                             default:
                                 return crearToken2(x => new TAgrupCer(x), ex.res)
                         }

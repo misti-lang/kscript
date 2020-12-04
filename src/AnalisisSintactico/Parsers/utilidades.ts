@@ -99,6 +99,7 @@ export const generarTextoError = <A>(entrada: string, info: InfoToken<A>): strin
 
 const globalState = {
     parensAbiertos: 0,
+    corchetesAbiertos: 0,
     ifAbiertos: 0
 };
 

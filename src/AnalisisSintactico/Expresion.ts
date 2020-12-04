@@ -11,6 +11,7 @@ import { EDeclaracion } from "./Expresion/EDeclaracion";
 import { ECondicional } from "./Expresion/ECondicional";
 import { EBloque } from "./Expresion/EBloque";
 import { EDeclaracionFuncion } from "./Expresion/EDeclaracionFuncion";
+import { EArray } from "./Expresion/EArray";
 
 export type Expresion =
     | EIdentificador
@@ -25,5 +26,6 @@ export type Expresion =
     | EDeclaracion
     | ECondicional
     | EBloque
+    | EArray
     | EDeclaracionFuncion
 

@@ -1,12 +1,7 @@
 import {flujo2} from "./Utils/flujos";
 
 const str = `
-if true do
-    console.log x y z
-elif true do
-    console.log a
-else
-    console.log b
+const arr = [console.log "Hola", 20, "adios", hola mundo]
 `;
 
 const resultado = flujo2(str, "test.ks")

@@ -21,6 +21,8 @@ export const getSigExprParen = (
     function sigExprParen(infoParen: InfoToken<string>, indentacionNuevaLinea: number, indentacionMinima: number) {
         const globalState = getGlobalState();
         globalState.parensAbiertos++;
+
+        // Extraer un token para ver si se tiene `()`, y generar el ast adecuado
         const sigToken = lexer.sigToken();
 
         if (sigToken.type == "EOFLexer") {
@@ -31,6 +33,7 @@ export const getSigExprParen = (
 
         const t = sigToken.token;
 
+        // Si se ingreso `()` se devuelve EUndefined
         if (t.type === "TParenCer") {
             const infoParenCer = t.token;
             return new PExito(new EUndefined({

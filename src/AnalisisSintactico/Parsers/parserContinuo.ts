@@ -67,7 +67,9 @@ export const generarParserContinuo = (
                     return new PExito(primeraExprId);
                 }
             }
-            case "TParenCer": {
+            case "TComa":
+            case "TParenCer":
+            case "TCorcheteCer": {
                 lexer.retroceder();
                 return new PExito(primeraExprId);
             }
@@ -76,6 +78,7 @@ export const generarParserContinuo = (
             case "TTexto":
             case "TBool":
             case "TParenAb":
+            case "TCorcheteAb":
             case "TUndefined": {
                 const infoOp2 = obtInfoFunAppl(false, infoIdInicio, infoIdNumLinea, infoIdPosInicioLinea, indentacionNuevaLinea);
 

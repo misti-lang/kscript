@@ -24,6 +24,7 @@ import { eOperador } from "./Expresion/EOperador";
 import { EOperadorUnarioIzq } from "./Expresion/EOperadorUnarioIzq";
 import { EDeclaracion } from "./Expresion/EDeclaracion";
 import { EBloque } from "./Expresion/EBloque";
+import { getSigExprArray } from "./Parsers/sigExprArray";
 
 export function parseTokens(lexer: Lexer): ResParser {
 
@@ -162,6 +163,7 @@ export function parseTokens(lexer: Lexer): ResParser {
     }
 
     const sigExprParen = getSigExprParen(lexer, sigExpresion);
+    const sigExprArray = getSigExprArray(lexer, sigExpresion);
     const sigExprCondicional = getSigExprCondicional(lexer, sigExpresion, sigExpresionBloque);
     const sigExprFuncion = getSigExprFuncion(lexer, sigExpresion, sigExpresionBloque);
 
@@ -302,6 +304,20 @@ export function parseTokens(lexer: Lexer): ResParser {
                     case "TAgrupCer": {
                         return new PError(`Otros signos de agrupación aun no estan soportados.`)
                     }
+                    case "TCorcheteAb": {
+                        const infoCorchete = token.token;
+                        return sigExprArray(infoCorchete, indentacionNuevaLinea, indentacionMinima);
+                    }
+                    case "TCorcheteCer": {
+                        const infoCorchete = token.token;
+                        if (globalState.corchetesAbiertos > 0) {
+                            lexer.retroceder();
+                            return new PReturn();
+                        } else {
+                            let textoErr = generarTextoError(lexer.entrada, infoCorchete);
+                            return new PError(`No se esperaba un corchete aquí. No hay ningún array a cerrar.\n\n${textoErr}`);
+                        }
+                    }
                     case "TGenerico":
                         return new PError(`Los genericos aun no estan soportados.`);
                     case "TOperador": {
@@ -311,6 +327,15 @@ export function parseTokens(lexer: Lexer): ResParser {
                         } else {
                             let textoErr = generarTextoError(lexer.entrada, infoOp);
                             return new PError(`No se puede usar el operador ${infoOp.valor} como operador unario.\n\n${textoErr}`);
+                        }
+                    }
+                    case "TComa": {
+                        if (globalState.parensAbiertos > 0 || globalState.corchetesAbiertos > 0) {
+                            lexer.retroceder();
+                            return new PReturn();
+                        } else {
+                            let textoErr = generarTextoError(lexer.entrada, token.token);
+                            return new PError(`No se esperaba una coma aquí. No hay ningún paréntesis, corchete o llave abierto.\n\n${textoErr}`);
                         }
                     }
                     case "PC_IF": {

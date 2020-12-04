@@ -18,6 +18,9 @@ import { PC_ELIF } from "./Token2/PC_ELIF";
 import { PC_DO } from "./Token2/PC_DO";
 import { PC_ELSE } from "./Token2/PC_ELSE";
 import { PC_FUN } from "./Token2/PC_FUN";
+import { TCorcheteAb } from "./Token2/TCorcheteAb";
+import { TCorcheteCer } from "./Token2/TCorcheteCer";
+import { TComa } from "./Token2/TComa";
 
 export type Token2 =
     | TNuevaLinea
@@ -29,10 +32,13 @@ export type Token2 =
     | TBool
     | TUndefined
     | TOperador
+    | TComa
     | TParenAb
     | TParenCer
     | TAgrupAb
     | TAgrupCer
+    | TCorcheteAb
+    | TCorcheteCer
     | PC_LET
     | PC_CONST
     | PC_IF

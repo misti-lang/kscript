@@ -352,6 +352,10 @@ export function crearCodeWithSourceMap(
             case "EDeclaracionFuncion": {
                 return generarJs_EDeclaracionFuncion(expr);
             }
+            case "EArray": {
+                console.log(JSON.stringify(expr.expresiones, null, 4));
+                throw new Error("Generador para expresion Array aun no soportada.");
+            }
             default:
                 let _: never;
                 _ = expr;

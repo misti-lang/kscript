@@ -98,6 +98,13 @@ export function obtPosExpr(ex: Expresion): PosExpr {
                 posInicioLineaPE: ex.posInicioLinea,
             }
         }
+        case "EArray":{
+            return {
+                inicioPE: ex.inicio,
+                numLineaPE: ex.numLinea,
+                posInicioLineaPE: ex.posInicioLinea,
+            }
+        }
         default:
             let _: never;
             _ = ex;
