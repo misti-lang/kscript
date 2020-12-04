@@ -1,7 +1,7 @@
-import {flujo2} from "./Utils/flujos";
+import { flujo2 } from "./Utils/flujos";
 
 const str = `
-const arr = [console.log "Hola", 20, "adios", hola mundo]
+const arr = [[1, 2], 3, [4, 5]]
 `;
 
 const resultado = flujo2(str, "test.ks")

@@ -1,6 +1,4 @@
-import {
-    Expresion
-} from "../AnalisisSintactico/Expresion";
+import { Expresion } from "../AnalisisSintactico/Expresion";
 import { SourceNode } from "source-map";
 import { InfoToken } from "../AnalisisLexico/InfoToken";
 import { EUndefined } from "../AnalisisSintactico/Expresion/EUndefined";
@@ -10,6 +8,7 @@ import { EOperadorUnarioIzq } from "../AnalisisSintactico/Expresion/EOperadorUna
 import { EDeclaracion } from "../AnalisisSintactico/Expresion/EDeclaracion";
 import { ECondicional } from "../AnalisisSintactico/Expresion/ECondicional";
 import { getGeneradorJs_EDeclaracionFuncion } from "./GeneradorEDeclaracionFuncion";
+import { getGeneradorJs_EArray } from "./GeneradorEArray";
 
 const opcionesDefecto: { [s: string]: boolean } = {
     imprimirParensEnOperadores: false
@@ -302,6 +301,11 @@ export function crearCodeWithSourceMap(
             indentacionNivelSig,
             indentacionNivel
         );
+        const generarJs_EArray = getGeneradorJs_EArray(
+            inner,
+            nivel,
+            nombreArchivo
+        );
 
         switch (expr.type) {
             case "EBloque": {
@@ -353,8 +357,7 @@ export function crearCodeWithSourceMap(
                 return generarJs_EDeclaracionFuncion(expr);
             }
             case "EArray": {
-                console.log(JSON.stringify(expr.expresiones, null, 4));
-                throw new Error("Generador para expresion Array aun no soportada.");
+                return generarJs_EArray(expr);
             }
             default:
                 let _: never;

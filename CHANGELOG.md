@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.32
+
+- Agregado soporte basico para arrays. Soporta cualquier tipo de expresion en su interior, separadas por coma.
+
 ## 0.0.31
 
 - Agregado soporte basico para funciones con `fun`.
