@@ -1,11 +1,10 @@
 import { Lexer } from "../..";
 import { Expresion } from "../Expresion";
 import { InfoToken } from "../../AnalisisLexico/InfoToken";
-import { ExprRes, PError, PErrorLexer, PExito, PReturn } from "../ExprRes";
+import { ExprRes, PError, PExito } from "../ExprRes";
 import { Asociatividad } from "../Asociatividad";
 import { ResLexer } from "../../AnalisisLexico/ResLexer";
-import { obtInfoFunAppl, obtInfoOp, generarTextoError } from "./utilidades"
-import { EBloque } from "../Expresion/EBloque";
+import { generarTextoError, obtInfoFunAppl, obtInfoOp } from "./utilidades"
 
 /* Si un operador esta en una nueva linea pero al mismo nivel de indentacion
 *  ya no se considera dentro de la misma expresion
@@ -143,7 +142,7 @@ export const generarParserContinuo = (
                                         condición en paréntesis.`);
             }
             case "PC_DO": {
-                // Asumir que estamos dentro de una condicion y que esta termino.
+                // Asumir que estamos dentro de una condicion o bucle y que esta termino.
                 lexer.retroceder();
                 return new PExito(primeraExprId);
             }
@@ -156,6 +155,14 @@ export const generarParserContinuo = (
                 // Asumir que estamos dentro de una condicion y que esta termino.
                 lexer.retroceder();
                 return new PExito(primeraExprId);
+            }
+            case "PC_WHILE": {
+                const info = token.token;
+                const textoError = generarTextoError(lexer.entrada, info);
+                return new PError(`No se esperaba la palabra clave 'while' luego de la aplicación del operador.
+                                        \n\n${textoError}
+                                        Si deseas usar un bucle como parámetro de una función encierra el
+                                        bucle en paréntesis.`);
             }
             case "PC_FUN": {
                 const info = token.token;

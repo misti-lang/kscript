@@ -12,6 +12,7 @@ import { ECondicional } from "./Expresion/ECondicional";
 import { EBloque } from "./Expresion/EBloque";
 import { EDeclaracionFuncion } from "./Expresion/EDeclaracionFuncion";
 import { EArray } from "./Expresion/EArray";
+import { EWhile } from "./Expresion/EWhile";
 
 export type Expresion =
     | EIdentificador
@@ -27,5 +28,6 @@ export type Expresion =
     | ECondicional
     | EBloque
     | EArray
+    | EWhile
     | EDeclaracionFuncion
 

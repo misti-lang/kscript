@@ -4,9 +4,7 @@ import { Lexer } from "../AnalisisLexico/Lexer";
 import { ErrorLexerP, ErrorParser, ExitoParser, ResParser } from "./ResParser";
 import { ExprRes, PEOF, PError, PErrorLexer, PExito, PReturn } from "./ExprRes";
 import { ErrorComun, Expect } from "./Expect";
-import {
-    Expresion
-} from "./Expresion";
+import { Expresion } from "./Expresion";
 import { SignIndefinida } from "./Signatura";
 import { ExprIdInfo } from "./ExprIdInfo";
 import { getParserSigExprOperador } from "./Parsers/sigExprOperador";
@@ -25,6 +23,7 @@ import { EOperadorUnarioIzq } from "./Expresion/EOperadorUnarioIzq";
 import { EDeclaracion } from "./Expresion/EDeclaracion";
 import { EBloque } from "./Expresion/EBloque";
 import { getSigExprArray } from "./Parsers/sigExprArray";
+import { getSigExprWhile } from "./Parsers/sigExprWhile";
 
 export function parseTokens(lexer: Lexer): ResParser {
 
@@ -165,6 +164,7 @@ export function parseTokens(lexer: Lexer): ResParser {
     const sigExprParen = getSigExprParen(lexer, sigExpresion);
     const sigExprArray = getSigExprArray(lexer, sigExpresion);
     const sigExprCondicional = getSigExprCondicional(lexer, sigExpresion, sigExpresionBloque);
+    const sigExprWhile = getSigExprWhile(lexer, sigExpresion, sigExpresionBloque);
     const sigExprFuncion = getSigExprFuncion(lexer, sigExpresion, sigExpresionBloque);
 
     /**
@@ -353,6 +353,9 @@ export function parseTokens(lexer: Lexer): ResParser {
                     }
                     case "PC_DO": {
                         return new PError("No se esperada la palabra clave 'do' aqui.")
+                    }
+                    case "PC_WHILE": {
+                        return sigExprWhile(token.token, indentacionNuevaLinea);
                     }
                     case "PC_FUN": {
                         return sigExprFuncion(token.token, indentacionNuevaLinea);

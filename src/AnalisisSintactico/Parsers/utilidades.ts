@@ -1,5 +1,9 @@
 import { InfoToken } from "../../AnalisisLexico/InfoToken";
 import { Asociatividad } from "../Asociatividad";
+import { ExprRes, PError } from "../ExprRes";
+import { Lexer } from "../../AnalisisLexico/Lexer";
+import { Expresion } from "../Expresion";
+import { ErrorComun, Expect } from "../Expect";
 
 export function obtInfoFunAppl(
     esCurry: boolean,
@@ -100,7 +104,114 @@ export const generarTextoError = <A>(entrada: string, info: InfoToken<A>): strin
 const globalState = {
     parensAbiertos: 0,
     corchetesAbiertos: 0,
-    ifAbiertos: 0
+    ifAbiertos: 0,
+    whileAbiertos: 0
 };
 
 export const getGlobalState = () => globalState;
+
+export interface Retorno<A> {
+    error?: ExprRes
+    exito?: A
+}
+
+export function obtExpresionBloqueCodigo(
+    indentacionNuevaLinea: number,
+    lexer: Lexer,
+    sigExpresion: (
+        nivel: number,
+        nivelPadre: number,
+        precedencia: number,
+        asociatividad: Asociatividad,
+        esExprPrincipal: boolean
+    ) => ExprRes,
+    sigExpresionBloque: (
+        nivel: number,
+        esExpresion: boolean
+    ) => ExprRes
+): Retorno<Expresion> {
+    // Revisar si el siguiente token está en la misma linea o en una linea diferente
+    const [_, nuevoNivel1, hayNuevaLinea, fnEstablecer] = lexer.lookAheadSignificativo(false);
+
+    if (hayNuevaLinea && nuevoNivel1 <= indentacionNuevaLinea) {
+        throw new ErrorComun(`La expresión condicional está incompleta. Se esperaba una expresión indentada.`);
+    }
+
+    if (hayNuevaLinea) {
+        fnEstablecer();
+    }
+
+    const nuevoNivel = Math.max(nuevoNivel1, indentacionNuevaLinea);
+
+    // Obtener la expresion que ira dentro del if. Si esta en la misma linea, solo 1 expresion.
+    //   Sino, un bloque de expresiones
+    const sigExprCuerpo = hayNuevaLinea ?
+        sigExpresionBloque(nuevoNivel, true) :
+        sigExpresion(
+            nuevoNivel,
+            indentacionNuevaLinea,
+            0,
+            Asociatividad.Izq,
+            true
+        );
+
+    if (sigExprCuerpo.type === "PReturn" || sigExprCuerpo.type === "PEOF") {
+        return {error: new PError("Se esperaba una expresión luego de 'do'.")};
+    } else if (sigExprCuerpo.type === "PError") {
+        return {error: new PError(`Se esperaba una expresión luego de 'do':\n${sigExprCuerpo.err}`)};
+    } else if (sigExprCuerpo.type === "PErrorLexer") {
+        return {error: sigExprCuerpo};
+    }
+
+    return {exito: sigExprCuerpo.expr};
+}
+
+export function obtExpresionesCondicion(
+    indentacionNuevaLinea: number,
+    tipoCondicion = "if",
+    lexer: Lexer,
+    sigExpresion: (
+        nivel: number,
+        nivelPadre: number,
+        precedencia: number,
+        asociatividad: Asociatividad,
+        esExprPrincipal: boolean
+    ) => ExprRes,
+    sigExpresionBloque: (
+        nivel: number,
+        esExpresion: boolean
+    ) => ExprRes
+): Retorno<[Expresion, Expresion]> {
+
+    // Obtener la posicion del siguiente token para ajustar la indentacion
+    const tokenSig = lexer.lookAhead();
+    if (tokenSig.type !== "TokenLexer") {
+        return {error: new PError(`Se esperaba una expresión luego de '${tipoCondicion}'.`)};
+    }
+    const posInicio = tokenSig.token.token.inicio - tokenSig.token.token.posInicioLinea;
+
+    // Obtener la expresion que se usara como condicional
+    const sigExpr = sigExpresion(posInicio, indentacionNuevaLinea, 0, Asociatividad.Izq, true);
+    if (sigExpr.type === "PReturn" || sigExpr.type === "PEOF") {
+        return {error: new PError(`Se esperaba una expresión luego de '${tipoCondicion}'.`)};
+    } else if (sigExpr.type === "PError") {
+        return {error: new PError(`Se esperaba una expresión luego de '${tipoCondicion}':\n${sigExpr.err}`)};
+    } else if (sigExpr.type === "PErrorLexer") {
+        return {error: sigExpr};
+    }
+
+    const exprCondicionIf = sigExpr.expr;
+
+    // Esperar el token 'do', o lanzar un error
+    Expect.PC_DO(lexer.sigToken(), "Se esperaba el token 'do'.", lexer);
+
+    const exprBloquePre = obtExpresionBloqueCodigo(indentacionNuevaLinea, lexer, sigExpresion, sigExpresionBloque);
+    if (exprBloquePre.error) {
+        return {error: exprBloquePre.error};
+    }
+
+    const exprBloque = exprBloquePre.exito!!;
+
+    return {exito: [exprCondicionIf, exprBloque]};
+}
+

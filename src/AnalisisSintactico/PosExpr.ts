@@ -84,6 +84,13 @@ export function obtPosExpr(ex: Expresion): PosExpr {
                 posInicioLineaPE: ex.posInicioLinea,
             }
         }
+        case "EWhile": {
+            return {
+                inicioPE: ex.inicio,
+                numLineaPE: ex.numLinea,
+                posInicioLineaPE: ex.posInicioLinea,
+            }
+        }
         case "EUndefined": {
             return {
                 inicioPE: ex.infoId.inicio,

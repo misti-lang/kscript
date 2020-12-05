@@ -350,6 +350,9 @@ export function crearCodeWithSourceMap(
             case "ECondicional": {
                 return generarJs_ECondicional(expr);
             }
+            case "EWhile": {
+                throw new Error("Expresion While aun no soportada.");
+            }
             case "EUndefined": {
                 return generarJs_EUndefined(expr);
             }
