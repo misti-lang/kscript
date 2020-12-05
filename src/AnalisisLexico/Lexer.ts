@@ -18,7 +18,7 @@ import { PC_ELIF } from "./Token2/PC_ELIF"
 import { PC_DO } from "./Token2/PC_DO"
 import { PC_ELSE } from "./Token2/PC_ELSE"
 import { PC_FUN } from "./Token2/PC_FUN";
-import {Token2} from "./Token2";
+import { Token2 } from "./Token2";
 import { Token } from "./Token";
 import { run } from "./parsers";
 import { parserGeneral } from "./gramatica";
@@ -28,6 +28,7 @@ import { TUndefined } from "./Token2/TUndefined";
 import { TCorcheteAb } from "./Token2/TCorcheteAb";
 import { TCorcheteCer } from "./Token2/TCorcheteCer";
 import { TComa } from "./Token2/TComa";
+import { PC_WHILE } from "./Token2/PC_WHILE";
 
 export class Lexer {
 
@@ -163,6 +164,9 @@ export class Lexer {
                             case "else": {
                                 return crearToken2(x => new PC_ELSE(x), "else");
                             }
+                            case "while": {
+                                return crearToken2(x => new PC_WHILE(x), "while");
+                            }
                             case "fun": {
                                 return crearToken2(x => new PC_FUN(x), "fun");
                             }
@@ -180,7 +184,7 @@ export class Lexer {
                     case Token.Texto:
                         return crearToken2(x => new TTexto(x), ex.res);
                     case Token.Operadores: {
-                        switch (ex.res) {
+                        switch (ex.res as string) {
                             case ",": {
                                 return crearToken2(x => new TComa(x), ex.res);
                             }
@@ -190,7 +194,7 @@ export class Lexer {
                         }
                     }
                     case Token.AgrupacionAb: {
-                        switch (ex.res) {
+                        switch (ex.res as string) {
                             case "(":
                                 return crearToken2(x => new TParenAb(x), ex.res)
                             case "[":
@@ -200,7 +204,7 @@ export class Lexer {
                         }
                     }
                     case Token.AgrupacionCer: {
-                        switch (ex.res) {
+                        switch (ex.res as string) {
                             case ")":
                                 return crearToken2(x => new TParenCer(x), ex.res)
                             case "]":

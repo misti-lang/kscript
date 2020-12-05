@@ -21,6 +21,7 @@ import { PC_FUN } from "./Token2/PC_FUN";
 import { TCorcheteAb } from "./Token2/TCorcheteAb";
 import { TCorcheteCer } from "./Token2/TCorcheteCer";
 import { TComa } from "./Token2/TComa";
+import { PC_WHILE } from "./Token2/PC_WHILE";
 
 export type Token2 =
     | TNuevaLinea
@@ -45,4 +46,5 @@ export type Token2 =
     | PC_ELIF
     | PC_DO
     | PC_ELSE
+    | PC_WHILE
     | PC_FUN
