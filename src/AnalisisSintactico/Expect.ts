@@ -2,7 +2,7 @@ import { ResLexer } from "../AnalisisLexico/ResLexer";
 import { Token2 } from "../AnalisisLexico/Token2";
 import { InfoToken } from "../AnalisisLexico/InfoToken";
 import { generarTextoError } from "./Parsers/utilidades";
-import { Lexer } from "..";
+import { Lexer } from "../AnalisisLexico/Lexer";
 
 export class ErrorComun extends Error {
     constructor(message: string) {

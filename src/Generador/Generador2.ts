@@ -9,6 +9,7 @@ import { EDeclaracion } from "../AnalisisSintactico/Expresion/EDeclaracion";
 import { ECondicional } from "../AnalisisSintactico/Expresion/ECondicional";
 import { getGeneradorJs_EDeclaracionFuncion } from "./GeneradorEDeclaracionFuncion";
 import { getGeneradorJs_EArray } from "./GeneradorEArray";
+import { getGeneradorJs_EWhile } from "./GeneradorEWhile";
 
 const opcionesDefecto: { [s: string]: boolean } = {
     imprimirParensEnOperadores: false
@@ -306,6 +307,13 @@ export function crearCodeWithSourceMap(
             nivel,
             nombreArchivo
         );
+        const generarJs_EWhile = getGeneradorJs_EWhile(
+            inner,
+            nivel,
+            nombreArchivo,
+            toplevel,
+            indentacionNivelSig
+        );
 
         switch (expr.type) {
             case "EBloque": {
@@ -351,7 +359,7 @@ export function crearCodeWithSourceMap(
                 return generarJs_ECondicional(expr);
             }
             case "EWhile": {
-                throw new Error("Expresion While aun no soportada.");
+                return generarJs_EWhile(expr);
             }
             case "EUndefined": {
                 return generarJs_EUndefined(expr);

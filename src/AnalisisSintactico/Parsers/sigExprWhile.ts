@@ -29,7 +29,7 @@ export function getSigExprWhile(
 
             const resultadoExpresionesWhile = obtExpresionesCondicion(
                 indentacionNuevaLinea,
-                "if",
+                "while",
                 lexer,
                 sigExpresion,
                 sigExpresionBloque
@@ -40,7 +40,7 @@ export function getSigExprWhile(
             const [exprCondicionWhile, exprBloqueWhile] = resultadoExpresionesWhile.exito!!
 
             const exprWhile = new EWhile(
-                exprBloqueWhile,
+                exprCondicionWhile,
                 exprBloqueWhile,
                 tokenWhile.inicio,
                 tokenWhile.numLinea,

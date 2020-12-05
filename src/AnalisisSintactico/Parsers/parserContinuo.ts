@@ -1,4 +1,4 @@
-import { Lexer } from "../..";
+import { Lexer } from "../../AnalisisLexico/Lexer";
 import { Expresion } from "../Expresion";
 import { InfoToken } from "../../AnalisisLexico/InfoToken";
 import { ExprRes, PError, PExito } from "../ExprRes";

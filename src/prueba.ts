@@ -1,7 +1,8 @@
 import { flujo2 } from "./Utils/flujos";
 
 const str = `
-const arr = [[1, 2], 3, [4, 5]]
+while true do
+    console.log "Hola mundo :D"
 `;
 
 const resultado = flujo2(str, "test.ks")
