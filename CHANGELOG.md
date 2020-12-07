@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.34
+
+- Restaurado exports removidos.
+
 ## 0.0.33
 
 - Agregado soporte basico para bucle while.
