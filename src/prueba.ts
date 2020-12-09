@@ -1,8 +1,9 @@
 import { flujo2 } from "./Utils/flujos";
 
 const str = `
-while true do
-    console.log "Hola mundo :D"
+const s = const j = 
+    console.log "hola mundo"
+    20
 `;
 
 const resultado = flujo2(str, "test.ks")

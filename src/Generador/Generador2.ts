@@ -25,7 +25,13 @@ export function crearCodeWithSourceMap(
 
     const imprParenEnOp = !!(opciones?.imprimirParensEnOperadores) ?? false;
 
-    function inner(expr: Expresion, toplevel: boolean, nivel: number, IIFE = true): [SourceNode, number] {
+    function inner(
+        expr: Expresion,
+        toplevel: boolean,
+        nivel: number,
+        IIFE = true,
+        usarReturn = false
+    ): [SourceNode, number] {
         const indentacionNivel = new Array(nivel * 4).fill(" ").join("");
         const indentacionNivelSig = new Array((nivel + 1) * 4).fill(" ").join("");
         const indentacionNivelAnt = (nivel == 0) ? "" : new Array((nivel - 1) * 4).fill(" ").join("");
@@ -76,23 +82,31 @@ export function crearCodeWithSourceMap(
             return nodoFun;
         }
 
-        function generarJS_EBloque(exprs: Array<Expresion>, toplevel: boolean, IIFE = true): [SourceNode, number] {
+        function generarJS_EBloque(
+            exprs: Array<Expresion>,
+            toplevel: boolean,
+            IIFE = true,
+            usarReturn = false
+        ): [SourceNode, number] {
             function generarInner(exprs: Array<Expresion>): SourceNode {
                 if (exprs.length === 1) {
                     const e = exprs[0];
                     if (toplevel) {
                         const snJs = inner(e, false, nivel)[0];
-                        return new SourceNode(snJs.line, snJs.column, nombreArchivo, [indentacionNivel, snJs, ";"]);
+                        return new SourceNode(snJs.line, snJs.column, nombreArchivo, [indentacionNivel, snJs]);
                     } else {
                         switch (e.type) {
                             case "EDeclaracion": {
                                 const snJs = inner(e, false, nivel)[0];
-                                const codigoRes = [indentacionNivel, snJs, ";\n", indentacionNivel, "return undefined;"];
+                                const codigoRes = [indentacionNivel, snJs, "\n", indentacionNivel];
+                                if (usarReturn) codigoRes.push("return undefined");
                                 return new SourceNode(snJs.line, snJs.column, nombreArchivo, codigoRes);
                             }
                             default: {
                                 const snJs = inner(e, false, nivel)[0];
-                                const codigoRes = [indentacionNivel, "return ", snJs, ";"];
+                                const codigoRes = usarReturn
+                                    ? [indentacionNivel, "return ", snJs]
+                                    : [indentacionNivel, snJs];
                                 return new SourceNode(snJs.line, snJs.column, nombreArchivo, codigoRes);
                             }
                         }
@@ -100,7 +114,7 @@ export function crearCodeWithSourceMap(
                 } else if (exprs.length > 1) {
                     const [e, ...es] = exprs
                     const snJs = inner(e, false, nivel)[0];
-                    const codigoRes = new SourceNode(null, null, nombreArchivo, [indentacionNivel, snJs, ";", "\n", generarInner(es)]);
+                    const codigoRes = new SourceNode(null, null, nombreArchivo, [indentacionNivel, snJs, "\n", generarInner(es)]);
                     return new SourceNode(snJs.line, snJs.column, nombreArchivo, codigoRes);
                 } else {
                     return new SourceNode(0, 0, nombreArchivo, "");
@@ -148,7 +162,7 @@ export function crearCodeWithSourceMap(
             ), 0];
         }
 
-        function generarJs_EUndefined(identificador: EUndefined): [SourceNode, number] {
+        function generarJS_EUndefined(identificador: EUndefined): [SourceNode, number] {
             const strRes = "undefined";
             return [new SourceNode(
                 identificador.infoId.numLinea,
@@ -161,17 +175,30 @@ export function crearCodeWithSourceMap(
         function generarJS_EDeclaracion(dec: EDeclaracion): [SourceNode, number] {
             const inicio = dec.mut ? "let" : "const";
             const snId = generarJS_EIdentificador(dec.id)[0];
-            const [snResto] = inner(dec.valorDec, false, (nivel + 1));
+
             switch (dec.valorDec.type) {
+                // Si se asigna una declaracion a otra declaracion
                 case "EDeclaracion": {
+                    const [snResto] = inner(dec.valorDec, false, (nivel + 1));
                     const codigoRes = [inicio, " ", snId, " = ", "(() => {\n", indentacionNivelSig, snResto, "\n", indentacionNivelSig,
                         "return undefined;\n", indentacionNivel, "})()"];
-                    const res = new SourceNode(dec.id.valorId.numLinea, dec.id.valorId.inicio - dec.id.valorId.posInicioLinea, nombreArchivo, codigoRes);
+                    const res = new SourceNode(
+                        dec.id.valorId.numLinea,
+                        dec.id.valorId.inicio - dec.id.valorId.posInicioLinea,
+                        nombreArchivo,
+                        codigoRes
+                    );
                     return [res, 0];
                 }
                 default: {
+                    const [snResto] = inner(dec.valorDec, false, (nivel + 1), true, true);
                     const codigoRes = [inicio, " ", snId, " = ", snResto];
-                    const res = new SourceNode(dec.id.valorId.numLinea, dec.id.valorId.inicio - dec.id.valorId.posInicioLinea, nombreArchivo, codigoRes);
+                    const res = new SourceNode(
+                        dec.id.valorId.numLinea,
+                        dec.id.valorId.inicio - dec.id.valorId.posInicioLinea,
+                        nombreArchivo,
+                        codigoRes
+                    );
                     return [res, 0];
                 }
             }
@@ -214,7 +241,7 @@ export function crearCodeWithSourceMap(
             return [retorno, precedenciaOp];
         }
 
-        function generarJs_EOpUnarioIzq(eOpApl: EOperadorUnarioIzq): [SourceNode, number] {
+        function generarJS_EOpUnarioIzq(eOpApl: EOperadorUnarioIzq): [SourceNode, number] {
             const infoOp = eOpApl.op.valorOp;
 
             const [nodo] = crearCodeWithSourceMap(eOpApl.expr, false, nivel, nombreArchivo);
@@ -230,7 +257,7 @@ export function crearCodeWithSourceMap(
             ];
         }
 
-        function generarJs_ECondicional(eCond: ECondicional): [SourceNode, number] {
+        function generarJS_ECondicional(eCond: ECondicional): [SourceNode, number] {
             const [exprCondicionIf, exprBloqueIf] = eCond.exprCondicion;
 
             const [snCondicion] = inner(exprCondicionIf, toplevel, nivel);
@@ -294,7 +321,7 @@ export function crearCodeWithSourceMap(
             return [nodoIf, 0];
         }
 
-        const generarJs_EDeclaracionFuncion = getGeneradorJs_EDeclaracionFuncion(
+        const generarJS_EDeclaracionFuncion = getGeneradorJs_EDeclaracionFuncion(
             inner,
             generarJS_EIdentificador,
             nivel,
@@ -302,12 +329,12 @@ export function crearCodeWithSourceMap(
             indentacionNivelSig,
             indentacionNivel
         );
-        const generarJs_EArray = getGeneradorJs_EArray(
+        const generarJS_EArray = getGeneradorJs_EArray(
             inner,
             nivel,
             nombreArchivo
         );
-        const generarJs_EWhile = getGeneradorJs_EWhile(
+        const generarJS_EWhile = getGeneradorJs_EWhile(
             inner,
             nivel,
             nombreArchivo,
@@ -317,7 +344,7 @@ export function crearCodeWithSourceMap(
 
         switch (expr.type) {
             case "EBloque": {
-                return generarJS_EBloque(expr.bloque, toplevel, IIFE);
+                return generarJS_EBloque(expr.bloque, toplevel, IIFE, usarReturn);
             }
             case "ENumero": {
                 return generarJS_ENumero(expr.info);
@@ -353,22 +380,22 @@ export function crearCodeWithSourceMap(
                 throw new Error("Usar operadores como expresiones aun no soportado.");
             }
             case "EOperadorUnarioIzq": {
-                return generarJs_EOpUnarioIzq(expr);
+                return generarJS_EOpUnarioIzq(expr);
             }
             case "ECondicional": {
-                return generarJs_ECondicional(expr);
+                return generarJS_ECondicional(expr);
             }
             case "EWhile": {
-                return generarJs_EWhile(expr);
+                return generarJS_EWhile(expr);
             }
             case "EUndefined": {
-                return generarJs_EUndefined(expr);
+                return generarJS_EUndefined(expr);
             }
             case "EDeclaracionFuncion": {
-                return generarJs_EDeclaracionFuncion(expr);
+                return generarJS_EDeclaracionFuncion(expr);
             }
             case "EArray": {
-                return generarJs_EArray(expr);
+                return generarJS_EArray(expr);
             }
             default:
                 let _: never;
