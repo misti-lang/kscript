@@ -23,6 +23,7 @@ export function getSigExprArray(
 
         const expresiones: Expresion[] = [];
 
+        let ultimoTokenEsComa = false;
         // Parsear todas las expresiones posibles
         while (true) {
 
@@ -46,10 +47,15 @@ export function getSigExprArray(
                             switch (sigToken.token.type) {
                                 // Continuar el bucle.
                                 case "TComa": {
+                                    ultimoTokenEsComa = true;
                                     continue;
                                 }
                                 // Salir del bucle
                                 case "TCorcheteCer": {
+                                    if (ultimoTokenEsComa) {
+                                        return new PError("Los arrays no pueden tener comas colgantes.");
+                                    }
+
                                     return new PExito(
                                         new EArray(expresiones, infoArray.inicio, infoArray.numLinea, infoArray.posInicioLinea)
                                     );
@@ -60,9 +66,11 @@ export function getSigExprArray(
                             }
                         }
                     }
+                    break;
                 }
                 // Si se encontro una expresion
                 case "PExito": {
+                    ultimoTokenEsComa = false;
                     const sigExpr2 = sigExpr.expr;
                     expresiones.push(sigExpr2);
                 }

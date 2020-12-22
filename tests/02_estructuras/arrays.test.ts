@@ -28,14 +28,6 @@ test("Array con diferentes tipos de elementos", () => {
     expect(salida).toBe(esperado);
 });
 
-// Not a bug, but a feature
-test("Array con coma colgante", () => {
-    const entrada = `[1, 2,]`;
-    const salida = flujo2(entrada, "").toString();
-    const esperado = `[1, 2]`;
-    expect(salida).toBe(esperado);
-});
-
 test("Array asignado a declaracion", () => {
     const entrada = `const frutas = ["Pera", "Manzana"]`;
     const salida = flujo2(entrada, "").toString();
@@ -85,3 +77,14 @@ test("Asignar elemento de array a elemento de array", () => {
     expect(salida).toBe(esperado);
 });
 
+test("Array con coma colgante", () => {
+    const entrada = `[1, 2, 3,]`;
+    const f = () => flujo2(entrada, "").toString();
+    expect(f).toThrow(Error);
+});
+
+test("Array con multiples comas colgantes", () => {
+    const entrada = `[1, 2, 3, , , , ,]`;
+    const f = () => flujo2(entrada, "").toString();
+    expect(f).toThrow(Error);
+});
