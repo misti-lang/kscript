@@ -6,3 +6,9 @@ test("Llamadas multiples separadas", () => {
     const esperado = `console.log("hola")\nconsole.log("mundo")`;
     expect(salida).toBe(esperado);
 });
+
+test("Declarar función sin parametros", () => {
+    const entrada = `fun f () = 10`;
+    const f = () => flujo2(entrada, "").toString();
+    expect(f).not.toThrow(Error);
+});

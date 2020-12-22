@@ -28,6 +28,24 @@ test("Constante y operacion compleja", () => {
     expect(salida).toBe(esperado);
 });
 
+test("Usar solo palabra clave const", () => {
+    const entrada = `const`;
+    const f = () => flujo2(entrada, "").toString();
+    expect(f).toThrow(Error);
+});
+
+test("Usar solo palabra clave const e identificador", () => {
+    const entrada = `const c`;
+    const f = () => flujo2(entrada, "").toString();
+    expect(f).toThrow(Error);
+});
+
+test("Declarar constante sin expresion tras igual", () => {
+    const entrada = `const c =`;
+    const f = () => flujo2(entrada, "").toString();
+    expect(f).toThrow(Error);
+});
+
 test("Constante asignada a constante", () => {
     const entrada = `const a = const b = 20`;
     const salida = flujo2(entrada, "").toString();

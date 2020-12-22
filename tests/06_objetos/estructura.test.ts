@@ -20,3 +20,9 @@ test("Asignar () compila a undefined", () => {
     const esperado = `a.b = undefined`;
     expect(salida).toBe(esperado);
 });
+
+test("Crear objeto", () => {
+    const entrada = `{a 20}`;
+    const f = () => flujo2(entrada, "").toString();
+    expect(f).not.toThrow(Error);
+});
