@@ -29,6 +29,8 @@ import { TCorcheteAb } from "./Token2/TCorcheteAb";
 import { TCorcheteCer } from "./Token2/TCorcheteCer";
 import { TComa } from "./Token2/TComa";
 import { PC_WHILE } from "./Token2/PC_WHILE";
+import { TLlaveAb } from "./Token2/TLlaveAb";
+import { TLlaveCer } from "./Token2/TLlaveCer";
 
 export class Lexer {
 
@@ -199,6 +201,8 @@ export class Lexer {
                                 return crearToken2(x => new TParenAb(x), ex.res)
                             case "[":
                                 return crearToken2(x => new TCorcheteAb(x), ex.res)
+                            case "{":
+                                return crearToken2(x => new TLlaveAb(x), ex.res)
                             default:
                                 return crearToken2(x => new TAgrupAb(x), ex.res)
                         }
@@ -209,6 +213,8 @@ export class Lexer {
                                 return crearToken2(x => new TParenCer(x), ex.res)
                             case "]":
                                 return crearToken2(x => new TCorcheteCer(x), ex.res)
+                            case "}":
+                                return crearToken2(x => new TLlaveCer(x), ex.res)
                             default:
                                 return crearToken2(x => new TAgrupCer(x), ex.res)
                         }

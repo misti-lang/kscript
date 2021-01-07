@@ -22,6 +22,8 @@ import { TCorcheteAb } from "./Token2/TCorcheteAb";
 import { TCorcheteCer } from "./Token2/TCorcheteCer";
 import { TComa } from "./Token2/TComa";
 import { PC_WHILE } from "./Token2/PC_WHILE";
+import { TLlaveAb } from "./Token2/TLlaveAb";
+import { TLlaveCer } from "./Token2/TLlaveCer";
 
 export type Token2 =
     | TNuevaLinea
@@ -40,6 +42,8 @@ export type Token2 =
     | TAgrupCer
     | TCorcheteAb
     | TCorcheteCer
+    | TLlaveAb
+    | TLlaveCer
     | PC_LET
     | PC_CONST
     | PC_IF
