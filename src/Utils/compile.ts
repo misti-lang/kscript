@@ -22,7 +22,8 @@ export const compilar = (ruta: string, imprimirEnStdout = false) => {
             process.exit(1);
         }
     })();
-    const nombreSinExtension = nombreArchivo.substr(0, nombreArchivo.length - 6);
+
+    const nombreSinExtension = nombreArchivo.substr(0, nombreArchivo.length - 3);
     let restoRuta = fragmentosRuta.join("/");
     if (restoRuta !== "") restoRuta += "/";
 

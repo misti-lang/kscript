@@ -26,3 +26,9 @@ test("Crear objeto", () => {
     const f = () => flujo2(entrada, "").toString();
     expect(f).not.toThrow(Error);
 });
+
+test("Crear objeto vacio", () => {
+    const entrada = `{}`;
+    const f = () => flujo2(entrada, "").toString();
+    expect(f).not.toThrow(Error);
+});

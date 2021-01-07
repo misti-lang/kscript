@@ -6,7 +6,7 @@ devDependencies:
   jest: 26.4.2
   ts-jest: 26.3.0_jest@26.4.2+typescript@3.9.7
   typescript: 3.9.7
-lockfileVersion: 5.1
+lockfileVersion: 5.2
 packages:
   /@babel/code-frame/7.10.4:
     dependencies:
@@ -333,7 +333,7 @@ packages:
       jest-haste-map: 26.3.0
       jest-message-util: 26.3.0
       jest-regex-util: 26.0.0
-      jest-resolve: 26.4.0_jest-resolve@26.4.0
+      jest-resolve: 26.4.0
       jest-resolve-dependencies: 26.4.2
       jest-runner: 26.4.2
       jest-runtime: 26.4.2
@@ -403,7 +403,7 @@ packages:
       istanbul-lib-source-maps: 4.0.0
       istanbul-reports: 3.0.2
       jest-haste-map: 26.3.0
-      jest-resolve: 26.4.0_jest-resolve@26.4.0
+      jest-resolve: 26.4.0
       jest-util: 26.3.0
       jest-worker: 26.3.0
       slash: 3.0.0
@@ -1994,7 +1994,7 @@ packages:
       jest-get-type: 26.3.0
       jest-jasmine2: 26.4.2
       jest-regex-util: 26.0.0
-      jest-resolve: 26.4.0_jest-resolve@26.4.0
+      jest-resolve: 26.4.0
       jest-util: 26.3.0
       jest-validate: 26.4.2
       micromatch: 4.0.2
@@ -2178,7 +2178,7 @@ packages:
       integrity: sha512-PeaRrg8Dc6mnS35gOo/CbZovoDPKAeB1FICZiuagAgGvbWdNNyjQjkOaGUa/3N3JtpQ/Mh9P4A2D4Fv51NnP8Q==
   /jest-pnp-resolver/1.2.2_jest-resolve@26.4.0:
     dependencies:
-      jest-resolve: 26.4.0_jest-resolve@26.4.0
+      jest-resolve: 26.4.0
     dev: true
     engines:
       node: '>=6'
@@ -2205,7 +2205,7 @@ packages:
       node: '>= 10.14.2'
     resolution:
       integrity: sha512-ADHaOwqEcVc71uTfySzSowA/RdxUpCxhxa2FNLiin9vWLB1uLPad3we+JSSROq5+SrL9iYPdZZF8bdKM7XABTQ==
-  /jest-resolve/26.4.0_jest-resolve@26.4.0:
+  /jest-resolve/26.4.0:
     dependencies:
       '@jest/types': 26.3.0
       chalk: 4.1.0
@@ -2218,8 +2218,6 @@ packages:
     dev: true
     engines:
       node: '>= 10.14.2'
-    peerDependencies:
-      jest-resolve: '*'
     resolution:
       integrity: sha512-bn/JoZTEXRSlEx3+SfgZcJAVuTMOksYq9xe9O6s4Ekg84aKBObEaVXKOEilULRqviSLAYJldnoWV9c07kwtiCg==
   /jest-runner/26.4.2:
@@ -2238,7 +2236,7 @@ packages:
       jest-haste-map: 26.3.0
       jest-leak-detector: 26.4.2
       jest-message-util: 26.3.0
-      jest-resolve: 26.4.0_jest-resolve@26.4.0
+      jest-resolve: 26.4.0
       jest-runtime: 26.4.2
       jest-util: 26.3.0
       jest-worker: 26.3.0
@@ -2270,7 +2268,7 @@ packages:
       jest-message-util: 26.3.0
       jest-mock: 26.3.0
       jest-regex-util: 26.0.0
-      jest-resolve: 26.4.0_jest-resolve@26.4.0
+      jest-resolve: 26.4.0
       jest-snapshot: 26.4.2
       jest-util: 26.3.0
       jest-validate: 26.4.2
@@ -2305,7 +2303,7 @@ packages:
       jest-haste-map: 26.3.0
       jest-matcher-utils: 26.4.2
       jest-message-util: 26.3.0
-      jest-resolve: 26.4.0_jest-resolve@26.4.0
+      jest-resolve: 26.4.0
       natural-compare: 1.4.0
       pretty-format: 26.4.2
       semver: 7.3.2

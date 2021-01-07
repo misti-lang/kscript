@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "node src/index.js",
+    "start": "node src/bin.js",
     "repl": "node ./src/index.js --repl",
     "compile": "node ./src/index.js -c",
     "probar": "node src/prueba.js",
