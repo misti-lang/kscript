@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.36
+
+- Arreglado error al crear funciones sin parametros y objetos tipo '{a 1}}}'
+
 ## 0.0.35
 
 - Agregado soporte basico para objetos. Solo en una linea, separados por comas, en una misma linea.

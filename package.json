@@ -1,6 +1,6 @@
 {
   "name": "kscript",
-  "version": "0.0.35",
+  "version": "0.0.36",
   "description": "Lenguaje de programación funcional que se compila a JavaScript.",
   "homepage": "https://kscript.araozu.pro/",
   "bugs": {
@@ -9,8 +9,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node src/bin.js",
-    "repl": "node ./src/index.js --repl",
-    "compile": "node ./src/index.js -c",
+    "repl": "node ./src/bin.js --repl",
+    "compile": "node ./src/bin.js -c",
     "probar": "node src/prueba.js",
     "test": "jest",
     "prepublishOnly": "tsc",
