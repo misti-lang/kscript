@@ -31,6 +31,7 @@ export function getSigExprFuncion(
         // La función no tiene parámetros
         // TODO: pattern matching :c
         if (tokenLookAhead.token.type === "TUndefined") {
+            lexer.sigToken();
             return [];
         } else if (tokenLookAhead.token.type === "TIdentificador") {
             const arrRetorno: TIdentificador[] = [];
