@@ -32,3 +32,42 @@ test("Crear objeto vacio", () => {
     const f = () => flujo2(entrada, "").toString();
     expect(f).not.toThrow(Error);
 });
+
+test("Objeto con comas colgantes", () => {
+    const entrada = `{a 20,}`;
+    const f = () => flujo2(entrada, "").toString();
+    expect(f).toThrow(Error);
+});
+
+test("Objeto con multiples llaves cerradas", () => {
+    const entrada = `{a 20}}`;
+    const f = () => flujo2(entrada, "").toString();
+    expect(f).toThrow(Error);
+});
+
+test("Objetos anidados", () => {
+    const entrada = `{a {b 30}}`;
+    const salida = flujo2(entrada, "").toString();
+    const esperado = `{a: {b: 30}}`
+    expect(salida).toBe(esperado);
+});
+
+test("Objeto con multiples valores", () => {
+    const entrada = `{a 20, b 30, c 40}`;
+    const salida = flujo2(entrada, "").toString();
+    const esperado = `{a: 20, b: 30, c: 40}`
+    expect(salida).toBe(esperado);
+});
+
+test("Usar numeros como claves", () => {
+    const entrada = `{40 20}`;
+    const f = () => flujo2(entrada, "").toString();
+    expect(f).toThrow(Error);
+});
+
+test("Usar string como clave", () => {
+    const entrada = `{"hola" "mundo"}`;
+    const f = () => flujo2(entrada, "").toString();
+    expect(f).toThrow(Error);
+});
+

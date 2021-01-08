@@ -37,6 +37,9 @@ export function getSigExprObjeto(
                             return new PError("Los objetos no pueden tener comas colgantes.");
                         }
 
+                        // Como aqui ya se esta consumiendo la llave cerrada, diminuir el contador
+                        globalState.llavesAbiertas--;
+
                         return new PExito(
                             new EObjeto(entradas, infoArray.inicio, infoArray.numLinea, infoArray.posInicioLinea)
                         );
