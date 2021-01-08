@@ -24,6 +24,7 @@ import { EDeclaracion } from "./Expresion/EDeclaracion";
 import { EBloque } from "./Expresion/EBloque";
 import { getSigExprArray } from "./Parsers/sigExprArray";
 import { getSigExprWhile } from "./Parsers/sigExprWhile";
+import { getSigExprObjeto } from "./Parsers/sigExprObjeto";
 
 export function parseTokens(lexer: Lexer): ResParser {
 
@@ -163,6 +164,7 @@ export function parseTokens(lexer: Lexer): ResParser {
 
     const sigExprParen = getSigExprParen(lexer, sigExpresion);
     const sigExprArray = getSigExprArray(lexer, sigExpresion);
+    const sigExprObjeto = getSigExprObjeto(lexer, sigExpresion);
     const sigExprCondicional = getSigExprCondicional(lexer, sigExpresion, sigExpresionBloque);
     const sigExprWhile = getSigExprWhile(lexer, sigExpresion, sigExpresionBloque);
     const sigExprFuncion = getSigExprFuncion(lexer, sigExpresion, sigExpresionBloque);
@@ -312,10 +314,25 @@ export function parseTokens(lexer: Lexer): ResParser {
                         const infoCorchete = token.token;
                         if (globalState.corchetesAbiertos > 0) {
                             lexer.retroceder();
+                            globalState.corchetesAbiertos--;
                             return new PReturn();
                         } else {
                             let textoErr = generarTextoError(lexer.entrada, infoCorchete);
                             return new PError(`No se esperaba un corchete aquí. No hay ningún array a cerrar.\n\n${textoErr}`);
+                        }
+                    }
+                    case "TLlaveAb": {
+                        return sigExprObjeto(token.token, indentacionNuevaLinea, indentacionMinima);
+                    }
+                    case "TLlaveCer": {
+                        const infoLlave = token.token;
+                        if (globalState.llavesAbiertas > 0) {
+                            lexer.retroceder();
+                            globalState.llavesAbiertas--;
+                            return new PReturn();
+                        } else {
+                            const textoErr = generarTextoError(lexer.entrada, infoLlave);
+                            return new PError(`No se esperaba una llave aquí. No hay ningún objeto a cerrar.\n\n${textoErr}`);
                         }
                     }
                     case "TGenerico":

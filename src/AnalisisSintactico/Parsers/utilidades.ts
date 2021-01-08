@@ -105,7 +105,8 @@ const globalState = {
     parensAbiertos: 0,
     corchetesAbiertos: 0,
     ifAbiertos: 0,
-    whileAbiertos: 0
+    whileAbiertos: 0,
+    llavesAbiertas: 0
 };
 
 export const getGlobalState = () => globalState;

@@ -7,6 +7,7 @@ export interface PosExpr {
     readonly posInicioLineaPE: number
 }
 
+// TODO: Refactorizar para que esas clases implementen una interfaz, y se obtengan los datos directamente
 /**
  * Devuelve la posicion de inicio absoluta, número de linea y pos. de inicio relativa de una expresión.
  * @param ex - Expresión de la que extraer los datos
@@ -106,6 +107,13 @@ export function obtPosExpr(ex: Expresion): PosExpr {
             }
         }
         case "EArray":{
+            return {
+                inicioPE: ex.inicio,
+                numLineaPE: ex.numLinea,
+                posInicioLineaPE: ex.posInicioLinea,
+            }
+        }
+        case "EObjeto":{
             return {
                 inicioPE: ex.inicio,
                 numLineaPE: ex.numLinea,

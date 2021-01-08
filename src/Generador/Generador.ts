@@ -397,6 +397,9 @@ export function crearCodeWithSourceMap(
             case "EArray": {
                 return generarJS_EArray(expr);
             }
+            case "EObjeto": {
+                throw new Error("Generacion de codigo de objetos no soportada.");
+            }
             default:
                 let _: never;
                 _ = expr;

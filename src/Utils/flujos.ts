@@ -1,7 +1,7 @@
 import { SourceNode } from "source-map";
 import { Lexer } from "../AnalisisLexico/Lexer";
 import { parseTokens } from "../AnalisisSintactico/parser";
-import { crearCodeWithSourceMap } from "../Generador/Generador2";
+import { crearCodeWithSourceMap } from "../Generador/Generador";
 
 export const flujo2 = (entrada: string, nombreArchivo: string | null, opciones?: {}): SourceNode => {
     const lexer = new Lexer(entrada);

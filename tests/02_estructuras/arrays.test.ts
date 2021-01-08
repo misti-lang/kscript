@@ -88,3 +88,9 @@ test("Array con multiples comas colgantes", () => {
     const f = () => flujo2(entrada, "").toString();
     expect(f).toThrow(Error);
 });
+
+test("Array con multiples corchetes cerrados", () => {
+    const entrada = `[1, 2, 3]]]]]]`;
+    const f = () => flujo2(entrada, "").toString();
+    expect(f).toThrow(Error);
+});
