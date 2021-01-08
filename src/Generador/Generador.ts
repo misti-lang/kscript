@@ -10,6 +10,7 @@ import { ECondicional } from "../AnalisisSintactico/Expresion/ECondicional";
 import { getGeneradorJs_EDeclaracionFuncion } from "./GeneradorEDeclaracionFuncion";
 import { getGeneradorJs_EArray } from "./GeneradorEArray";
 import { getGeneradorJs_EWhile } from "./GeneradorEWhile";
+import { getGeneradorJs_EObjeto } from "./generadorEObjetos";
 
 const opcionesDefecto: { [s: string]: boolean } = {
     imprimirParensEnOperadores: false
@@ -329,11 +330,8 @@ export function crearCodeWithSourceMap(
             indentacionNivelSig,
             indentacionNivel
         );
-        const generarJS_EArray = getGeneradorJs_EArray(
-            inner,
-            nivel,
-            nombreArchivo
-        );
+        const generarJS_EArray = getGeneradorJs_EArray(inner, nivel, nombreArchivo);
+        const generarJS_EObjeto = getGeneradorJs_EObjeto(inner, nivel, nombreArchivo);
         const generarJS_EWhile = getGeneradorJs_EWhile(
             inner,
             nivel,
@@ -398,7 +396,7 @@ export function crearCodeWithSourceMap(
                 return generarJS_EArray(expr);
             }
             case "EObjeto": {
-                throw new Error("Generacion de codigo de objetos no soportada.");
+                return generarJS_EObjeto(expr);
             }
             default:
                 let _: never;

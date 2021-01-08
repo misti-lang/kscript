@@ -28,16 +28,24 @@ export function getSigExprObjeto(
             // Parsear todas las expresiones posibles
             while (true) {
 
-                // Revisar si el sig token es una llave cerrada, y terminar el objeto si es asi
+                // Revisar el sig token
                 const sigToken = lexer.sigToken();
-                if (sigToken.type === "TokenLexer" && sigToken.token.type === "TLlaveCer") {
-                    if (ultimoTokenEsComa) {
-                        return new PError("Los objetos no pueden tener comas colgantes.");
-                    }
+                if (sigToken.type === "TokenLexer") {
+                    // Si es una llave retornar
+                    if (sigToken.token.type === "TLlaveCer") {
+                        if (ultimoTokenEsComa) {
+                            return new PError("Los objetos no pueden tener comas colgantes.");
+                        }
 
-                    return new PExito(
-                        new EObjeto(entradas, infoArray.inicio, infoArray.numLinea, infoArray.posInicioLinea)
-                    );
+                        return new PExito(
+                            new EObjeto(entradas, infoArray.inicio, infoArray.numLinea, infoArray.posInicioLinea)
+                        );
+                    }
+                    // Si es una coma continuar
+                    if (sigToken.token.type === "TComa") {
+                        ultimoTokenEsComa = true;
+                        continue;
+                    }
                 }
 
                 // El siguiente token no es una llave cerrada. Retroceder y seguir flujo normal

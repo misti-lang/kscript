@@ -1,7 +1,7 @@
 import { flujo2 } from "./Utils/flujos";
 
 const str = `
-const s = [1, 2,]
+const s = {hola "mundo", adios "mundo", test 20}
 `;
 
 const resultado = flujo2(str, "test.ks")

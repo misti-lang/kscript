@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.35
+
+- Agregado soporte basico para objetos. Solo en una linea, separados por comas, en una misma linea.
+
 ## 0.0.34
 
 - Restaurado exports removidos.
