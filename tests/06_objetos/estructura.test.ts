@@ -33,14 +33,14 @@ test("Crear objeto vacio", () => {
     expect(f).not.toThrow(Error);
 });
 
-test("Objeto con comas colgantes", () => {
-    const entrada = `{a 20,}`;
+test("Objeto con multiples llaves cerradas", () => {
+    const entrada = `{a 20}}`;
     const f = () => flujo2(entrada, "").toString();
     expect(f).toThrow(Error);
 });
 
-test("Objeto con multiples llaves cerradas", () => {
-    const entrada = `{a 20}}`;
+test("Objeto con comas colgantes", () => {
+    const entrada = `{a 20,}`;
     const f = () => flujo2(entrada, "").toString();
     expect(f).toThrow(Error);
 });
