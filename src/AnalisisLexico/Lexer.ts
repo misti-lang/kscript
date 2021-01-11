@@ -31,6 +31,7 @@ import { TComa } from "./Token2/TComa";
 import { PC_WHILE } from "./Token2/PC_WHILE";
 import { TLlaveAb } from "./Token2/TLlaveAb";
 import { TLlaveCer } from "./Token2/TLlaveCer";
+import { PC_FROM, PC_IMPORT } from "./Token2/PC_modulos";
 
 export class Lexer {
 
@@ -171,6 +172,12 @@ export class Lexer {
                             }
                             case "fun": {
                                 return crearToken2(x => new PC_FUN(x), "fun");
+                            }
+                            case "import": {
+                                return crearToken2(x => new PC_IMPORT(x), "import");
+                            }
+                            case "from": {
+                                return crearToken2(x => new PC_FROM(x), "from");
                             }
                             default: {
                                 return crearToken2(x => new TIdentificador(x), ex.res)
