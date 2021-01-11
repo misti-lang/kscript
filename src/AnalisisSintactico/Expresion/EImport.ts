@@ -1,4 +1,3 @@
-import { Expresion } from "../Expresion";
 import { InfoToken } from "../../AnalisisLexico/InfoToken";
 import { EObjeto } from "./EObjeto";
 import { IPosition } from "./IPosition";

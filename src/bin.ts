@@ -29,7 +29,7 @@ switch (comando) {
     }
     case "-v":
     case "--version": {
-        console.log("KScript versión 0.0.36");
+        console.log("KScript versión 0.0.37");
         process.exit(0);
     }
     case "--repl": {

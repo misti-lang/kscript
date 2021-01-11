@@ -10,7 +10,8 @@ import { ECondicional } from "../AnalisisSintactico/Expresion/ECondicional";
 import { getGeneradorJs_EDeclaracionFuncion } from "./GeneradorEDeclaracionFuncion";
 import { getGeneradorJs_EArray } from "./GeneradorEArray";
 import { getGeneradorJs_EWhile } from "./GeneradorEWhile";
-import { getGeneradorJs_EObjeto } from "./generadorEObjetos";
+import { getGeneradorJs_EObjeto } from "./GeneradorEObjetos";
+import { getGeneradorJS_EImport } from "./GeneradorEImport";
 
 const opcionesDefecto: { [s: string]: boolean } = {
     imprimirParensEnOperadores: false
@@ -339,6 +340,7 @@ export function crearCodeWithSourceMap(
             toplevel,
             indentacionNivelSig
         );
+        const generarJS_EImport = getGeneradorJS_EImport(inner, nivel, nombreArchivo);
 
         switch (expr.type) {
             case "EBloque": {
@@ -399,7 +401,7 @@ export function crearCodeWithSourceMap(
                 return generarJS_EObjeto(expr);
             }
             case "EImport": {
-                throw new Error(`Generacion de codigo para EImport no disponible`);
+                return generarJS_EImport(expr);
             }
             default:
                 let _: never;

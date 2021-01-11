@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.37
+
+- Agregado soporte basico para importar. Solo import default por ahora.
+
 ## 0.0.36
 
 - Arreglado error al crear funciones sin parametros y objetos tipo '{a 1}}}'
