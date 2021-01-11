@@ -34,6 +34,7 @@ function extraerToken<A>(resLexer: ResLexer, msgError: string): Token2 {
     }
 }
 
+// TODO: Limpiar
 export const Expect = Object.freeze({
     Any: <A>(
         resLexer: ResLexer,
@@ -78,6 +79,26 @@ export const Expect = Object.freeze({
                 return Expect.TIdentificador(fnObtToken, valorOpc, msgError);
             }
             case "TIdentificador": {
+                if (valorOpc && preToken.token.valor === valorOpc) {
+                    return preToken.token;
+                } else if (valorOpc) {
+                    throw new ErrorComun("");
+                } else {
+                    return preToken.token
+                }
+            }
+            default: {
+                throw new ErrorComun(msgError);
+            }
+        }
+    },
+    TTexto: (fnObtToken: () => ResLexer, valorOpc: string | undefined, msgError: string): InfoToken<string> => {
+        const preToken = extraerToken(fnObtToken(), msgError);
+        switch (preToken.type) {
+            case "TComentario": {
+                return Expect.TIdentificador(fnObtToken, valorOpc, msgError);
+            }
+            case "TTexto": {
                 if (valorOpc && preToken.token.valor === valorOpc) {
                     return preToken.token;
                 } else if (valorOpc) {
@@ -157,6 +178,18 @@ export const Expect = Object.freeze({
         const preToken = extraerToken(resLexer, msgError);
         switch (preToken.type) {
             case "PC_ELSE": {
+                return preToken.token
+            }
+            default: {
+                const msgErrorF = generarTextoError<any>(lexer.entrada, preToken.token);
+                throw new ErrorComun(msgError + "\n" + msgErrorF);
+            }
+        }
+    },
+    PC_IMPORT: (resLexer: ResLexer, msgError: string, lexer: Lexer): InfoToken<string> => {
+        const preToken = extraerToken(resLexer, msgError);
+        switch (preToken.type) {
+            case "PC_IMPORT": {
                 return preToken.token
             }
             default: {

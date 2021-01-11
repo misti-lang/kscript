@@ -17,7 +17,7 @@ export function getSigExprObjeto(
     ) => ExprRes
 ) {
 
-    function sigExprObjeto(infoArray: InfoToken<string>, indentacionNuevaLinea: number, indentacionMinima: number) {
+    function sigExprObjeto(infoObjeto: InfoToken<string>, indentacionNuevaLinea: number, indentacionMinima: number) {
         try {
             const globalState = getGlobalState();
             globalState.llavesAbiertas++;
@@ -41,7 +41,7 @@ export function getSigExprObjeto(
                         globalState.llavesAbiertas--;
 
                         return new PExito(
-                            new EObjeto(entradas, infoArray.inicio, infoArray.numLinea, infoArray.posInicioLinea)
+                            new EObjeto(entradas, infoObjeto.inicio, infoObjeto.numLinea, infoObjeto.posInicioLinea)
                         );
                     }
                     // Si es una coma continuar
@@ -84,7 +84,7 @@ export function getSigExprObjeto(
                             }
 
                             return new PExito(
-                                new EObjeto(entradas, infoArray.inicio, infoArray.numLinea, infoArray.posInicioLinea)
+                                new EObjeto(entradas, infoObjeto.inicio, infoObjeto.numLinea, infoObjeto.posInicioLinea)
                             );
                         }
                         default: {

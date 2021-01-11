@@ -173,6 +173,10 @@ export const generarParserContinuo = (
                                         \n\n${textoError}
                                         Si deseas usar una función como expresión, usa una función anónima.`);
             }
+            case "PC_IMPORT":
+            case "PC_FROM": {
+                return new PError(`No se puede importar módulos dentro de una expresión.`);
+            }
             default: {
                 let _: never;
                 _ = token;

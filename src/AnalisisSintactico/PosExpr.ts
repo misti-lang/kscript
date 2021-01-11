@@ -120,6 +120,13 @@ export function obtPosExpr(ex: Expresion): PosExpr {
                 posInicioLineaPE: ex.posInicioLinea,
             }
         }
+        case "EImport": {
+            return {
+                inicioPE: ex.inicioPE,
+                numLineaPE: ex.numLineaPE,
+                posInicioLineaPE: ex.posInicioLineaPE,
+            }
+        }
         default:
             let _: never;
             _ = ex;

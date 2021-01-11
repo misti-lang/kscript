@@ -398,6 +398,9 @@ export function crearCodeWithSourceMap(
             case "EObjeto": {
                 return generarJS_EObjeto(expr);
             }
+            case "EImport": {
+                throw new Error(`Generacion de codigo para EImport no disponible`);
+            }
             default:
                 let _: never;
                 _ = expr;
