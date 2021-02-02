@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.38
+
+- Agregado soporte para sintaxis abreviada de objetos `{a, b}`
+- Roto soporte para importar modulos
+
 ## 0.0.37
 
 - Agregado soporte basico para importar. Solo import default por ahora.

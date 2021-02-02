@@ -1,7 +1,7 @@
 import { flujo2 } from "./Utils/flujos";
 
 const str = `
-from "aphrodite" import React, {Stylesheet s, css css}
+{hola, mundo}
 `;
 
 const resultado = flujo2(str, "test.ks")

@@ -22,7 +22,7 @@ export function getSigExprObjeto(
             const globalState = getGlobalState();
             globalState.llavesAbiertas++;
 
-            const entradas: [InfoToken<string>, Expresion][] = [];
+            const entradas: [InfoToken<string>, Expresion?][] = [];
 
             let ultimoTokenEsComa = false;
             // Parsear todas las expresiones posibles
@@ -59,6 +59,28 @@ export function getSigExprObjeto(
                     undefined,
                     "Se esperaba un identificador como clave"
                 );
+
+                // Ver si el sig token es una coma o llave, entonces se usa la sintaxis corta.
+                const posibleTokenComa = lexer.lookAhead();
+                if (posibleTokenComa.type === "TokenLexer") {
+                    const t = posibleTokenComa.token;
+                    if (t.type === "TComa") {
+                        lexer.sigToken();
+                        // Agregar y continuar
+                        entradas.push([identificador]);
+                        continue;
+                    } else if (t.type === "TLlaveCer") {
+                        lexer.sigToken();
+                        // Agregar y retornar
+                        entradas.push([identificador]);
+                        // Como aqui ya se esta consumiendo la llave cerrada, diminuir el contador
+                        globalState.llavesAbiertas--;
+
+                        return new PExito(
+                            new EObjeto(entradas, infoObjeto.inicio, infoObjeto.numLinea, infoObjeto.posInicioLinea)
+                        );
+                    }
+                }
 
                 const sigExpr = sigExpresion(0, 0, 0, Asociatividad.Izq);
                 if (sigExpr.type === "PEOF" || sigExpr.type === "PError" || sigExpr.type === "PErrorLexer") {

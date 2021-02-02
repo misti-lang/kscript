@@ -12,10 +12,16 @@ export const getGeneradorJs_EObjeto = (
     const codigoExpresiones = eObjeto.entradas
         .map(([clave, valor], index) => {
             const claveStr = clave.valor;
-            const valorStr = inner(valor, false, nivel)[0];
-            return (index === numEntradas - 1)
-                ? [claveStr, ": ", valorStr]
-                : [claveStr, ": ", valorStr, ", "];
+            if (valor) {
+                const valorStr = inner(valor, false, nivel)[0];
+                return (index === numEntradas - 1)
+                    ? [claveStr, ": ", valorStr]
+                    : [claveStr, ": ", valorStr, ", "];
+            } else {
+                return (index === numEntradas - 1)
+                    ? [claveStr]
+                    : [claveStr, ", "];
+            }
         })
         .reduce(
             (acc, val) => acc.concat(val),

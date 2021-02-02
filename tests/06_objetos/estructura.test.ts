@@ -71,3 +71,16 @@ test("Usar string como clave", () => {
     expect(f).toThrow(Error);
 });
 
+test("Sintaxis corta", () => {
+    const entrada = `{hola}`;
+    const salida = flujo2(entrada, "").toString();
+    const esperado = `{hola}`
+    expect(salida).toBe(esperado);
+});
+
+test("Sintaxis corta con 2 valores", () => {
+    const entrada = `{hola, mundo}`;
+    const salida = flujo2(entrada, "").toString();
+    const esperado = `{hola, mundo}`
+    expect(salida).toBe(esperado);
+});
