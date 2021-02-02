@@ -3,7 +3,6 @@ import { InfoToken } from "../../AnalisisLexico/InfoToken";
 import { ErrorComun, Expect } from "../Expect";
 import { ExprRes, PError, PExito } from "../ExprRes";
 import { generarTextoError } from "./utilidades";
-import { Asociatividad } from "../Asociatividad";
 import { EObjeto } from "../Expresion/EObjeto";
 import { EImport } from "../Expresion/EImport";
 
@@ -51,9 +50,24 @@ export function getSigExprImport(
             // Verificar sig token
             const sigToken$ = lexer.lookAhead();
             let exprObjeto: EObjeto | undefined
-            if (sigToken$.type === "ErrorLexer" || sigToken$.type === "EOFLexer") {
+            if (sigToken$.type === "ErrorLexer") {
                 return new PError(`Se esperaba un identificador u objeto luego de la palabra clave 'from'.`);
+            } else if (sigToken$.type === "EOFLexer") {
+                // Si se acabo la entrada pero hay un import default
+                if (tokenDefault) {
+                    return new PExito(new EImport(
+                        rutaModulo,
+                        tokenDefault,
+                        exprObjeto,
+                        infoImport.inicio,
+                        infoImport.numLinea,
+                        infoImport.posInicioLinea
+                    ));
+                } else {
+                    return new PError(`Expresión incompleta: Luego de 'import' se esperaba un identificador u objeto.`);
+                }
             }
+
             switch (sigToken$.token.type) {
                 case "TComa": {
                     // Si no hay import default, una coma es un error sintactico

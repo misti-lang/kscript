@@ -46,7 +46,7 @@ export const getGeneradorJS_EImport = (
             ...imports,
             " from \"",
             nodoRuta,
-            "\";"
+            "\""
         ]
     ), 0];
 }

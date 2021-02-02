@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.39
+
+- Recuperado soporte para import default e import abreviado 'from "a" import A, {b, c}'
+
 ## 0.0.38
 
 - Agregado soporte para sintaxis abreviada de objetos `{a, b}`
