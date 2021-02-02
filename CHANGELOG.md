@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.40
+
+- Agregado soporte para import as: 'from "react" import {u useEffect}'
+
 ## 0.0.39
 
 - Recuperado soporte para import default e import abreviado 'from "a" import A, {b, c}'

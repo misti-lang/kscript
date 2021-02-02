@@ -14,9 +14,16 @@ export const getGeneradorJs_EObjeto = (
             const claveStr = clave.valor;
             if (valor) {
                 const valorStr = inner(valor, false, nivel)[0];
-                return (index === numEntradas - 1)
-                    ? [claveStr, ": ", valorStr]
-                    : [claveStr, ": ", valorStr, ", "];
+
+                if (eObjeto.esImport) {
+                    return (index === numEntradas - 1)
+                        ? [valorStr, " as ", claveStr]
+                        : [valorStr, " as ", claveStr, ", "];
+                } else {
+                    return (index === numEntradas - 1)
+                        ? [claveStr, ": ", valorStr]
+                        : [claveStr, ": ", valorStr, ", "];
+                }
             } else {
                 return (index === numEntradas - 1)
                     ? [claveStr]

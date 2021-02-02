@@ -1,6 +1,6 @@
 {
   "name": "kscript",
-  "version": "0.0.37",
+  "version": "0.0.40",
   "description": "Lenguaje de programación funcional que se compila a JavaScript.",
   "homepage": "https://kscript.araozu.pro/",
   "bugs": {

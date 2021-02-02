@@ -11,12 +11,13 @@ export function getSigExprImport(
     sigExprObjeto: (
         infoArray: InfoToken<string>,
         indentacionNuevaLinea: number,
-        indentacionMinima: number
+        indentacionMinima: number,
+        esImport?: boolean
     ) => ExprRes
 ) {
 
     const esperarExprObjeto = (infoArray: InfoToken<string>) => {
-        const exprObjeto = sigExprObjeto(infoArray, 0, 0);
+        const exprObjeto = sigExprObjeto(infoArray, 0, 0, true);
         if (exprObjeto.type === "PExito" && exprObjeto.expr.type === "EObjeto") {
             return exprObjeto.expr;
         } else {

@@ -8,11 +8,13 @@ export class EObjeto {
     readonly inicio: number
     readonly numLinea: number
     readonly posInicioLinea: number
+    readonly esImport: boolean
 
-    constructor(entradas: [InfoToken<string>, Expresion?][], inicio: number, numLinea: number, posInicioLinea: number) {
+    constructor(entradas: [InfoToken<string>, Expresion?][], inicio: number, numLinea: number, posInicioLinea: number, esImport = false) {
         this.entradas = entradas;
         this.inicio = inicio;
         this.numLinea = numLinea;
         this.posInicioLinea = posInicioLinea;
+        this.esImport = esImport;
     }
 }

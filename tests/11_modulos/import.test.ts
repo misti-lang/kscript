@@ -22,7 +22,7 @@ test("Import default y comun", () => {
 });
 
 test("Import comun as", () => {
-    const entrada = `from "aphrodite" import {S: Stylesheet}`;
+    const entrada = `from "aphrodite" import {S Stylesheet}`;
     const salida = flujo2(entrada, "").toString();
     const esperado = `import {Stylesheet as S} from "aphrodite"`;
     expect(salida).toBe(esperado);
