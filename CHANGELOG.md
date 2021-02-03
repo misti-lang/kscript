@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.42
+
+- Agregado soporte para import "./x.css"
+
 ## 0.0.41
 
 - Agregado soporte para import *

@@ -39,3 +39,19 @@ export class EImportAll implements IPosition {
         this.posInicioLineaPE = posInicioLineaPE;
     }
 }
+
+export class EImportSolo implements IPosition {
+    type = "EImportSolo" as const
+
+    readonly rutaModulo: InfoToken<string>
+    readonly inicioPE: number;
+    readonly numLineaPE: number;
+    readonly posInicioLineaPE: number;
+
+    constructor(rutaModulo: InfoToken<string>, inicioPE: number, numLineaPE: number, posInicioLineaPE: number) {
+        this.rutaModulo = rutaModulo;
+        this.inicioPE = inicioPE;
+        this.numLineaPE = numLineaPE;
+        this.posInicioLineaPE = posInicioLineaPE;
+    }
+}

@@ -25,7 +25,7 @@ import { EBloque } from "./Expresion/EBloque";
 import { getSigExprArray } from "./Parsers/sigExprArray";
 import { getSigExprWhile } from "./Parsers/sigExprWhile";
 import { getSigExprObjeto } from "./Parsers/sigExprObjeto";
-import { getSigExprImport } from "./Parsers/sigExprImport";
+import { getSigExprImport, getSigExprImportSolo } from "./Parsers/sigExprImport";
 
 export function parseTokens(lexer: Lexer): ResParser {
 
@@ -170,6 +170,7 @@ export function parseTokens(lexer: Lexer): ResParser {
     const sigExprWhile = getSigExprWhile(lexer, sigExpresion, sigExpresionBloque);
     const sigExprFuncion = getSigExprFuncion(lexer, sigExpresion, sigExpresionBloque);
     const sigExprImport = getSigExprImport(lexer, sigExprObjeto);
+    const sigExprImportSolo = getSigExprImportSolo(lexer);
 
     /**
      * Obtiene el siguiente bloque de expresiones.
@@ -383,9 +384,7 @@ export function parseTokens(lexer: Lexer): ResParser {
                         return new PExito(new EUndefined(token.token));
                     }
                     case "PC_IMPORT": {
-                        const textoError = generarTextoError(lexer.entrada, token.token);
-                        return new PError(`No se esperaba la palabra clave 'from' aquí.\n${textoError
-                        }\nSi quieres importar un módulo escribe 'from' primero: 'from "x" import {}'.`);
+                        return sigExprImportSolo(token.token);
                     }
                     case "PC_FROM": {
                         return sigExprImport(token.token);

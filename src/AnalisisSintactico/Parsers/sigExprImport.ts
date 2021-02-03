@@ -4,7 +4,7 @@ import { ErrorComun, Expect } from "../Expect";
 import { ExprRes, PError, PExito } from "../ExprRes";
 import { generarTextoError } from "./utilidades";
 import { EObjeto } from "../Expresion/EObjeto";
-import { EImport, EImportAll } from "../Expresion/EImport";
+import { EImport, EImportAll, EImportSolo } from "../Expresion/EImport";
 
 export function getSigExprImport(
     lexer: Lexer,
@@ -160,4 +160,23 @@ export function getSigExprImport(
             }
         }
     };
+}
+
+export function getSigExprImportSolo(
+    lexer: Lexer
+) {
+    return (infoImport: InfoToken<string>) => {
+        const rutaModulo = Expect.TTexto(
+            lexer.sigToken.bind(lexer),
+            undefined,
+            "Se esperaba un string como ruta del módulo."
+        );
+
+        return new PExito(new EImportSolo(
+            rutaModulo,
+            infoImport.inicio,
+            infoImport.numLinea,
+            infoImport.posInicioLinea
+        ));
+    }
 }

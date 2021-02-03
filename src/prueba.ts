@@ -1,7 +1,7 @@
 import { flujo2 } from "./Utils/flujos";
 
 const str = `
-from "react" import * as R
+import "./style.css"
 `;
 
 const resultado = flujo2(str, "test.ks")
