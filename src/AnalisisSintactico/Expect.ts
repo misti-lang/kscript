@@ -198,6 +198,18 @@ export const Expect = Object.freeze({
             }
         }
     },
+    PC_AS: (resLexer: ResLexer, msgError: string, lexer: Lexer): InfoToken<string> => {
+        const preToken = extraerToken(resLexer, msgError);
+        switch (preToken.type) {
+            case "PC_AS": {
+                return preToken.token
+            }
+            default: {
+                const msgErrorF = generarTextoError<any>(lexer.entrada, preToken.token);
+                throw new ErrorComun(msgError + "\n" + msgErrorF);
+            }
+        }
+    },
     TOperador: (fnObtToken: () => ResLexer, valorOpc: string | undefined, msgError: string): InfoToken<string> => {
         const preToken = extraerToken(fnObtToken(), msgError);
         switch (preToken.type) {

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.41
+
+- Agregado soporte para import *
+
 ## 0.0.40
 
 - Agregado soporte para import as: 'from "react" import {u useEffect}'

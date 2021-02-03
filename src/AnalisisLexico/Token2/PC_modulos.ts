@@ -38,3 +38,16 @@ export class PC_FROM {
         return `${this.type}: ${this.token.valor}`;
     }
 }
+
+export class PC_AS {
+    type = "PC_AS" as const
+    token: InfoToken<string>
+
+    constructor(token: InfoToken<string>) {
+        this.token = token;
+    }
+
+    toString() {
+        return `${this.type}: ${this.token.valor}`;
+    }
+}

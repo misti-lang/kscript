@@ -24,7 +24,7 @@ import { TComa } from "./Token2/TComa";
 import { PC_WHILE } from "./Token2/PC_WHILE";
 import { TLlaveAb } from "./Token2/TLlaveAb";
 import { TLlaveCer } from "./Token2/TLlaveCer";
-import { PC_FROM, PC_IMPORT } from "./Token2/PC_modulos";
+import { PC_AS, PC_FROM, PC_IMPORT } from "./Token2/PC_modulos";
 
 export type Token2 =
     | TNuevaLinea
@@ -55,3 +55,4 @@ export type Token2 =
     | PC_FUN
     | PC_IMPORT
     | PC_FROM
+    | PC_AS

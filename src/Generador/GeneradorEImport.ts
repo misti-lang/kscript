@@ -1,6 +1,6 @@
 import { Expresion } from "../AnalisisSintactico/Expresion";
 import { SourceNode } from "source-map";
-import { EImport } from "../AnalisisSintactico/Expresion/EImport";
+import { EImport, EImportAll } from "../AnalisisSintactico/Expresion/EImport";
 
 export const getGeneradorJS_EImport = (
     inner: (expr: Expresion, toplevel: boolean, nivel: number, IIFE?: boolean) => [SourceNode, number],
@@ -50,3 +50,33 @@ export const getGeneradorJS_EImport = (
         ]
     ), 0];
 }
+
+export const getGeneradorJS_EImportAll = (
+    inner: (expr: Expresion, toplevel: boolean, nivel: number, IIFE?: boolean) => [SourceNode, number],
+    nivel: number,
+    nombreArchivo: string | null
+) => (eImport: EImportAll): [SourceNode, number] => {
+
+    const infoRuta = eImport.rutaModulo;
+    const nodoRuta = new SourceNode(
+        infoRuta.numLinea,
+        infoRuta.inicio - infoRuta.posInicioLinea,
+        nombreArchivo,
+        infoRuta.valor
+    );
+
+    const idAs = eImport.importId.valor ;
+
+    return [new SourceNode(
+        eImport.numLineaPE,
+        eImport.inicioPE - eImport.posInicioLineaPE,
+        nombreArchivo,
+        [
+            "import * as ",
+            idAs,
+            " from \"",
+            nodoRuta,
+            "\""
+        ]
+    ), 0];
+};

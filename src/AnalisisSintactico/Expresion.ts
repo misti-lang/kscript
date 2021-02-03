@@ -14,7 +14,7 @@ import { EDeclaracionFuncion } from "./Expresion/EDeclaracionFuncion";
 import { EArray } from "./Expresion/EArray";
 import { EWhile } from "./Expresion/EWhile";
 import { EObjeto } from "./Expresion/EObjeto";
-import { EImport } from "./Expresion/EImport";
+import { EImport, EImportAll } from "./Expresion/EImport";
 
 export type Expresion =
     | EIdentificador
@@ -27,6 +27,7 @@ export type Expresion =
     | EOperadorApl
     | EOperadorUnarioIzq
     | EImport
+    | EImportAll
     | EDeclaracion
     | ECondicional
     | EBloque

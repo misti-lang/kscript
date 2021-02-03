@@ -390,6 +390,10 @@ export function parseTokens(lexer: Lexer): ResParser {
                     case "PC_FROM": {
                         return sigExprImport(token.token);
                     }
+                    case "PC_AS": {
+                        const textoError = generarTextoError(lexer.entrada, token.token);
+                        return new PError(`No se esperaba la palabra clave 'as' aquí.\n${textoError}`);
+                    }
                     default:
                         let _: never;
                         _ = token;

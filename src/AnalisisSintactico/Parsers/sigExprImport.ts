@@ -4,7 +4,7 @@ import { ErrorComun, Expect } from "../Expect";
 import { ExprRes, PError, PExito } from "../ExprRes";
 import { generarTextoError } from "./utilidades";
 import { EObjeto } from "../Expresion/EObjeto";
-import { EImport } from "../Expresion/EImport";
+import { EImport, EImportAll } from "../Expresion/EImport";
 
 export function getSigExprImport(
     lexer: Lexer,
@@ -25,6 +25,33 @@ export function getSigExprImport(
         }
     };
 
+    const expectImportAll = (infoImport: InfoToken<string>, rutaModulo: InfoToken<string>) => {
+
+        Expect.PC_AS(
+            lexer.sigToken(),
+            "Se esperaba la palabra clave 'as' luego de 'import *'",
+            lexer
+        );
+
+        // Intentar obtener identificador para el import default o import *
+        const sigToken = lexer.lookAhead();
+        if (sigToken.type === "TokenLexer" && sigToken.token.type === "TIdentificador") {
+            const tokenIdentificador = sigToken.token.token
+            lexer.sigToken();
+
+            return new PExito(new EImportAll(
+                rutaModulo,
+                tokenIdentificador,
+                infoImport.inicio,
+                infoImport.numLinea,
+                infoImport.posInicioLinea
+            ));
+
+        } else {
+            return new PError("Se esperaba un identificador luego de la palabra clave 'as'.");
+        }
+    };
+
     return (infoImport: InfoToken<string>) => {
         try {
 
@@ -40,12 +67,17 @@ export function getSigExprImport(
                 lexer
             );
 
-            // Intentar obtener identificador para el import default
+            // Intentar obtener identificador para el import default o import *
             const sigToken = lexer.lookAhead();
             let tokenDefault: InfoToken<string> | undefined
-            if (sigToken.type === "TokenLexer" && sigToken.token.type === "TIdentificador") {
-                tokenDefault = sigToken.token.token
-                lexer.sigToken();
+            if (sigToken.type === "TokenLexer") {
+                if (sigToken.token.type === "TIdentificador") {
+                    tokenDefault = sigToken.token.token
+                    lexer.sigToken();
+                } else if (sigToken.token.type === "TOperador" && sigToken.token.token.valor === "*") {
+                    lexer.sigToken();
+                    return expectImportAll(infoImport, rutaModulo);
+                }
             }
 
             // Verificar sig token

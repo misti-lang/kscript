@@ -11,7 +11,7 @@ import { getGeneradorJs_EDeclaracionFuncion } from "./GeneradorEDeclaracionFunci
 import { getGeneradorJs_EArray } from "./GeneradorEArray";
 import { getGeneradorJs_EWhile } from "./GeneradorEWhile";
 import { getGeneradorJs_EObjeto } from "./GeneradorEObjetos";
-import { getGeneradorJS_EImport } from "./GeneradorEImport";
+import { getGeneradorJS_EImport, getGeneradorJS_EImportAll } from "./GeneradorEImport";
 
 const opcionesDefecto: { [s: string]: boolean } = {
     imprimirParensEnOperadores: false
@@ -341,6 +341,7 @@ export function crearCodeWithSourceMap(
             indentacionNivelSig
         );
         const generarJS_EImport = getGeneradorJS_EImport(inner, nivel, nombreArchivo);
+        const generarJS_EImportAll = getGeneradorJS_EImportAll(inner, nivel, nombreArchivo);
 
         switch (expr.type) {
             case "EBloque": {
@@ -402,6 +403,9 @@ export function crearCodeWithSourceMap(
             }
             case "EImport": {
                 return generarJS_EImport(expr);
+            }
+            case "EImportAll": {
+                return generarJS_EImportAll(expr);
             }
             default:
                 let _: never;
