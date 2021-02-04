@@ -1,6 +1,7 @@
-import { Parser } from "./Parser";
 import { ErrorRes, ExitoRes, Resultado } from "./Resultado";
-import { Token } from "./Token";
+import { TipoToken } from "./TipoToken";
+
+type Parser<A> = (s: string, n: number) => Resultado<A>
 
 export function run<A>(parser: Parser<A>, entrada: string, inicio: number) {
     return parser(entrada, inicio);
@@ -28,7 +29,7 @@ export function returnP<A>(x: A): Parser<A> {
             res: x,
             posInicio: inicio,
             posFinal: inicio,
-            tipo: Token.Nada
+            tipo: TipoToken.Nada
         });
     }
 }
@@ -62,7 +63,7 @@ export function parseCaracter(caracter: string): Parser<string> {
                     res: c,
                     posInicio: inicio,
                     posFinal: inicio + 1,
-                    tipo: Token.Nada
+                    tipo: TipoToken.Nada
                 });
             } else {
                 return new ErrorRes(`Se esperaba '${caracter}' pero se obtuvo '${c}'.`);
@@ -89,7 +90,7 @@ export function parseString(str: string): Parser<string> {
                 res: substr,
                 posInicio: inicio,
                 posFinal: inicio + largoStr,
-                tipo: Token.Nada
+                tipo: TipoToken.Nada
             });
         } else {
             return new ErrorRes("No se encontró el string solicitado.");
@@ -111,7 +112,7 @@ export function parseLuego<A, B>(p1: Parser<A>, p2: Parser<B>): Parser<[A, B]> {
                         res: [res1.exito.res, res2.exito.res],
                         posInicio: inicio,
                         posFinal: res2.exito.posFinal,
-                        tipo: Token.Nada
+                        tipo: TipoToken.Nada
                     });
                 } else {
                     throw new Error("");
@@ -175,7 +176,7 @@ export function parseVarios<A>(parser: Parser<A>): Parser<Array<A>> {
             res: datos,
             posInicio: inicio,
             posFinal: posFinal,
-            tipo: Token.Nada
+            tipo: TipoToken.Nada
         });
     }
 }
@@ -194,7 +195,7 @@ export function parseVarios1<A>(parser: Parser<A>): Parser<Array<A>> {
                 res: datos,
                 posInicio: inicio,
                 posFinal: posFinal,
-                tipo: Token.Nada
+                tipo: TipoToken.Nada
             });
         }
     }
@@ -212,14 +213,14 @@ export function parseSegundoOpcional<A, B>(p1: Parser<A>, p2: Parser<B>): Parser
                     res: [res1.exito.res, undefined],
                     posInicio: inicio,
                     posFinal: res1.exito.posFinal,
-                    tipo: Token.Nada
+                    tipo: TipoToken.Nada
                 });
             } else if (res2 instanceof ExitoRes) {
                 return new ExitoRes({
                     res: [res1.exito.res, res2.exito.res],
                     posInicio: inicio,
                     posFinal: res2.exito.posFinal,
-                    tipo: Token.Nada
+                    tipo: TipoToken.Nada
                 });
             } else {
                 throw new Error("");
@@ -244,7 +245,7 @@ export function parseCualquierMenos(caracter: string): Parser<string> {
                     res: c,
                     posInicio: inicio,
                     posFinal: inicio + 1,
-                    tipo: Token.Nada
+                    tipo: TipoToken.Nada
                 });
             }
         }
@@ -262,7 +263,7 @@ export function parseCualquierMenosP<A>(parserAEvitar: Parser<A>): Parser<string
                     res: entrada.substring(inicio, inicio + 1),
                     posInicio: inicio,
                     posFinal: inicio + 1,
-                    tipo: Token.Nada
+                    tipo: TipoToken.Nada
                 });
             } else {
                 return new ErrorRes("Parser cumplido");
@@ -301,7 +302,7 @@ export function parseVariasOpciones<A>(parsers: Array<Parser<A>>): Parser<A> {
     }
 }
 
-export function mapTipo<A>(parser: Parser<A>, nuevoTipo: Token): Parser<A> {
+export function mapTipo<A>(parser: Parser<A>, nuevoTipo: TipoToken): Parser<A> {
     return function (entrada, inicio) {
         const res = run(parser, entrada, inicio);
 

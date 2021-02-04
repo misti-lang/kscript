@@ -8,17 +8,5 @@ con código JavaScript existente, y una fuerte interoperabilidad.
 
 ## Documentacion
 
-La documentación se encuentra [aquí](https://kscript.araozu.pro/)
-
-## Estado
-
-Altamente inestable, en construcción. Al momento soporta las siguientes caracteristicas:
-
-- Constantes
-- Variables
-- number
-- string
-- boolean
-- Funciones
-- Operadores
-- Constantes/Variables anidadas
+La documentación se encuentra [aquí](https://kscript.araozu.pro/). Todas las funciones
+del lenguaje se encuentran bajo una versión específica.

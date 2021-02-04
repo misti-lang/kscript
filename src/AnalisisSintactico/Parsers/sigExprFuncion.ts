@@ -3,7 +3,7 @@ import { Asociatividad } from "../Asociatividad";
 import { ExprRes, PError, PExito } from "../ExprRes";
 import { InfoToken } from "../../AnalisisLexico/InfoToken";
 import { ErrorComun, Expect } from "../Expect";
-import { TIdentificador } from "../../AnalisisLexico/Token2/TIdentificador";
+import { TIdentificador } from "../../AnalisisLexico/Token/TIdentificador";
 import { EIdentificador } from "../Expresion/EIdentificador";
 import { SignIndefinida } from "../Signatura";
 import { EDeclaracionFuncion } from "../Expresion/EDeclaracionFuncion";

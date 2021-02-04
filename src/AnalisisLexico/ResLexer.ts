@@ -1,13 +1,13 @@
-import { Token2 } from "./Token2";
+import { Token } from "./Token";
 
 export type ResLexer = TokenLexer | ErrorLexer | EOFLexer
 
 export class TokenLexer {
     type = "TokenLexer" as const
-    token: Token2
+    token: Token
     indentacion: number
 
-    constructor(token: Token2, pos: number) {
+    constructor(token: Token, pos: number) {
         this.token = token;
         this.indentacion = pos;
     }

@@ -1,5 +1,5 @@
 import { ResLexer } from "../AnalisisLexico/ResLexer";
-import { Token2 } from "../AnalisisLexico/Token2";
+import { Token } from "../AnalisisLexico/Token";
 import { InfoToken } from "../AnalisisLexico/InfoToken";
 import { generarTextoError } from "./Parsers/utilidades";
 import { Lexer } from "../AnalisisLexico/Lexer";
@@ -16,7 +16,7 @@ export class OpInvalida extends Error {
     }
 }
 
-function extraerToken<A>(resLexer: ResLexer, msgError: string): Token2 {
+function extraerToken<A>(resLexer: ResLexer, msgError: string): Token {
     switch (resLexer.type) {
         case "ErrorLexer": {
             throw new ErrorComun(`${msgError} (${resLexer.razon})`);
@@ -41,7 +41,7 @@ export const Expect = Object.freeze({
         msgError: string,
         fnErrorLexer?: (s: string) => Error,
         fnEOF?: (s: string) => Error
-    ): [Token2, number] | void => {
+    ): [Token, number] | void => {
         const fnErrorLexer2 = fnErrorLexer ?? (s => new ErrorComun(s));
         const fnEOF2 = fnEOF ?? (s => new ErrorComun(s));
 

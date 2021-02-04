@@ -2,19 +2,19 @@
 
 ## 0.0.42
 
-- Agregado soporte para import "./x.css"
+- Agregado soporte para `import "./x.css"`
 
 ## 0.0.41
 
-- Agregado soporte para import *
+- Agregado soporte para `import *`
 
 ## 0.0.40
 
-- Agregado soporte para import as: 'from "react" import {u useEffect}'
+- Agregado soporte para import as: `from "react" import {u useEffect}`
 
 ## 0.0.39
 
-- Recuperado soporte para import default e import abreviado 'from "a" import A, {b, c}'
+- Recuperado soporte para import default e import abreviado `from "a" import A, {b, c}`
 
 ## 0.0.38
 

@@ -8,8 +8,7 @@ import {
     parseSegundoOpcional, parseString, parseVariasOpciones, parseVarios,
     parseVarios1
 } from "./parsers";
-import { Token } from "./Token";
-
+import { TipoToken } from "./TipoToken";
 
 const operadores = ["+", "-", "=", "*", "!", "\\", "/", "\'", "|", "@", "#", "·", "$", "~", "%", "¦", "&", "?", "¿", "¡", "<", ">", "€", "^", "-", ".", ":", ",", ";"];
 const digitos = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
@@ -143,17 +142,17 @@ const parseSignoAgrupacionAb = escoger([parseParenAb, parseLlaveAb, parseCorchet
 const parseSignoAgrupacionCer = escoger([parseParenCer, parseLlaveCer, parseCorcheteCer]);
 
 export const parserGeneral = parseVariasOpciones([
-    mapTipo(parseIndentacion, Token.Indentacion),
-    mapTipo(parseNuevaLinea, Token.NuevaLinea),
-    mapTipo(parseComentarioMulti, Token.Comentario),
-    mapTipo(parseComentario, Token.Comentario),
-    mapTipo(parseUndefined, Token.Undefined),
-    mapTipo(parseIdentificador, Token.Identificador),
-    mapTipo(parseGenerico, Token.Generico),
-    mapTipo(parseNumero, Token.Numero),
-    mapTipo(parseTexto, Token.Texto),
-    mapTipo(parseOperadores, Token.Operadores),
-    mapTipo(parseSignoAgrupacionAb, Token.AgrupacionAb),
-    mapTipo(parseSignoAgrupacionCer, Token.AgrupacionCer)
+    mapTipo(parseIndentacion, TipoToken.Indentacion),
+    mapTipo(parseNuevaLinea, TipoToken.NuevaLinea),
+    mapTipo(parseComentarioMulti, TipoToken.Comentario),
+    mapTipo(parseComentario, TipoToken.Comentario),
+    mapTipo(parseUndefined, TipoToken.Undefined),
+    mapTipo(parseIdentificador, TipoToken.Identificador),
+    mapTipo(parseGenerico, TipoToken.Generico),
+    mapTipo(parseNumero, TipoToken.Numero),
+    mapTipo(parseTexto, TipoToken.Texto),
+    mapTipo(parseOperadores, TipoToken.Operadores),
+    mapTipo(parseSignoAgrupacionAb, TipoToken.AgrupacionAb),
+    mapTipo(parseSignoAgrupacionCer, TipoToken.AgrupacionCer)
 ]);
 

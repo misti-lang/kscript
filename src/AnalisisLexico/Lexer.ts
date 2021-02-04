@@ -1,37 +1,37 @@
 import { EOFLexer, ErrorLexer, ResLexer, TokenLexer } from "./ResLexer";
-import { TNuevaLinea } from "./Token2/TNuevaLinea"
-import { TIdentificador } from "./Token2/TIdentificador";
-import { TGenerico } from "./Token2/TGenerico";
-import { TComentario } from "./Token2/TComentario";
-import { TNumero } from "./Token2/TNumero"
-import { TTexto } from "./Token2/TTexto"
-import { TBool } from "./Token2/TBool"
-import { TOperador } from "./Token2/TOperador"
-import { TParenAb } from "./Token2/TParenAb"
-import { TParenCer } from "./Token2/TParenCer"
-import { TAgrupAb } from "./Token2/TAgrupAb"
-import { TAgrupCer } from "./Token2/TAgrupCer"
-import { PC_LET } from "./Token2/PC_LET"
-import { PC_CONST } from "./Token2/PC_CONST"
-import { PC_IF } from "./Token2/PC_IF"
-import { PC_ELIF } from "./Token2/PC_ELIF"
-import { PC_DO } from "./Token2/PC_DO"
-import { PC_ELSE } from "./Token2/PC_ELSE"
-import { PC_FUN } from "./Token2/PC_FUN";
-import { Token2 } from "./Token2";
+import { TNuevaLinea } from "./Token/TNuevaLinea"
+import { TIdentificador } from "./Token/TIdentificador";
+import { TGenerico } from "./Token/TGenerico";
+import { TComentario } from "./Token/TComentario";
+import { TNumero } from "./Token/TNumero"
+import { TTexto } from "./Token/TTexto"
+import { TBool } from "./Token/TBool"
+import { TOperador } from "./Token/TOperador"
+import { TParenAb } from "./Token/TParenAb"
+import { TParenCer } from "./Token/TParenCer"
+import { TAgrupAb } from "./Token/TAgrupAb"
+import { TAgrupCer } from "./Token/TAgrupCer"
+import { PC_LET } from "./Token/PC_LET"
+import { PC_CONST } from "./Token/PC_CONST"
+import { PC_IF } from "./Token/PC_IF"
+import { PC_ELIF } from "./Token/PC_ELIF"
+import { PC_DO } from "./Token/PC_DO"
+import { PC_ELSE } from "./Token/PC_ELSE"
+import { PC_FUN } from "./Token/PC_FUN";
 import { Token } from "./Token";
+import { TipoToken } from "./TipoToken";
 import { run } from "./parsers";
 import { parserGeneral } from "./gramatica";
 import { ErrorRes, ExitoRes } from "./Resultado";
 import { InfoToken } from "./InfoToken";
-import { TUndefined } from "./Token2/TUndefined";
-import { TCorcheteAb } from "./Token2/TCorcheteAb";
-import { TCorcheteCer } from "./Token2/TCorcheteCer";
-import { TComa } from "./Token2/TComa";
-import { PC_WHILE } from "./Token2/PC_WHILE";
-import { TLlaveAb } from "./Token2/TLlaveAb";
-import { TLlaveCer } from "./Token2/TLlaveCer";
-import { PC_AS, PC_FROM, PC_IMPORT } from "./Token2/PC_modulos";
+import { TUndefined } from "./Token/TUndefined";
+import { TCorcheteAb } from "./Token/TCorcheteAb";
+import { TCorcheteCer } from "./Token/TCorcheteCer";
+import { TComa } from "./Token/TComa";
+import { PC_WHILE } from "./Token/PC_WHILE";
+import { TLlaveAb } from "./Token/TLlaveAb";
+import { TLlaveCer } from "./Token/TLlaveCer";
+import { PC_AS, PC_FROM, PC_IMPORT } from "./Token/PC_modulos";
 
 export class Lexer {
 
@@ -52,14 +52,14 @@ export class Lexer {
         this.tokensRestantes = [this.extraerToken()];
     }
 
-    private sigTokenLuegoDeIdentacion(posActual: number): [Token, number] {
+    private sigTokenLuegoDeIdentacion(posActual: number): [TipoToken, number] {
         const sigToken = run(parserGeneral, this.entrada, posActual);
         switch (sigToken.type) {
             case "ErrorRes":
-                return [Token.Nada, -1]
+                return [TipoToken.Nada, -1]
             case "ExitoRes": {
                 const ex = sigToken.exito;
-                if (ex.tipo === Token.Indentacion) return this.sigTokenLuegoDeIdentacion(ex.posFinal);
+                if (ex.tipo === TipoToken.Indentacion) return this.sigTokenLuegoDeIdentacion(ex.posFinal);
                 else return [ex.tipo, posActual];
             }
             default:
@@ -84,7 +84,7 @@ export class Lexer {
                     this.posActual = ex.posFinal;
                 };
 
-                const crearToken2 = (fnTipo: (i: InfoToken<any>) => Token2, valor: any) => {
+                const crearToken2 = (fnTipo: (i: InfoToken<any>) => Token, valor: any) => {
                     opComun();
 
                     return new TokenLexer(fnTipo({
@@ -98,13 +98,13 @@ export class Lexer {
                 };
 
                 switch (ex.tipo) {
-                    case Token.Nada: {
+                    case TipoToken.Nada: {
                         return new ErrorLexer("Se encontró un token Huerfano");
                     }
-                    case Token.Undefined: {
+                    case TipoToken.Undefined: {
                         return crearToken2(x => new TUndefined(x), ex.res);
                     }
-                    case Token.Indentacion: {
+                    case TipoToken.Indentacion: {
                         if (!this.esInicioDeLinea) {
                             // Se encontró espacios blancos o un Tab en medio de una linea.
                             this.posActual = ex.posFinal;
@@ -112,9 +112,9 @@ export class Lexer {
                         } else {
                             let [tipo, sigPos] = this.sigTokenLuegoDeIdentacion(ex.posFinal);
                             switch (tipo) {
-                                case Token.Nada:
+                                case TipoToken.Nada:
                                     return new EOFLexer();
-                                case Token.NuevaLinea: {
+                                case TipoToken.NuevaLinea: {
                                     this.posActual = sigPos;
                                     this.indentacionActual = 0;
                                     return this.extraerToken();
@@ -127,7 +127,7 @@ export class Lexer {
                             }
                         }
                     }
-                    case Token.NuevaLinea: {
+                    case TipoToken.NuevaLinea: {
                         const resultado = new TokenLexer(new TNuevaLinea({
                             valor: undefined,
                             inicio: ex.posInicio,
@@ -143,7 +143,7 @@ export class Lexer {
                         this.posAbsInicioLinea = ex.posFinal;
                         return resultado;
                     }
-                    case Token.Identificador: {
+                    case TipoToken.Identificador: {
                         switch (ex.res as string) {
                             case "true":
                             case "false": {
@@ -187,15 +187,15 @@ export class Lexer {
                             }
                         }
                     }
-                    case Token.Generico:
+                    case TipoToken.Generico:
                         return crearToken2(x => new TGenerico(x), ex.res);
-                    case Token.Comentario:
+                    case TipoToken.Comentario:
                         return crearToken2(x => new TComentario(x), ex.res);
-                    case Token.Numero:
+                    case TipoToken.Numero:
                         return crearToken2(x => new TNumero(x), ex.res);
-                    case Token.Texto:
+                    case TipoToken.Texto:
                         return crearToken2(x => new TTexto(x), ex.res);
-                    case Token.Operadores: {
+                    case TipoToken.Operadores: {
                         switch (ex.res as string) {
                             case ",": {
                                 return crearToken2(x => new TComa(x), ex.res);
@@ -205,7 +205,7 @@ export class Lexer {
                             }
                         }
                     }
-                    case Token.AgrupacionAb: {
+                    case TipoToken.AgrupacionAb: {
                         switch (ex.res as string) {
                             case "(":
                                 return crearToken2(x => new TParenAb(x), ex.res)
@@ -217,7 +217,7 @@ export class Lexer {
                                 return crearToken2(x => new TAgrupAb(x), ex.res)
                         }
                     }
-                    case Token.AgrupacionCer: {
+                    case TipoToken.AgrupacionCer: {
                         switch (ex.res as string) {
                             case ")":
                                 return crearToken2(x => new TParenCer(x), ex.res)
