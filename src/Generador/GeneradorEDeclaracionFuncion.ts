@@ -37,7 +37,7 @@ export function getGeneradorJs_EDeclaracionFuncion(
             indentacionNivel,
             "}"
         ];
-        const res = new SourceNode(eDecF.numLinea, eDecF.inicio - eDecF.posInicioLinea, nombreArchivo, codigoRes);
+        const res = new SourceNode(eDecF.numLineaPE, eDecF.inicioPE - eDecF.posInicioLineaPE, nombreArchivo, codigoRes);
         return [res, 0];
     }
 

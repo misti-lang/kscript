@@ -44,7 +44,7 @@ export function crearCodeWithSourceMap(
                 const ultimoParam = exprFn.der;
                 switch (exprOpCurry.type) {
                     case "EOperadorApl": {
-                        const valorOp = exprOpCurry.op.valorOp.valor;
+                        const valorOp = exprOpCurry.op.info.valor;
                         if (valorOp === "ñ" || valorOp === "Ñ") {
                             return extraerParams(exprOpCurry, [ultimoParam, ...acc]);
                         } else {
@@ -155,10 +155,10 @@ export function crearCodeWithSourceMap(
         }
 
         function generarJS_EIdentificador(identificador: EIdentificador): [SourceNode, number] {
-            const strRes = identificador.valorId.valor === "()" ? "undefined" : identificador.valorId.valor;
+            const strRes = identificador.info.valor === "()" ? "undefined" : identificador.info.valor;
             return [new SourceNode(
-                identificador.valorId.numLinea,
-                identificador.valorId.inicio - identificador.valorId.posInicioLinea,
+                identificador.info.numLinea,
+                identificador.info.inicio - identificador.info.posInicioLinea,
                 nombreArchivo,
                 strRes
             ), 0];
@@ -185,8 +185,8 @@ export function crearCodeWithSourceMap(
                     const codigoRes = [inicio, " ", snId, " = ", "(() => {\n", indentacionNivelSig, snResto, "\n", indentacionNivelSig,
                         "return undefined;\n", indentacionNivel, "})()"];
                     const res = new SourceNode(
-                        dec.id.valorId.numLinea,
-                        dec.id.valorId.inicio - dec.id.valorId.posInicioLinea,
+                        dec.id.info.numLinea,
+                        dec.id.info.inicio - dec.id.info.posInicioLinea,
                         nombreArchivo,
                         codigoRes
                     );
@@ -196,8 +196,8 @@ export function crearCodeWithSourceMap(
                     const [snResto] = inner(dec.valorDec, false, (nivel + 1), true, true);
                     const codigoRes = [inicio, " ", snId, " = ", snResto];
                     const res = new SourceNode(
-                        dec.id.valorId.numLinea,
-                        dec.id.valorId.inicio - dec.id.valorId.posInicioLinea,
+                        dec.id.info.numLinea,
+                        dec.id.info.inicio - dec.id.info.posInicioLinea,
                         nombreArchivo,
                         codigoRes
                     );
@@ -208,7 +208,7 @@ export function crearCodeWithSourceMap(
 
         function generarJS_EOperadorApl(eOpApl: EOperadorApl): [SourceNode, number] {
             const {op, izq, der} = eOpApl;
-            const operador = op.valorOp.valor;
+            const operador = op.info.valor;
             const precedenciaOp = op.precedencia;
             if (operador === "ñ" || operador === "Ñ") return [uncurry(eOpApl), 14];
 
@@ -236,7 +236,7 @@ export function crearCodeWithSourceMap(
                 }
             })();
 
-            const nodoOp = new SourceNode(op.valorOp.numLinea, op.valorOp.inicio - op.valorOp.posInicioLinea, nombreArchivo, jsOpFinal);
+            const nodoOp = new SourceNode(op.info.numLinea, op.info.inicio - op.info.posInicioLinea, nombreArchivo, jsOpFinal);
 
             const chunks = imprParenEnOp ? ["(", nuevoNodoIzq, nodoOp, nuevoNodoDer, ")"] : [nuevoNodoIzq, nodoOp, nuevoNodoDer];
             const retorno = new SourceNode(nodoIzq.line, nodoIzq.column, nombreArchivo, chunks);
@@ -244,7 +244,7 @@ export function crearCodeWithSourceMap(
         }
 
         function generarJS_EOpUnarioIzq(eOpApl: EOperadorUnarioIzq): [SourceNode, number] {
-            const infoOp = eOpApl.op.valorOp;
+            const infoOp = eOpApl.op.info;
 
             const [nodo] = crearCodeWithSourceMap(eOpApl.expr, false, nivel, nombreArchivo);
 
@@ -266,8 +266,8 @@ export function crearCodeWithSourceMap(
             const [snBloqueIf] = inner(exprBloqueIf, toplevel, nivel + 1, false);
 
             const nodoIf = new SourceNode(
-                eCond.numLinea,
-                eCond.inicio - eCond.posInicioLinea,
+                eCond.numLineaPE,
+                eCond.inicioPE - eCond.posInicioLineaPE,
                 nombreArchivo,
                 [
                     "if (",

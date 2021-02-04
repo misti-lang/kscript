@@ -1,19 +1,20 @@
 import { Expresion } from "../Expresion";
+import { IPosition } from "./IPosition";
 
-export class EWhile {
+export class EWhile implements IPosition {
     type = "EWhile" as const
 
     readonly condicion: Expresion
     readonly cuerpo: Expresion
-    readonly inicio: number
-    readonly numLinea: number
-    readonly posInicioLinea: number
+    readonly inicioPE: number
+    readonly numLineaPE: number
+    readonly posInicioLineaPE: number
 
     constructor(condicion: Expresion, cuerpo: Expresion, inicio: number, numLinea: number, posInicioLinea: number) {
         this.condicion = condicion;
         this.cuerpo = cuerpo;
-        this.inicio = inicio;
-        this.numLinea = numLinea;
-        this.posInicioLinea = posInicioLinea;
+        this.inicioPE = inicio;
+        this.numLineaPE = numLinea;
+        this.posInicioLineaPE = posInicioLinea;
     }
 }

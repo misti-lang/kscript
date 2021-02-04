@@ -18,8 +18,8 @@ export function getGeneradorJs_EWhile(
         const [snBloqueWhile] = inner(exprBloqueWhile, toplevel, nivel + 1, false);
 
         const nodoWhile = new SourceNode(
-            eWhile.numLinea,
-            eWhile.inicio - eWhile.posInicioLinea,
+            eWhile.numLineaPE,
+            eWhile.inicioPE - eWhile.posInicioLineaPE,
             nombreArchivo,
             [
                 "while (",

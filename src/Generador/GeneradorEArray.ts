@@ -18,7 +18,7 @@ export function getGeneradorJs_EArray(
             .reduce((acc, val) => acc.concat(val), []);
 
         const codigoRes = ["[", ...codigoExpresiones, "]"];
-        const res = new SourceNode(eArr.numLinea, eArr.inicio - eArr.posInicioLinea, nombreArchivo, codigoRes);
+        const res = new SourceNode(eArr.numLineaPE, eArr.inicioPE - eArr.posInicioLineaPE, nombreArchivo, codigoRes);
         return [res, 0];
     }
 }

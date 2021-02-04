@@ -36,7 +36,7 @@ export const getGeneradorJs_EObjeto = (
         );
 
     const codigoRes = ["{", ...codigoExpresiones, "}"];
-    const res = new SourceNode(eObjeto.numLinea, eObjeto.inicio - eObjeto.posInicioLinea, nombreArchivo, codigoRes);
+    const res = new SourceNode(eObjeto.numLineaPE, eObjeto.inicioPE - eObjeto.posInicioLineaPE, nombreArchivo, codigoRes);
     return [res, 0];
 
 }
