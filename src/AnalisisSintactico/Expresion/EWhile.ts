@@ -1,5 +1,6 @@
 import { Expresion } from "../Expresion";
 import { IPosition } from "./IPosition";
+import { InfoToken } from "../../AnalisisLexico/InfoToken";
 
 export class EWhile implements IPosition {
     type = "EWhile" as const
@@ -10,11 +11,11 @@ export class EWhile implements IPosition {
     readonly numLineaPE: number
     readonly posInicioLineaPE: number
 
-    constructor(condicion: Expresion, cuerpo: Expresion, inicio: number, numLinea: number, posInicioLinea: number) {
+    constructor(condicion: Expresion, cuerpo: Expresion, infoWhile: InfoToken<string>) {
         this.condicion = condicion;
         this.cuerpo = cuerpo;
-        this.inicioPE = inicio;
-        this.numLineaPE = numLinea;
-        this.posInicioLineaPE = posInicioLinea;
+        this.inicioPE = infoWhile.inicio;
+        this.numLineaPE = infoWhile.numLinea;
+        this.posInicioLineaPE = infoWhile.posInicioLinea;
     }
 }

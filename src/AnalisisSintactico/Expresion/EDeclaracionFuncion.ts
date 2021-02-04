@@ -1,6 +1,7 @@
 import { EIdentificador } from "./EIdentificador";
 import { Expresion } from "../Expresion";
 import { IPosition } from "./IPosition";
+import { InfoToken } from "../../AnalisisLexico/InfoToken";
 
 export class EDeclaracionFuncion implements IPosition {
     type = "EDeclaracionFuncion" as const
@@ -11,12 +12,12 @@ export class EDeclaracionFuncion implements IPosition {
     readonly numLineaPE: number
     readonly posInicioLineaPE: number
 
-    constructor(id: EIdentificador, parametros: EIdentificador[], valor: Expresion, inicio: number, numLinea: number, posInicioLinea: number) {
+    constructor(id: EIdentificador, parametros: EIdentificador[], valor: Expresion, infoFun: InfoToken<string>) {
         this.id = id;
         this.parametros = parametros;
         this.valor = valor;
-        this.inicioPE = inicio;
-        this.numLineaPE = numLinea;
-        this.posInicioLineaPE = posInicioLinea;
+        this.inicioPE = infoFun.inicio;
+        this.numLineaPE = infoFun.numLinea;
+        this.posInicioLineaPE = infoFun.posInicioLinea;
     }
 }

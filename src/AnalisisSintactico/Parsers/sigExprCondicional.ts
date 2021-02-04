@@ -85,9 +85,7 @@ export function getSigExprCondicional(
 
             // Crear AST
             const exprCondicional = new ECondicional(
-                tokenIf.inicio,
-                tokenIf.numLinea,
-                tokenIf.posInicioLinea,
+                tokenIf,
                 [exprCondicionIf, exprBloqueIf],
                 arrExpresionesElif.length > 0 ? arrExpresionesElif : undefined,
                 expresionBloqueElse

@@ -11,11 +11,11 @@ export class EObjeto implements IPosition {
     readonly posInicioLineaPE: number
     readonly esImport: boolean
 
-    constructor(entradas: [InfoToken<string>, Expresion?][], inicio: number, numLinea: number, posInicioLinea: number, esImport = false) {
+    constructor(entradas: [InfoToken<string>, Expresion?][], infoObjeto: InfoToken<string>, esImport = false) {
         this.entradas = entradas;
-        this.inicioPE = inicio;
-        this.numLineaPE = numLinea;
-        this.posInicioLineaPE = posInicioLinea;
+        this.inicioPE = infoObjeto.inicio;
+        this.numLineaPE = infoObjeto.numLinea;
+        this.posInicioLineaPE = infoObjeto.posInicioLinea;
         this.esImport = esImport;
     }
 }

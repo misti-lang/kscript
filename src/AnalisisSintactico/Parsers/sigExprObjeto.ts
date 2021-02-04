@@ -46,7 +46,7 @@ export function getSigExprObjeto(
                         globalState.llavesAbiertas--;
 
                         return new PExito(
-                            new EObjeto(entradas, infoObjeto.inicio, infoObjeto.numLinea, infoObjeto.posInicioLinea, esImport)
+                            new EObjeto(entradas, infoObjeto, esImport)
                         );
                     }
                     // Si es una coma continuar
@@ -82,7 +82,7 @@ export function getSigExprObjeto(
                         globalState.llavesAbiertas--;
 
                         return new PExito(
-                            new EObjeto(entradas, infoObjeto.inicio, infoObjeto.numLinea, infoObjeto.posInicioLinea, esImport)
+                            new EObjeto(entradas, infoObjeto, esImport)
                         );
                     }
                 }
@@ -111,7 +111,7 @@ export function getSigExprObjeto(
                             }
 
                             return new PExito(
-                                new EObjeto(entradas, infoObjeto.inicio, infoObjeto.numLinea, infoObjeto.posInicioLinea, esImport)
+                                new EObjeto(entradas, infoObjeto, esImport)
                             );
                         }
                         default: {

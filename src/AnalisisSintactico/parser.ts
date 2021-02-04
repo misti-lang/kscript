@@ -89,9 +89,7 @@ export function parseTokens(lexer: Lexer): ResParser {
                 esMut,
                 new EIdentificador(new SignIndefinida(), infoTokenId),
                 exprFinal,
-                infoTokenId.inicio,
-                infoTokenId.numLinea,
-                infoTokenId.posInicioLinea
+                infoTokenId
             );
             return new PExito(exprDeclaracion);
         } catch (e) {

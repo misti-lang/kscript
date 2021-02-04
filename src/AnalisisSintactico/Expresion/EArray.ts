@@ -1,5 +1,6 @@
 import { Expresion } from "../Expresion";
 import { IPosition } from "./IPosition";
+import { InfoToken } from "../../AnalisisLexico/InfoToken";
 
 export class EArray implements IPosition {
     type = "EArray" as const
@@ -9,10 +10,11 @@ export class EArray implements IPosition {
     readonly numLineaPE: number
     readonly posInicioLineaPE: number
 
-    constructor(expresiones: Expresion[], inicio: number, numLinea: number, posInicioLinea: number) {
+    constructor(expresiones: Expresion[], infoArray: InfoToken<string>) {
         this.expresiones = expresiones;
-        this.inicioPE = inicio;
-        this.numLineaPE = numLinea;
-        this.posInicioLineaPE = posInicioLinea;
+        this.inicioPE = infoArray.inicio;
+        this.numLineaPE = infoArray.numLinea;
+        this.posInicioLineaPE = infoArray.posInicioLinea;
     }
+
 }

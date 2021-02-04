@@ -1,5 +1,6 @@
 import { Expresion } from "../Expresion";
 import { IPosition } from "./IPosition";
+import { InfoToken } from "../../AnalisisLexico/InfoToken";
 
 export class ECondicional implements IPosition {
     type = "ECondicional" as const
@@ -12,9 +13,7 @@ export class ECondicional implements IPosition {
     readonly posInicioLineaPE: number
 
     constructor(
-        inicioDec: number,
-        numLineaDec: number,
-        posInicioLineaDec: number,
+        infoIf: InfoToken<string>,
         exprCondicion: [Expresion, Expresion],
         exprElif?: [Expresion, Expresion][],
         exprElse?: Expresion
@@ -22,8 +21,9 @@ export class ECondicional implements IPosition {
         this.exprCondicion = exprCondicion;
         this.exprElif = exprElif;
         this.exprElse = exprElse;
-        this.inicioPE = inicioDec;
-        this.numLineaPE = numLineaDec;
-        this.posInicioLineaPE = posInicioLineaDec;
+        this.inicioPE = infoIf.inicio;
+        this.numLineaPE = infoIf.numLinea;
+        this.posInicioLineaPE = infoIf.posInicioLinea;
     }
+
 }

@@ -129,9 +129,7 @@ export function getSigExprFuncion(
                 new EIdentificador(new SignIndefinida(), infoIdentificadorFun),
                 parametros,
                 exprFinal,
-                infoIdentificadorFun.inicio,
-                infoIdentificadorFun.numLinea,
-                infoIdentificadorFun.posInicioLinea
+                infoIdentificadorFun
             );
 
             return new PExito(exprDeclaracionFuncion);

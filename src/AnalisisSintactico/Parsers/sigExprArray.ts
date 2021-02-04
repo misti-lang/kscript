@@ -57,7 +57,7 @@ export function getSigExprArray(
                                     }
 
                                     return new PExito(
-                                        new EArray(expresiones, infoArray.inicio, infoArray.numLinea, infoArray.posInicioLinea)
+                                        new EArray(expresiones, infoArray)
                                     );
                                 }
                                 default: {

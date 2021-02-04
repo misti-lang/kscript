@@ -174,9 +174,7 @@ export function getSigExprImportSolo(
 
         return new PExito(new EImportSolo(
             rutaModulo,
-            infoImport.inicio,
-            infoImport.numLinea,
-            infoImport.posInicioLinea
+            infoImport
         ));
     }
 }

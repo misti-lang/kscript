@@ -1,4 +1,5 @@
-import { Asociatividad, InfoToken } from "../../../kscript";
+import { InfoToken } from "../../AnalisisLexico/InfoToken";
+import { Asociatividad } from "../Asociatividad";
 import { ExprRes, PError, PExito } from "../ExprRes";
 import { ErrorComun } from "../Expect";
 import { Lexer } from "../../AnalisisLexico/Lexer";
@@ -42,9 +43,7 @@ export function getSigExprWhile(
             const exprWhile = new EWhile(
                 exprCondicionWhile,
                 exprBloqueWhile,
-                tokenWhile.inicio,
-                tokenWhile.numLinea,
-                tokenWhile.posInicioLinea
+                tokenWhile
             );
 
             globalState.whileAbiertos -= 1;
