@@ -87,11 +87,12 @@ export function getSigExprFuncion(
 
             /* Robado de sigExprDeclaracion */
 
-            const operadorEsperado = esAnonima ? "->" : "=";
+            const operadorEsperado = esAnonima ? ["->", "=>"] : ["="];
             const mensajeErrorOperador = esAnonima
                 ? "Se esperaba el operador de asignación '=' luego de los parametros de la función"
-                : "Se esperaba el operador '->' luego de los parametros de la función anónima";
-            Expect.TOperador(
+                : "Se esperaba el operador '->' o '=>' luego de los parametros de la función anónima";
+            // Captura el operador = -> o => , y si se esta parseando una fun anonima se envia
+            const operadorFun = Expect.VariosTOperador(
                 lexer.sigToken.bind(lexer),
                 operadorEsperado,
                 mensajeErrorOperador
@@ -137,6 +138,7 @@ export function getSigExprFuncion(
                 if (esAnonima) {
                     return new EDeclaracionFn(
                         parametros,
+                        operadorFun,
                         exprFinal,
                         tokenFun
                     );

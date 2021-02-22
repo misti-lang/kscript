@@ -21,7 +21,7 @@ const repl = () => {
 };
 
 export const flujoREPL = () => {
-    console.log("KScript v0.0.42");
+    console.log("KScript v0.0.43");
     console.log("Para salir del REPL escribe :s o CTRL+C");
     repl();
 };

@@ -229,5 +229,25 @@ export const Expect = Object.freeze({
                 throw new ErrorComun(msgError);
             }
         }
+    },
+    VariosTOperador: (fnObtToken: () => ResLexer, valorOpc: string[] | undefined, msgError: string): InfoToken<string> => {
+        const preToken = extraerToken(fnObtToken(), msgError);
+        switch (preToken.type) {
+            case "TComentario": {
+                return Expect.VariosTOperador(fnObtToken, valorOpc, msgError);
+            }
+            case "TOperador": {
+                if (valorOpc && valorOpc.find((x) => x === preToken.token.valor) !== undefined) {
+                    return preToken.token;
+                } else if (valorOpc) {
+                    throw new ErrorComun("");
+                } else {
+                    return preToken.token
+                }
+            }
+            default: {
+                throw new ErrorComun(msgError);
+            }
+        }
     }
 });

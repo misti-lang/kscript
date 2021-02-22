@@ -1,7 +1,7 @@
 import { flujo2 } from "./Utils/flujos";
 
 const str = `
-add "click" fn x y -> x + y
+add "click" fn x y => x + y
 `;
 
 const resultado = flujo2(str, "test.ks")

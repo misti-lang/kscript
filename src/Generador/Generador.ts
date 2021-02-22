@@ -7,7 +7,7 @@ import { EOperadorApl } from "../AnalisisSintactico/Expresion/EOperadorApl";
 import { EOperadorUnarioIzq } from "../AnalisisSintactico/Expresion/EOperadorUnarioIzq";
 import { EDeclaracion } from "../AnalisisSintactico/Expresion/EDeclaracion";
 import { ECondicional } from "../AnalisisSintactico/Expresion/ECondicional";
-import { getGeneradorJs_EDeclaracionFuncion } from "./GeneradorEDeclaracionFuncion";
+import { getGeneradorJs_EDeclaracionFn, getGeneradorJs_EDeclaracionFuncion } from "./GeneradorEDeclaracionFuncion";
 import { getGeneradorJs_EArray } from "./GeneradorEArray";
 import { getGeneradorJs_EWhile } from "./GeneradorEWhile";
 import { getGeneradorJs_EObjeto } from "./GeneradorEObjetos";
@@ -331,6 +331,14 @@ export function crearCodeWithSourceMap(
             indentacionNivelSig,
             indentacionNivel
         );
+        const generarJS_EDeclaracionFn = getGeneradorJs_EDeclaracionFn(
+            inner,
+            generarJS_EIdentificador,
+            nivel,
+            nombreArchivo,
+            indentacionNivelSig,
+            indentacionNivel
+        );
         const generarJS_EArray = getGeneradorJs_EArray(inner, nivel, nombreArchivo);
         const generarJS_EObjeto = getGeneradorJs_EObjeto(inner, nivel, nombreArchivo);
         const generarJS_EWhile = getGeneradorJs_EWhile(
@@ -397,8 +405,7 @@ export function crearCodeWithSourceMap(
                 return generarJS_EDeclaracionFuncion(expr);
             }
             case "EDeclaracionFn": {
-                console.log(JSON.stringify(expr, null, 4));
-                throw Error("D:");
+                return generarJS_EDeclaracionFn(expr);
             }
             case "EArray": {
                 return generarJS_EArray(expr);

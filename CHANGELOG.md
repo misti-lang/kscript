@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.43
+
+- Agregado soporte para funciones anonimas `fn ->` y `fn =>`
+
 ## 0.0.42
 
 - Agregado soporte para `import "./x.css"`

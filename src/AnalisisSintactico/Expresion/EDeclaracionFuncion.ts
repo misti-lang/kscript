@@ -25,13 +25,15 @@ export class EDeclaracionFuncion implements IPosition {
 export class EDeclaracionFn implements IPosition {
     type = "EDeclaracionFn" as const
     readonly parametros: EIdentificador[]
+    readonly operadorFn: InfoToken<string>
     readonly valor: Expresion
     readonly inicioPE: number
     readonly numLineaPE: number
     readonly posInicioLineaPE: number
 
-    constructor(parametros: EIdentificador[], valor: Expresion, infoFun: InfoToken<string>) {
+    constructor(parametros: EIdentificador[], operadorFn: InfoToken<string>, valor: Expresion, infoFun: InfoToken<string>) {
         this.parametros = parametros;
+        this.operadorFn = operadorFn;
         this.valor = valor;
         this.inicioPE = infoFun.inicio;
         this.numLineaPE = infoFun.numLinea;
