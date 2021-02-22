@@ -378,6 +378,9 @@ export function parseTokens(lexer: Lexer): ResParser {
                     case "PC_FUN": {
                         return sigExprFuncion(token.token, indentacionNuevaLinea);
                     }
+                    case "PC_FN": {
+                        return sigExprFuncion(token.token, indentacionNuevaLinea, true);
+                    }
                     case "TUndefined": {
                         return new PExito(new EUndefined(token.token));
                     }

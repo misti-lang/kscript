@@ -10,7 +10,7 @@ import { EOperadorUnarioIzq } from "./Expresion/EOperadorUnarioIzq";
 import { EDeclaracion } from "./Expresion/EDeclaracion";
 import { ECondicional } from "./Expresion/ECondicional";
 import { EBloque } from "./Expresion/EBloque";
-import { EDeclaracionFuncion } from "./Expresion/EDeclaracionFuncion";
+import { EDeclaracionFn, EDeclaracionFuncion } from "./Expresion/EDeclaracionFuncion";
 import { EArray } from "./Expresion/EArray";
 import { EWhile } from "./Expresion/EWhile";
 import { EObjeto } from "./Expresion/EObjeto";
@@ -36,4 +36,5 @@ export type Expresion =
     | EObjeto
     | EWhile
     | EDeclaracionFuncion
+    | EDeclaracionFn
 

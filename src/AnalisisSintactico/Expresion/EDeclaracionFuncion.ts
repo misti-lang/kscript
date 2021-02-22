@@ -21,3 +21,20 @@ export class EDeclaracionFuncion implements IPosition {
         this.posInicioLineaPE = infoFun.posInicioLinea;
     }
 }
+
+export class EDeclaracionFn implements IPosition {
+    type = "EDeclaracionFn" as const
+    readonly parametros: EIdentificador[]
+    readonly valor: Expresion
+    readonly inicioPE: number
+    readonly numLineaPE: number
+    readonly posInicioLineaPE: number
+
+    constructor(parametros: EIdentificador[], valor: Expresion, infoFun: InfoToken<string>) {
+        this.parametros = parametros;
+        this.valor = valor;
+        this.inicioPE = infoFun.inicio;
+        this.numLineaPE = infoFun.numLinea;
+        this.posInicioLineaPE = infoFun.posInicioLinea;
+    }
+}

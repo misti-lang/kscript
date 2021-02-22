@@ -17,7 +17,7 @@ import { PC_IF } from "./Token/PC_IF";
 import { PC_ELIF } from "./Token/PC_ELIF";
 import { PC_DO } from "./Token/PC_DO";
 import { PC_ELSE } from "./Token/PC_ELSE";
-import { PC_FUN } from "./Token/PC_FUN";
+import { PC_FN, PC_FUN } from "./Token/PC_FUN";
 import { TCorcheteAb } from "./Token/TCorcheteAb";
 import { TCorcheteCer } from "./Token/TCorcheteCer";
 import { TComa } from "./Token/TComa";
@@ -53,6 +53,7 @@ export type Token =
     | PC_ELSE
     | PC_WHILE
     | PC_FUN
+    | PC_FN
     | PC_IMPORT
     | PC_FROM
     | PC_AS

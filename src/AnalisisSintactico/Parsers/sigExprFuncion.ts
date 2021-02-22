@@ -6,7 +6,7 @@ import { ErrorComun, Expect } from "../Expect";
 import { TIdentificador } from "../../AnalisisLexico/Token/TIdentificador";
 import { EIdentificador } from "../Expresion/EIdentificador";
 import { SignIndefinida } from "../Signatura";
-import { EDeclaracionFuncion } from "../Expresion/EDeclaracionFuncion";
+import { EDeclaracionFn, EDeclaracionFuncion } from "../Expresion/EDeclaracionFuncion";
 
 export function getSigExprFuncion(
     lexer: Lexer,
@@ -48,7 +48,7 @@ export function getSigExprFuncion(
                 if (tokenRaw.token.type === "TIdentificador") {
                     arrRetorno.push(tokenRaw.token);
                     lexer.sigToken();
-                } else if (tokenRaw.token.type === "TOperador" && tokenRaw.token.token.valor === "=") {
+                } else if (tokenRaw.token.type === "TOperador") {
                     break;
                 } else {
                     throw new ErrorComun("Uno de los parámetros provistos a la función son inválidos.");
@@ -67,15 +67,19 @@ export function getSigExprFuncion(
      * Parsea una expresión de declaración de función (fun f x y = ...)
      * @param tokenFun El token 'fun'
      * @param indentacionNuevaLinea La cantidad de indentacion
+     * @param esAnonima Si la funcion a parsear es anonima
      */
-    function sigExprFuncion(tokenFun: InfoToken<string>, indentacionNuevaLinea: number): ExprRes {
+    function sigExprFuncion(tokenFun: InfoToken<string>, indentacionNuevaLinea: number, esAnonima = false): ExprRes {
         try {
 
-            const infoIdentificadorFun = Expect.TIdentificador(
-                lexer.sigToken.bind(lexer),
-                undefined,
-                "Se esperaba un identificador"
-            );
+            let infoIdentificadorFun: InfoToken<string> | null = null;
+            if (!esAnonima) {
+                infoIdentificadorFun = Expect.TIdentificador(
+                    lexer.sigToken.bind(lexer),
+                    undefined,
+                    "Se esperaba un identificador"
+                );
+            }
 
             const parametros = obtenerParametros().map((x) =>
                 new EIdentificador(new SignIndefinida(), x.token)
@@ -83,10 +87,14 @@ export function getSigExprFuncion(
 
             /* Robado de sigExprDeclaracion */
 
+            const operadorEsperado = esAnonima ? "->" : "=";
+            const mensajeErrorOperador = esAnonima
+                ? "Se esperaba el operador de asignación '=' luego de los parametros de la función"
+                : "Se esperaba el operador '->' luego de los parametros de la función anónima";
             Expect.TOperador(
                 lexer.sigToken.bind(lexer),
-                "=",
-                "Se esperaba el operador de asignación '=' luego del indentificador."
+                operadorEsperado,
+                mensajeErrorOperador
             );
 
             const [_, nuevoNivel1, hayNuevaLinea, fnEstablecer] = lexer.lookAheadSignificativo(false);
@@ -103,9 +111,9 @@ export function getSigExprFuncion(
             const nuevoNivel = Math.max(nuevoNivel1, indentacionNuevaLinea);
 
             // Obtener expresion que representa el valor de la declaracion
-            const sigExpr = hayNuevaLinea ?
-                sigExpresionBloque(nuevoNivel, true) :
-                sigExpresion(
+            const sigExpr = hayNuevaLinea
+                ? sigExpresionBloque(nuevoNivel, true)
+                : sigExpresion(
                     nuevoNivel,
                     hayNuevaLinea ? nuevoNivel : indentacionNuevaLinea,
                     0,
@@ -125,14 +133,24 @@ export function getSigExprFuncion(
 
             /* Fin robo de sigExprDeclaracion */
 
-            const exprDeclaracionFuncion = new EDeclaracionFuncion(
-                new EIdentificador(new SignIndefinida(), infoIdentificadorFun),
-                parametros,
-                exprFinal,
-                infoIdentificadorFun
-            );
+            const exprResultado: EDeclaracionFuncion | EDeclaracionFn = (() => {
+                if (esAnonima) {
+                    return new EDeclaracionFn(
+                        parametros,
+                        exprFinal,
+                        tokenFun
+                    );
+                } else {
+                    return new EDeclaracionFuncion(
+                        new EIdentificador(new SignIndefinida(), infoIdentificadorFun!!),
+                        parametros,
+                        exprFinal,
+                        infoIdentificadorFun!!
+                    );
+                }
+            })();
 
-            return new PExito(exprDeclaracionFuncion);
+            return new PExito(exprResultado);
         } catch (e) {
             if (e instanceof ErrorComun) {
                 return new PError(e.message);

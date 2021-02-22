@@ -396,6 +396,10 @@ export function crearCodeWithSourceMap(
             case "EDeclaracionFuncion": {
                 return generarJS_EDeclaracionFuncion(expr);
             }
+            case "EDeclaracionFn": {
+                console.log(JSON.stringify(expr, null, 4));
+                throw Error("D:");
+            }
             case "EArray": {
                 return generarJS_EArray(expr);
             }

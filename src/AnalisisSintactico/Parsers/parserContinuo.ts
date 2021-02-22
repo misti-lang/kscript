@@ -73,6 +73,7 @@ export const generarParserContinuo = (
                 lexer.retroceder();
                 return new PExito(primeraExprId);
             }
+            case "PC_FN":
             case "TIdentificador":
             case "TNumero":
             case "TTexto":
@@ -83,7 +84,7 @@ export const generarParserContinuo = (
             case "TUndefined": {
                 const infoOp2 = obtInfoFunAppl(false, infoIdInicio, infoIdNumLinea, infoIdPosInicioLinea, indentacionNuevaLinea);
 
-                const [precOpFunApl, asocOpFunApl] = obtInfoOp(infoOp2.valor);
+                const [precOpFunApl, asocOpFunApl] = [13, Asociatividad.Izq]; // obtInfoOp(infoOp2.valor);
                 lexer.retroceder();
 
                 if (precOpFunApl > precedencia) {

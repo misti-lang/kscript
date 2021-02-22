@@ -17,7 +17,7 @@ import { PC_IF } from "./Token/PC_IF"
 import { PC_ELIF } from "./Token/PC_ELIF"
 import { PC_DO } from "./Token/PC_DO"
 import { PC_ELSE } from "./Token/PC_ELSE"
-import { PC_FUN } from "./Token/PC_FUN";
+import { PC_FN, PC_FUN } from "./Token/PC_FUN";
 import { Token } from "./Token";
 import { TipoToken } from "./TipoToken";
 import { run } from "./parsers";
@@ -172,6 +172,9 @@ export class Lexer {
                             }
                             case "fun": {
                                 return crearToken2(x => new PC_FUN(x), "fun");
+                            }
+                            case "fn": {
+                                return crearToken2(x => new PC_FN(x), "fn");
                             }
                             case "import": {
                                 return crearToken2(x => new PC_IMPORT(x), "import");
