@@ -28,7 +28,7 @@ import { TUndefined } from "./Token/TUndefined";
 import { TCorcheteAb } from "./Token/TCorcheteAb";
 import { TCorcheteCer } from "./Token/TCorcheteCer";
 import { TComa } from "./Token/TComa";
-import { PC_WHILE } from "./Token/PC_WHILE";
+import { PC_FOR, PC_IN, PC_OF, PC_WHILE } from "./Token/PC_bucles";
 import { TLlaveAb } from "./Token/TLlaveAb";
 import { TLlaveCer } from "./Token/TLlaveCer";
 import { PC_AS, PC_FROM, PC_IMPORT } from "./Token/PC_modulos";
@@ -169,6 +169,15 @@ export class Lexer {
                             }
                             case "while": {
                                 return crearToken2(x => new PC_WHILE(x), "while");
+                            }
+                            case "for": {
+                                return crearToken2(x => new PC_FOR(x), "for");
+                            }
+                            case "of": {
+                                return crearToken2(x => new PC_OF(x), "of");
+                            }
+                            case "in": {
+                                return crearToken2(x => new PC_IN(x), "in");
                             }
                             case "fun": {
                                 return crearToken2(x => new PC_FUN(x), "fun");

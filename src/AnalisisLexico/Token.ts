@@ -21,7 +21,7 @@ import { PC_FN, PC_FUN } from "./Token/PC_FUN";
 import { TCorcheteAb } from "./Token/TCorcheteAb";
 import { TCorcheteCer } from "./Token/TCorcheteCer";
 import { TComa } from "./Token/TComa";
-import { PC_WHILE } from "./Token/PC_WHILE";
+import { PC_FOR, PC_IN, PC_OF, PC_WHILE } from "./Token/PC_bucles";
 import { TLlaveAb } from "./Token/TLlaveAb";
 import { TLlaveCer } from "./Token/TLlaveCer";
 import { PC_AS, PC_FROM, PC_IMPORT } from "./Token/PC_modulos";
@@ -52,6 +52,9 @@ export type Token =
     | PC_DO
     | PC_ELSE
     | PC_WHILE
+    | PC_FOR
+    | PC_OF
+    | PC_IN
     | PC_FUN
     | PC_FN
     | PC_IMPORT
